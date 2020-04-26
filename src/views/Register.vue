@@ -19,8 +19,6 @@
 </template>
 
 <script>
-    import firebase from 'firebase';
-    import api from '../service/api';
     import GoogleLogin from '@/components/GoogleLogin';
 
     export default {
@@ -33,24 +31,17 @@
         }) ,
         methods: {
             handleRegister: function () {
-                let token;
-                // Create a user
-                firebase.auth().createUserWithEmailAndPassword(this.email , this.password)
-                    .then(() => {
-                        // Get jwt token from current user
-                        return firebase.auth().currentUser.getIdToken(true);
+                this.$store.dispatch('handleRegisterUser' ,
+                    {
+                        email: this.email ,
+                        password: this.password
                     })
-                    .then(tok => {
-                        token = tok;
-                        api.defaults.headers.common['Authorization'] = `Bearer ${ token }`;
-                        return api.post('/createuser');
-                    })
-                    .then(res => {
-                        this.$store.commit('setUser' , { token , username: res.data.username });
-                        this.$router.replace('home');
-                    })
-                    .catch(err => {
-                        this.error = err.message;
+                    .then(( { error } ) => {
+                        if (error) {
+                            this.error = error;
+                        } else {
+                            this.$router.replace('home');
+                        }
                     });
             }
         }

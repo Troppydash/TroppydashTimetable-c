@@ -2,7 +2,9 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
+import Settings from '../views/Settings.vue'
 import Register from '../views/Register.vue'
+import store from '../store';
 
 import * as firebase from 'firebase';
 
@@ -32,6 +34,14 @@ const routes: Array<RouteConfig> = [
             requireAuth: true
         }
     },
+    {
+        path: '/settings',
+        name: 'Settings',
+        component: Settings,
+        meta: {
+            requireAuth: true
+        }
+    },
 
 ]
 
@@ -45,9 +55,9 @@ router.beforeEach( ( to, from, next ) => {
     const currentUser = firebase.auth().currentUser;
     const requireAuth = to.matched.some( record => record.meta.requireAuth );
 
-    if ( requireAuth && !currentUser )
+    if ( requireAuth && !currentUser)
         next( 'login' );
-    else if ( !requireAuth && currentUser )
+    else if ( !requireAuth && currentUser && store.state.authenticated)
         next( 'home' );
     else
         next();

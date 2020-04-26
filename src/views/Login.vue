@@ -19,8 +19,6 @@
 </template>
 
 <script>
-    import firebase from 'firebase';
-    import api from '@/service/api';
     import GoogleLogin from '@/components/GoogleLogin';
 
     export default {
@@ -33,22 +31,16 @@
         }) ,
         methods: {
             handleLogin: function () {
-                let token;
-                firebase.auth().signInWithEmailAndPassword(this.email , this.password)
-                    .then(() => {
-                        return firebase.auth().currentUser.getIdToken(true);
-                    })
-                    .then(tok => {
-                        token = tok;
-                        api.defaults.headers.common['Authorization'] = `Bearer ${ token }`;
-                        return api.post('/loginuser');
-                    })
-                    .then(res => {
-                        this.$store.commit('setUser' , { token, username: res.data.username });
-                        this.$router.replace('home');
-                    })
-                    .catch(err => {
-                        this.error = err.message;
+                this.$store.dispatch('handleLoginUser' , {
+                    email: this.email ,
+                    password: this.password
+                })
+                    .then(( { error } ) => {
+                        if (error) {
+                            this.error = error;
+                        } else {
+                            this.$router.replace('home');
+                        }
                     });
             }
         }
