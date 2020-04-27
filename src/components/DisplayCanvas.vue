@@ -51,7 +51,7 @@
                 const selectedIndex = susIndex[0].index;
 
                 this.models[selectedIndex].material.color.set('#ff0000');
-                this.ref.controls.target = this.models[selectedIndex].position;
+                this.ref.controls.target = new THREE.Vector3(this.models[selectedIndex].position.x, this.models[selectedIndex].position.y, this.models[selectedIndex].position.z);
 
                 const zoomDistance = Number(30) ,
                     currDistance = this.ref.camera.position.length() ,
