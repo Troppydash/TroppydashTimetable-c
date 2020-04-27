@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import api from '../service/api';
 import firebase from "firebase";
 import router from "@/router";
+import axios from 'axios';
 
 Vue.use( Vuex )
 
@@ -40,6 +41,11 @@ export default new Vuex.Store( {
             state.token = '';
             state.username = '';
             state.authenticated = false;
+            state.timetable = {
+                loading: false,
+                data: [],
+                error: ''
+            };
         },
         setUserError( state, payload ) {
             state.error = payload.error;
@@ -65,12 +71,11 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    return context.dispatch( 'handleGetTimetable', { force: false } );
-                } )
-                .then( () => {
+                    context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' }
                 } )
                 .catch( err => {
+                    firebase.auth().signOut();
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -93,9 +98,7 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    return context.dispatch( 'handleGetTimetable', { force: false } );
-                } )
-                .then( () => {
+                    context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -120,12 +123,11 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    return context.dispatch( 'handleGetTimetable', { force: false } );
-                } )
-                .then( () => {
+                    context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
+                    firebase.auth().signOut();
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -135,9 +137,7 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
-                    if ( localStorage.getItem( "TIMETABLE" ) ) {
-                        localStorage.setItem( "TIMETABLE", '' );
-                    }
+                    localStorage.clear();
                     context.commit( 'signoutUser' );
                 } );
         },
@@ -147,9 +147,7 @@ export default new Vuex.Store( {
                     return api.delete( '/deleteuser' )
                 } )
                 .then( res => {
-                    if ( localStorage.getItem( "TIMETABLE" ) ) {
-                        localStorage.setItem( "TIMETABLE", '' );
-                    }
+                    localStorage.clear();
                     context.commit( 'signoutUser' );
                 } )
                 .catch( err => {
@@ -176,12 +174,14 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
-                    return context.dispatch( 'handleGetTimetable', { force: false } );
+                    context.dispatch( 'handleGetTimetable', { force: false } );
+                    return { error: '' }
                 } )
                 .catch( err => {
                     context.commit( 'setUserError', {
                         error: err.message
                     } )
+                    return { error: err.message }
                 } ).finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
@@ -202,7 +202,10 @@ export default new Vuex.Store( {
                 // return { error: '' };
             }
 
-            return api.post( '/timetable' )
+
+            return axios.post( 'https://frozen-hamlet-21795.herokuapp.com/timetable', {}, {
+                headers: { 'Authorization': `Bearer ${context.state.token}` }
+            } )
                 .then( res => {
                     context.state.timetable.error = '';
                     context.state.timetable.data = JSON.parse( res.data.data );
@@ -210,6 +213,7 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
+                    console.log( err );
                     context.state.timetable.error = err.response.data.message;
                     return { error: err.response.data.message };
                 } )
