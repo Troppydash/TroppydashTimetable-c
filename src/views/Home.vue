@@ -1,49 +1,38 @@
 <template>
-    <div class="home">
-        <img alt="Vue logo" src="../assets/logo.png">
+    <div class="home" v-if="!loading">
+        <h1>Home</h1>
         <h2>Hello {{ username }}</h2>
-        <button @click="handleLogout">Logout</button>
-        <button @click="handleDelete">Delete user</button>
-        <button @click="getTimetable">Fetch</button>
+
+        <div v-if="!timetable.loading">
+            <TimeTable />
+        </div>
+        <div v-else>
+            <p>Loading... Please wait</p>
+        </div>
+    </div>
+    <div v-else>
+        <p>Getting Current User...</p>
     </div>
 </template>
 
 <script>
-    import api from '../service/api';
+    import { mapState } from 'vuex';
+    import TimeTable from '@/components/TimeTable';
 
     export default {
         name: 'Home' ,
+        components: { TimeTable } ,
         data() {
             return {};
         } ,
         computed: {
-            username() {
-                return this.$store.state.username;
-            }
+            ...mapState([
+                'username',
+                'timetable',
+                'loading'
+            ])
         } ,
         methods: {
-            getTimetable() {
-                api.post('/timetable')
-                    .then(res => {
-                        console.log(JSON.parse(res.data.data));
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        console.log(err.response.data.message);
-                    });
-            } ,
-            handleLogout: function () {
-                this.$store.dispatch('handleLogoutUser')
-                    .then(() => {
-                        this.$router.replace('login');
-                    });
-            } ,
-            handleDelete: function () {
-                this.$store.dispatch('handleDeleteUser')
-                    .then(() => {
-                        this.$router.replace('login');
-                    });
-            }
         }
     };
 </script>

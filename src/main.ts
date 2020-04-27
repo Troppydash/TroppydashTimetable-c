@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import * as firebase from 'firebase';
 
+import "../node_modules/normalize.css/normalize.css";
 Vue.config.productionTip = false
 
 // TODO: Secure this

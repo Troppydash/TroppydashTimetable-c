@@ -11,10 +11,17 @@ export default new Vuex.Store( {
         token: '',
         username: '',
         authenticated: false,
-        error: ''
+        error: '',
+        loading: false,
+
+        timetable: {
+            loading: false,
+            data: [],
+            error: ''
+        }
     },
     mutations: {
-        setUsername(state, payload) {
+        setUsername( state, payload ) {
             state.username = payload.username;
         },
         setUser( state, payload ) {
@@ -22,6 +29,12 @@ export default new Vuex.Store( {
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
+        },
+        setLoading( state, { isLoading } ) {
+            state.loading = isLoading;
+        },
+        setTimetableLoading( state, { isLoading } ) {
+            state.timetable.loading = isLoading;
         },
         signoutUser( state ) {
             state.token = '';
@@ -39,6 +52,7 @@ export default new Vuex.Store( {
             const provider = new firebase.auth.GoogleAuthProvider();
 
             let token: string;
+            context.commit( 'setLoading', { isLoading: true } );
             return firebase.auth().signInWithPopup( provider )
                 .then( () => {
                     // Get jwt token from current user
@@ -51,14 +65,21 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
+                    return context.dispatch( 'handleGetTimetable', { force: false } );
+                } )
+                .then( () => {
                     return { error: '' }
                 } )
                 .catch( err => {
                     return { error: err.message };
+                } )
+                .finally( () => {
+                    context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
         handleRegisterUser( context, payload ) {
             let token: string;
+            context.commit( 'setLoading', { isLoading: true } );
             // Create a user
             return firebase.auth().createUserWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
@@ -72,13 +93,21 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
+                    return context.dispatch( 'handleGetTimetable', { force: false } );
+                } )
+                .then( () => {
                     return { error: '' };
                 } )
                 .catch( err => {
+                    context.commit( 'setLoading', { isLoading: false } );
                     return { error: err.message };
+                } )
+                .finally( () => {
+                    context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
         handleLoginUser( context, payload ) {
+            context.commit( 'setLoading', { isLoading: true } );
             let token: string;
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
@@ -91,15 +120,24 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
+                    return context.dispatch( 'handleGetTimetable', { force: false } );
+                } )
+                .then( () => {
                     return { error: '' };
                 } )
                 .catch( err => {
                     return { error: err.message };
+                } )
+                .finally( () => {
+                    context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
+                    if ( localStorage.getItem( "TIMETABLE" ) ) {
+                        localStorage.setItem( "TIMETABLE", '' );
+                    }
                     context.commit( 'signoutUser' );
                 } );
         },
@@ -109,6 +147,9 @@ export default new Vuex.Store( {
                     return api.delete( '/deleteuser' )
                 } )
                 .then( res => {
+                    if ( localStorage.getItem( "TIMETABLE" ) ) {
+                        localStorage.setItem( "TIMETABLE", '' );
+                    }
                     context.commit( 'signoutUser' );
                 } )
                 .catch( err => {
@@ -118,6 +159,8 @@ export default new Vuex.Store( {
                 } )
         },
         handleGetUser( context ) {
+            context.commit( 'setLoading', { isLoading: true } );
+
             const user = {
                 token: '',
                 username: ''
@@ -133,11 +176,45 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
+                    return context.dispatch( 'handleGetTimetable', { force: false } );
                 } )
                 .catch( err => {
                     context.commit( 'setUserError', {
                         error: err.message
                     } )
+                } ).finally( () => {
+                    context.commit( 'setLoading', { isLoading: false } );
+                } );
+        },
+        handleGetTimetable( context, { force = false } ) {
+            if ( !force && context.state.timetable.data.length !== 0 ) {
+                return { error: '' };
+            }
+            context.commit( 'setTimetableLoading', { isLoading: true } );
+
+            // TODO: Change for production
+            // Check localstorage && dev only
+            if ( localStorage.getItem( "TIMETABLE" ) ) {
+                context.commit( 'setTimetableLoading', { isLoading: false } );
+
+                context.state.timetable.error = '';
+                context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
+                // return { error: '' };
+            }
+
+            return api.post( '/timetable' )
+                .then( res => {
+                    context.state.timetable.error = '';
+                    context.state.timetable.data = JSON.parse( res.data.data );
+                    localStorage.setItem( "TIMETABLE", res.data.data );
+                    return { error: '' }
+                } )
+                .catch( err => {
+                    context.state.timetable.error = err.response.data.message;
+                    return { error: err.response.data.message };
+                } )
+                .finally( () => {
+                    context.commit( 'setTimetableLoading', { isLoading: false } );
                 } )
         }
     },

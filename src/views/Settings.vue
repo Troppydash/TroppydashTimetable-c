@@ -1,5 +1,6 @@
 <template>
     <div class="settings">
+        <h1>Settings</h1>
         <form @submit.prevent="handleSubmit">
             <div>
                 Username
@@ -10,8 +11,11 @@
                 <input type="text" v-model="keyCode" />
             </div>
             <p v-if="error">{{ error }}</p>
-            <input type="submit" value="Edit" />
+            <input type="submit" value="Edit" disabled/>
         </form>
+
+        <button @click="handleLogout">Logout</button>
+        <button @click="handleDelete" disabled>Delete user</button>
     </div>
 </template>
 
@@ -39,6 +43,18 @@
                     })
                     .catch(err => {
                         this.error = err.message;
+                    });
+            },
+            handleLogout: function () {
+                this.$store.dispatch('handleLogoutUser')
+                    .then(() => {
+                        this.$router.replace('login');
+                    });
+            } ,
+            handleDelete: function () {
+                this.$store.dispatch('handleDeleteUser')
+                    .then(() => {
+                        this.$router.replace('login');
                     });
             }
         }

@@ -10,7 +10,7 @@
             </div>
             <p v-if="error">{{ error }}</p>
             <div>
-                <input type="submit" value="Register">
+                <input type="submit" value="Register" disabled>
             </div>
         </form>
 
