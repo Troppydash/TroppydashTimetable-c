@@ -199,7 +199,7 @@ export default new Vuex.Store( {
 
                 context.state.timetable.error = '';
                 context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
-                // return { error: '' };
+                return { error: '' };
             }
 
 
