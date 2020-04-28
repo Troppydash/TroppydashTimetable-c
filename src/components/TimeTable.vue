@@ -1,7 +1,12 @@
 <template>
     <div class="timeTable">
         <p v-if="timetable.error">{{ timetable.error }}</p>
-        <div class="row">
+        <div class="row" style="width: 100%">
+
+            <!--Canvas-->
+            <div class="col-lg-4">
+                <DisplayCanvas ref="map"/>
+            </div>
 
             <!--Table-->
             <div class="col-lg-8">
@@ -43,5 +48,7 @@
 </script>
 
 <style scoped>
-
+    .timeTable {
+        width: 100%;
+    }
 </style>

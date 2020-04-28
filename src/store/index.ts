@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import api from '../service/api';
-import firebase from "firebase";
+import * as firebase from "firebase";
 import router from "@/router";
 import axios from 'axios';
 
@@ -15,13 +15,28 @@ export default new Vuex.Store( {
         error: '',
         loading: false,
 
+        messages: Array<{
+            info: string;
+            text: string;
+        }>(),
+
+        isVerified: false,
+
         timetable: {
             loading: false,
             data: [],
             error: ''
         }
     },
+    getters: {
+        lastMessage( state ) {
+            return state.messages[state.messages.length - 1];
+        }
+    },
     mutations: {
+        addMessages( state, { message } ) {
+            state.messages.push( message );
+        },
         setUsername( state, payload ) {
             state.username = payload.username;
         },
@@ -30,6 +45,7 @@ export default new Vuex.Store( {
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
+            state.isVerified = firebase.auth().currentUser?.emailVerified || false;
         },
         setLoading( state, { isLoading } ) {
             state.loading = isLoading;
@@ -46,6 +62,7 @@ export default new Vuex.Store( {
                 data: [],
                 error: ''
             };
+            state.isVerified = false;
         },
         setUserError( state, payload ) {
             state.error = payload.error;
@@ -54,6 +71,19 @@ export default new Vuex.Store( {
         },
     },
     actions: {
+        verifyEmail(context) {
+            const actionCodeSettings = {
+                handleCodeInApp: true,
+                url: 'http://localhost:8080/home'
+            }
+            firebase.auth().currentUser?.sendEmailVerification(actionCodeSettings)
+                .then(res => {
+                    console.log(res);
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+        },
         handleUserSocialLogin( context ) {
             const provider = new firebase.auth.GoogleAuthProvider();
 
@@ -188,8 +218,19 @@ export default new Vuex.Store( {
         },
         handleGetTimetable( context, { force = false } ) {
             if ( !force && context.state.timetable.data.length !== 0 ) {
-                return { error: '' };
+                context.commit( 'addMessages', {
+                    message: { type: 'info', text: 'data already exists' }
+                } );
+                return;
             }
+
+            if ( !context.state.isVerified ) {
+                context.commit( 'addMessages', {
+                    message: { type: 'info', text: 'email not verified' }
+                } );
+                return;
+            }
+
             context.commit( 'setTimetableLoading', { isLoading: true } );
 
             // TODO: Change for production
@@ -199,7 +240,10 @@ export default new Vuex.Store( {
 
                 context.state.timetable.error = '';
                 context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
-                return { error: '' };
+                context.commit( 'addMessages', {
+                    message: { type: 'info', text: 'received cache item' }
+                } );
+                return;
             }
 
 
@@ -210,12 +254,18 @@ export default new Vuex.Store( {
                     context.state.timetable.error = '';
                     context.state.timetable.data = JSON.parse( res.data.data );
                     localStorage.setItem( "TIMETABLE", res.data.data );
-                    return { error: '' }
+                    context.commit( 'addMessages', {
+                        message: { type: 'info', text: 'received network item' }
+                    } );
+                    return;
                 } )
                 .catch( err => {
                     console.log( err );
                     context.state.timetable.error = err.response.data.message;
-                    return { error: err.response.data.message };
+                    context.commit( 'addMessages', {
+                        message: { type: 'error', text: err.response.data.message }
+                    } );
+                    return;
                 } )
                 .finally( () => {
                     context.commit( 'setTimetableLoading', { isLoading: false } );

@@ -1,14 +1,13 @@
 <template>
     <div class="home" v-if="!loading">
-        <h1>Home</h1>
         <h2>Hello {{ username }}</h2>
 
-        <div v-if="!timetable.loading">
-            <TimeTable />
-        </div>
+        <TimeTable v-if="!timetable.loading" />
         <div v-else>
             <p>Loading... Please wait</p>
         </div>
+
+        <VerifyEmailBanner v-if="!loading && !isVerified" />
     </div>
     <div v-else>
         <p>Getting Current User...</p>
@@ -16,23 +15,24 @@
 </template>
 
 <script>
-    import { mapState } from 'vuex';
+    import { mapGetters , mapState } from 'vuex';
     import TimeTable from '@/components/TimeTable';
+    import VerifyEmailBanner from '@/components/VerifyEmailBanner';
 
     export default {
         name: 'Home' ,
-        components: { TimeTable } ,
+        components: { VerifyEmailBanner , TimeTable } ,
         data() {
             return {};
         } ,
         computed: {
             ...mapState([
-                'username',
-                'timetable',
-                'loading'
+                'username' ,
+                'timetable' ,
+                'loading' ,
+                'isVerified'
             ])
         } ,
-        methods: {
-        }
+        methods: {}
     };
 </script>

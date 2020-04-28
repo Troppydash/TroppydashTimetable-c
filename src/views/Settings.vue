@@ -16,11 +16,13 @@
 
         <button @click="handleLogout">Logout</button>
         <button @click="handleDelete" disabled>Delete user</button>
+        <button @click="verifyEmail" v-if="!isVerified">Verify Email</button>
     </div>
 </template>
 
 <script>
     import api from '../service/api';
+    import { mapState } from 'vuex';
 
     export default {
         name: 'Settings' ,
@@ -31,7 +33,15 @@
                 error: ''
             };
         } ,
+        computed: {
+            ...mapState([
+                'isVerified'
+            ])
+        } ,
         methods: {
+            verifyEmail() {
+                this.$store.dispatch('verifyEmail');
+            },
             handleSubmit() {
                 const username = this.username;
                 api.put('/edituser' , { username: username , keyCode: this.keyCode })

@@ -26,7 +26,7 @@ let app: Vue;
 let tried = false;
 firebase.auth().onAuthStateChanged( user => {
     if (user && !store.state.authenticated && !tried) {
-        store.dispatch('handleGetUser');
+        store.dispatch('handleGetUser')
         tried = true;
     }
 
