@@ -11,11 +11,11 @@
                 <input type="text" v-model="keyCode" />
             </div>
             <p v-if="error">{{ error }}</p>
-            <input type="submit" value="Edit" disabled/>
+            <input type="submit" value="Edit"/>
         </form>
 
         <button @click="handleLogout">Logout</button>
-        <button @click="handleDelete" disabled>Delete user</button>
+        <button @click="handleDelete">Delete user</button>
         <button @click="verifyEmail" v-if="!isVerified">Verify Email</button>
     </div>
 </template>

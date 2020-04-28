@@ -1,24 +1,11 @@
 <template>
     <div class="timeTable">
         <p v-if="timetable.error">{{ timetable.error }}</p>
-        <div class="row" style="width: 100%">
+        <!--Table-->
+        <DisplayTable v-bind:table-data="timetable.data" :on-click="handleClick" />
 
-            <!--Canvas-->
-            <div class="col-lg-4">
-                <DisplayCanvas ref="map"/>
-            </div>
-
-            <!--Table-->
-            <div class="col-lg-8">
-                <DisplayTable v-bind:table-data="timetable.data" :on-click="handleClick"/>
-            </div>
-
-            <!--Canvas-->
-            <div class="col-lg-4">
-                <DisplayCanvas ref="map"/>
-            </div>
-
-        </div>
+        <!--Canvas-->
+        <DisplayCanvas ref="map" />
     </div>
 </template>
 
@@ -31,12 +18,11 @@
         name: 'TimeTable' ,
         components: { DisplayCanvas , DisplayTable } ,
         data() {
-            return {
-            }
-        },
+            return {};
+        } ,
         computed: {
             ...mapState([
-                'timetable',
+                'timetable' ,
             ])
         } ,
         methods: {
@@ -50,5 +36,7 @@
 <style scoped>
     .timeTable {
         width: 100%;
+
+        margin: 50px 0 500px;
     }
 </style>

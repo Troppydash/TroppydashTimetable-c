@@ -1,8 +1,11 @@
 <template>
     <div class="header-outside">
-        <div class="header p-3" v-if="isAuthenticated">
+        <div class="header p-3" v-if="authenticated">
             <router-link to="/home">Home</router-link>
             <router-link to="/settings">Settings</router-link>
+            <div class="username-container">
+                <p class="username">Hello {{ username }}</p>
+            </div>
         </div>
         <div class="header p-3" v-else>
             <router-link to="/login">Login</router-link>
@@ -12,17 +15,29 @@
 </template>
 
 <script>
+    import { mapState } from 'vuex';
+
     export default {
         name: 'Header',
         computed: {
-            isAuthenticated() {
-                return this.$store.state.authenticated;
-            }
+            ...mapState([
+                'username' ,
+                'authenticated'
+            ])
         }
     };
 </script>
 
 <style scoped lang="scss">
+    .username-container {
+        margin-left: auto;
+
+        .username {
+            color: white;
+
+        }
+    }
+
     .header-outside {
         width: 100%;
         height: 50px;

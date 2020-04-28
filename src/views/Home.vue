@@ -1,8 +1,9 @@
 <template>
     <div class="home" v-if="!loading">
-        <h2>Hello {{ username }}</h2>
+
 
         <TimeTable v-if="!timetable.loading" />
+
         <div v-else>
             <p>Loading... Please wait</p>
         </div>
@@ -13,6 +14,14 @@
         <p>Getting Current User...</p>
     </div>
 </template>
+
+<style>
+    .home-header {
+        font-family: "Roboto Light", "Calibri Light";
+        text-align: right;
+        font-size: 3rem;
+    }
+</style>
 
 <script>
     import { mapGetters , mapState } from 'vuex';

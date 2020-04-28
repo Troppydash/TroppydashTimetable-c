@@ -1,6 +1,6 @@
 <template>
     <div class="displayTable">
-        <table>
+        <table class="main-table">
             <thead>
                 <tr>
                     <th></th>
@@ -11,7 +11,7 @@
             </thead>
             <tbody>
                 <tr v-for="day in tableData" :key="day.Date">
-                    <td>{{ day.DateFormatted }}</td>
+                    <td class="date-column">{{ day.DateFormatted }}</td>
                     <td v-for="period in day.periodData" :key="period.PeriodID" v-on:click="onClick(period.AdditionalData.Room)">
                         {{ period.AdditionalData.Desc }}
                     </td>
@@ -38,8 +38,61 @@
     };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
     .displayTable {
         text-align: left;
+        width: 100%;
     }
+
+    .date-column {
+        width: 16%;
+    }
+
+    .main-table {
+        width: 90%;
+        margin: 0 auto;
+        border-collapse: collapse;
+
+
+        tbody tr {
+            &:hover {
+                background: var(--scots-lightgrey);
+            }
+            td:hover {
+                background: lightgray;
+            }
+        }
+
+        td, th {
+            padding: 1rem;
+            cursor: pointer;
+        }
+
+        td:not(.date-column) {
+            width: 14%;
+        }
+
+        td {
+            height: 4rem;
+            overflow-y: auto;
+        }
+
+        tr + tr {
+            border-bottom: 1px solid var(--scots-grey1);
+            border-top: 1px solid var(--scots-grey1);
+        }
+
+        thead tr {
+            background: var(--scots-grey2);
+
+            th {
+                color: white;
+                font-family: "Roboto Light", "Calibri Light";
+                font-weight: normal;
+                font-size: 1.25rem;
+            }
+        }
+    }
+
+
 </style>

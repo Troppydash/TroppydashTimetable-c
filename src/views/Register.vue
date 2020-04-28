@@ -85,7 +85,7 @@
 
     h1 {
         margin: 1rem 0;
-        font-family: "Roboto Light";
+        font-family: "Roboto Light", "Calibri Light";
         font-weight: lighter;
         font-size: 5rem;
     }

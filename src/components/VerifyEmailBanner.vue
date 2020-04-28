@@ -39,24 +39,24 @@
 
     @-webkit-keyframes slide {
         100% {
-            bottom: 0;
+            transform: translateY(0);
         }
     }
 
     @keyframes slide {
         100% {
-            bottom: 0;
+            transform: translateY(0);
         }
     }
 
-
     .verifyEmailBanner {
-        animation: slide 0.75s forwards;
-        -webkit-animation: slide 0.75s forwards;
+        animation: slide 0.25s forwards;
+        -webkit-animation: slide 0.25s forwards;
 
-        bottom: -60px;
+        transform: translateY(60px);
 
         position: absolute;
+        bottom: 0;
         left: 10%;
 
         width: 80%;

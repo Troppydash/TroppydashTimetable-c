@@ -1,6 +1,13 @@
 <template>
-    <div class="displayCanvas">
-        <div id="schoolMap"></div>
+    <div class="displayCanvas" :class="{ 'displayCanvas__transp': closed }">
+        <div class="wrapper">
+            <div class="close-button__container" :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }">
+                <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }" @click="toggleCanvas">
+                    {{ closed ? '+' : '&#10005;' }}
+                </button>
+            </div>
+            <div id="schoolMap" :class="{ closed: closed }"></div>
+        </div>
     </div>
 </template>
 
@@ -23,11 +30,17 @@
                     controls: null ,
                     scene: null ,
                     renderer: null ,
-                }
+                },
+
+                closed: false
             };
         } ,
         methods: {
             focusFromCode( code ) {
+
+                if (this.closed) {
+                    return;
+                }
 
                 this.clearAll();
                 code = code.toLowerCase();
@@ -71,7 +84,7 @@
             } ,
             init() {
                 // Init ThreeJS
-                const width = 500 , height = 400;
+                const width = 600 , height = width / 16 * 9;
 
                 const targetElement = document.getElementById('schoolMap');
                 this.ref.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -80,7 +93,7 @@
                 targetElement.appendChild(this.ref.renderer.domElement);
 
                 this.ref.scene = new THREE.Scene();
-                this.ref.camera = new THREE.PerspectiveCamera(45 , width / height , 0.1 , 10000);
+                this.ref.camera = new THREE.PerspectiveCamera(45 , 16 / 9 , 0.1 , 10000);
 
                 this.ref.camera.position.z = 200;
                 this.ref.camera.position.y = 200;
@@ -113,6 +126,9 @@
                 requestAnimationFrame(this.animate);
                 this.ref.controls.update();
                 this.ref.renderer.render(this.ref.scene , this.ref.camera);
+            },
+            toggleCanvas() {
+                this.closed = !this.closed;
             }
         } ,
         mounted() {
@@ -121,6 +137,92 @@
     };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
+    .close-button__container {
+        pointer-events: all;
+    }
+
+    .displayCanvas__transp {
+        pointer-events: none;
+    }
+
+    .closed-button__closed {
+        color: black;
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+
+        top: initial;
+    }
+    .button__open {
+        color: whitesmoke;
+
+        &:hover {
+            color: lightgray;
+        }
+    }
+    .button__closed {
+        color: black;
+        background: lightgray !important;
+        border-radius: 50%;
+
+        &:hover {
+            color: gray;
+        }
+    }
+
+    .closed-button__open {
+        position: absolute;
+        top: 1px;
+        right: 1px
+    }
+
+    .close-button {
+        padding: 0.75rem 1rem;
+        background: none;
+        border: none;
+    }
+
+
+    @-webkit-keyframes slide {
+        0% {
+            transform: translateX(0px);
+        }
+    }
+
+    @keyframes slide {
+        0% {
+            transform: translateX(0px);
+        }
+    }
+
+    .closed {
+        animation: slide 0.25s forwards;
+        -webkit-animation: slide 0.25s forwards;
+
+        transform: translateX(150%);
+    }
+
+    .displayCanvas {
+        position: absolute;
+        bottom: 1rem;
+        right: 2rem;
+        height: auto;
+    }
+
+    .displayCanvas:hover:not(:focus):not(:active) {
+        transition-duration: 500ms;
+        transition-delay: 1s;
+
+        opacity: 0.3;
+    }
+
+    #schoolMap {
+        width: 100%;
+        height: 342px;
+
+        box-shadow: 3px 3px 5px 2px gray;
+        border: 2px solid var(--scots-red);
+    }
 </style>
