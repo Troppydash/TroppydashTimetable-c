@@ -1,8 +1,10 @@
 <template>
     <div class="displayCanvas" :class="{ 'displayCanvas__transp': closed }">
         <div class="wrapper">
-            <div class="close-button__container" :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }">
-                <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }" @click="toggleCanvas">
+            <div class="close-button__container"
+                 :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }">
+                <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }"
+                        @click="toggleCanvas">
                     {{ closed ? '+' : '&#10005;' }}
                 </button>
             </div>
@@ -30,9 +32,11 @@
                     controls: null ,
                     scene: null ,
                     renderer: null ,
-                },
+                } ,
 
-                closed: false
+                closed: false ,
+
+                location: null ,
             };
         } ,
         methods: {
@@ -60,11 +64,11 @@
                         susIndex.push(temp[0]);
                     }
                 });
-                susIndex = susIndex.sort(( x , y ) => y.percent - x.percent)
+                susIndex = susIndex.sort(( x , y ) => y.percent - x.percent);
                 const selectedIndex = susIndex[0].index;
 
                 this.models[selectedIndex].material.color.set('#ff0000');
-                this.ref.controls.target = new THREE.Vector3(this.models[selectedIndex].position.x, this.models[selectedIndex].position.y, this.models[selectedIndex].position.z);
+                this.ref.controls.target = new THREE.Vector3(this.models[selectedIndex].position.x , this.models[selectedIndex].position.y , this.models[selectedIndex].position.z);
 
                 const zoomDistance = Number(30) ,
                     currDistance = this.ref.camera.position.length() ,
@@ -81,6 +85,44 @@
                         model.material.color.set('#fff');
                     }
                 });
+            } ,
+            measure( originLat , originLong , lat , long ) {  // generally used geo measurement function
+                const latdif = originLat - lat;
+                const longdif = originLong - long;
+
+                return {
+                    lat: latdif * 111.32 * 1000,
+                    long: longdif * 40075 * Math.cos(latdif) / 360 * 1000,
+                }
+            },
+            setUserInCanvas() {
+                if (!this.location) {
+                    return;
+                }
+
+                const hodgeLat = -41.328232;
+                const hodgeLong = 174.818269;
+                const {lat, long} = this.measure(hodgeLat, hodgeLong, this.location.latitude, this.location.longitude)
+                if (lat > 1000 || long > 1000) {
+                    return;
+                }
+
+                if (this.models.filter(m => m.name === 'Player').length > 0) {
+                    // Already exists, repositioning
+                    return;
+                }
+
+                const geometry = new THREE.BoxGeometry(5 , 14 , 5);
+                const cubeMeterial = new THREE.MeshNormalMaterial();
+
+                const mesh = new THREE.Mesh(geometry , cubeMeterial);
+                mesh.name = 'Player';
+
+                mesh.position.x = (-long * 0.65) - 68;
+                mesh.position.z = (lat * 0.92) - 22;
+                mesh.position.y = 30;
+
+                this.ref.scene.add(mesh);
             } ,
             init() {
                 // Init ThreeJS
@@ -126,13 +168,22 @@
                 requestAnimationFrame(this.animate);
                 this.ref.controls.update();
                 this.ref.renderer.render(this.ref.scene , this.ref.camera);
-            },
+            } ,
             toggleCanvas() {
                 this.closed = !this.closed;
+            } ,
+            getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        this.location = position.coords;
+                        this.setUserInCanvas();
+                    });
+                }
             }
         } ,
         mounted() {
             this.init();
+            this.getLocation();
         }
     };
 </script>
@@ -155,6 +206,7 @@
 
         top: initial;
     }
+
     .button__open {
         color: whitesmoke;
 
@@ -162,6 +214,7 @@
             color: lightgray;
         }
     }
+
     .button__closed {
         color: black;
         background: lightgray !important;
