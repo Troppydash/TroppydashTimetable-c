@@ -16,11 +16,7 @@
 </template>
 
 <style>
-    .home-header {
-        font-family: "Roboto Light", "Calibri Light";
-        text-align: right;
-        font-size: 3rem;
-    }
+
 </style>
 
 <script>

@@ -87,7 +87,7 @@
 
             th {
                 color: white;
-                font-family: "Roboto Light", "Calibri Light";
+                font-family: "Roboto Light", "Helvetica";
                 font-weight: normal;
                 font-size: 1.25rem;
             }

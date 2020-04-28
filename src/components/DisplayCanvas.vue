@@ -42,10 +42,6 @@
         methods: {
             focusFromCode( code ) {
 
-                if (this.closed) {
-                    return;
-                }
-
                 this.clearAll();
                 code = code.toLowerCase();
 
