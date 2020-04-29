@@ -1,9 +1,9 @@
 <template>
-    <div class="googleLogin">
-        <button class="google-button button" @click="handleSocialLogin" :disabled="loading">
-            <span>Sign in with Google</span>
+    <div class="msLogin">
+        <button class="ms-button button" @click="handleSocialLogin" :disabled="loading">
+            <span>Sign in with Microsoft</span>
             <span>
-                <img alt="Google Logo" src="../assets/google-logo.svg" />
+                <img alt="Microsoft Logo" src="../assets/ms-logo.svg" />
             </span>
         </button>
     </div>
@@ -11,14 +11,14 @@
 
 <script>
     export default {
-        name: 'GoogleLogin' ,
-        props: ['loading', 'handleError'],
+        name: 'MSLogin' ,
+        props: ['loading' , 'handleError'] ,
         methods: {
-            handleSocialLogin: function () {
-                this.$store.dispatch('handleUserSocialLogin', { type: 'google' })
+            handleSocialLogin() {
+                this.$store.dispatch('handleUserSocialLogin' , { type: 'ms' })
                     .then(( { error } ) => {
                         if (error) {
-                            this.handleError(error)
+                            this.handleError(error);
                         } else {
                             this.$router.replace('home');
                         }
@@ -29,11 +29,11 @@
 </script>
 
 <style scoped lang="scss">
-    .googleLogin {
+    .msLogin {
         margin: 10px 0;
     }
 
-    .google-button {
+    .ms-button {
 
         padding: 5px;
 

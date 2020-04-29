@@ -1,5 +1,5 @@
 <template>
-    <div class="header-outside">
+    <div class="header-outside" v-if="!loading">
         <div class="header p-3" v-if="authenticated">
             <router-link to="/home">Home</router-link>
             <router-link to="/settings">Settings</router-link>
@@ -12,6 +12,11 @@
             <router-link to="/register">Register</router-link>
         </div>
     </div>
+    <div v-else class="header-outside">
+        <div class="header p-3">
+            <a>Loading...</a>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -22,7 +27,8 @@
         computed: {
             ...mapState([
                 'username' ,
-                'authenticated'
+                'authenticated',
+                'loading'
             ])
         }
     };

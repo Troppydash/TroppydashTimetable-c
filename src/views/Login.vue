@@ -23,6 +23,9 @@
             <div class="google-login__container">
                 <GoogleLogin :loading="loaded" :handle-error="handleError" />
             </div>
+            <div class="ms-login__container">
+                <MSLogin :loading="loaded" :handle-error="handleError" />
+            </div>
         </div>
 
     </div>
@@ -31,10 +34,11 @@
 <script>
     import GoogleLogin from '@/components/GoogleLogin';
     import { mapState } from 'vuex';
+    import MSLogin from '@/components/MSLogin';
 
     export default {
         name: 'Login' ,
-        components: { GoogleLogin } ,
+        components: { MSLogin , GoogleLogin } ,
         data: () => ({
             email: '' ,
             password: '' ,
@@ -60,11 +64,12 @@
                     password: this.password
                 })
                     .then(( { error } ) => {
-                        this.submitted = false;
                         if (error) {
                             this.error = error;
+                            this.submitted = false;
                         } else {
                             this.$router.replace('home');
+                            this.submitted = false;
                         }
                     });
             }
@@ -112,25 +117,21 @@
 
     @-webkit-keyframes slide {
         100% {
-            left: 0;
-            opacity: 1
+            transform: translateY(10px);
         }
     }
 
     @keyframes slide {
         100% {
-            left: 0;
-            opacity: 1
+            transform: translateY(10px);
         }
     }
 
     .login {
-        position: relative;
-        left: -50px;
-        opacity: 0;
+        transform: translateY(0);
 
-        animation: slide 0.75s forwards;
-        -webkit-animation: slide 0.75s forwards;
+        animation: slide 0.5s forwards;
+        -webkit-animation: slide 0.5s forwards;
 
         width: 100%;
         height: calc(100% - 60px);

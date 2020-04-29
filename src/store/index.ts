@@ -45,7 +45,13 @@ export default new Vuex.Store( {
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
-            state.isVerified = firebase.auth().currentUser?.emailVerified || false;
+
+            if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
+                || firebase.auth().currentUser?.providerData[0]?.providerId === 'google.com' ) {
+                state.isVerified = true;
+            } else {
+                state.isVerified = firebase.auth().currentUser?.emailVerified || false;
+            }
         },
         setLoading( state, { isLoading } ) {
             state.loading = isLoading;
@@ -71,21 +77,29 @@ export default new Vuex.Store( {
         },
     },
     actions: {
-        verifyEmail(context) {
+        verifyEmail( context ) {
             const actionCodeSettings = {
                 handleCodeInApp: true,
                 url: 'http://stimetable.now.sh/home'
             }
-            firebase.auth().currentUser?.sendEmailVerification(actionCodeSettings)
-                .then(res => {
-                    console.log(res);
-                })
-                .catch(err => {
-                    console.log(err);
-                })
+            firebase.auth().currentUser?.sendEmailVerification( actionCodeSettings )
+                .then( () => {
+                    context.commit('addMessages', { message: 'Successfully sent email'})
+                } )
+                .catch( err => {
+                    console.error(err);
+                    context.commit( 'addMessages', { message: 'Unable to send email' } );
+                } )
         },
-        handleUserSocialLogin( context ) {
-            const provider = new firebase.auth.GoogleAuthProvider();
+        handleUserSocialLogin( context, { type } ) {
+            let provider = new firebase.auth.GoogleAuthProvider();
+
+            if ( type === 'ms' ) {
+                provider = new firebase.auth.OAuthProvider( 'microsoft.com' );
+            } else if ( type === 'google' ) {
+                let _ = 'fuckyoutypescript';
+                _ = '1';
+            }
 
             let token: string;
             context.commit( 'setLoading', { isLoading: true } );
@@ -167,7 +181,7 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
-                    localStorage.clear();
+                    localStorage.removeItem( 'TIMETABLE' );
                     context.commit( 'signoutUser' );
                 } );
         },
@@ -176,8 +190,8 @@ export default new Vuex.Store( {
                 .then( () => {
                     return api.delete( '/deleteuser' )
                 } )
-                .then( res => {
-                    localStorage.clear();
+                .then( () => {
+                    localStorage.removeItem( 'TIMETABLE' );
                     context.commit( 'signoutUser' );
                 } )
                 .catch( err => {
@@ -233,8 +247,6 @@ export default new Vuex.Store( {
 
             context.commit( 'setTimetableLoading', { isLoading: true } );
 
-            // TODO: Change for production
-            // Check localstorage && dev only
             if ( localStorage.getItem( "TIMETABLE" ) ) {
                 context.commit( 'setTimetableLoading', { isLoading: false } );
 
@@ -243,7 +255,6 @@ export default new Vuex.Store( {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'received cache item' }
                 } );
-                return;
             }
 
 

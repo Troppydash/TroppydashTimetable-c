@@ -1,6 +1,7 @@
 <template>
     <div class="settings">
         <h1>Settings</h1>
+        <h5>{{ email }}</h5>
         <form @submit.prevent="handleSubmit">
             <div>
                 Username
@@ -23,7 +24,7 @@
 <script>
     import api from '../service/api';
     import { mapState } from 'vuex';
-
+    import firebase from 'firebase'
     export default {
         name: 'Settings' ,
         data() {
@@ -36,7 +37,10 @@
         computed: {
             ...mapState([
                 'isVerified'
-            ])
+            ]),
+            email() {
+                return firebase.auth().currentUser.email
+            }
         } ,
         methods: {
             verifyEmail() {
@@ -45,10 +49,11 @@
             handleSubmit() {
                 const username = this.username;
                 api.put('/edituser' , { username: username , keyCode: this.keyCode })
-                    .then(res => {
+                    .then(() => {
                         if (username) {
                             this.$store.commit('setUsername' , { username });
                         }
+                        this.$store.dispatch( 'handleGetTimetable', { force: true});
                         this.$router.replace('home');
                     })
                     .catch(err => {

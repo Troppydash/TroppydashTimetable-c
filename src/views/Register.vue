@@ -18,11 +18,14 @@
 
                 <p class="error" v-if="error">{{ error }}</p>
                 <div>
-                    <input type="submit" value="Login" class="button button-form button-primary" :disabled="loaded">
+                    <input type="submit" value="Register" class="button button-form button-primary" :disabled="loaded">
                 </div>
             </form>
             <div class="google-login__container">
                 <GoogleLogin :loading="loaded" :handle-error="handleError" />
+            </div>
+            <div class="ms-login__container">
+                <MSLogin :loading="loaded" :handle-error="handleError" />
             </div>
         </div>
     </div>
@@ -31,10 +34,11 @@
 <script>
     import GoogleLogin from '@/components/GoogleLogin';
     import { mapState } from 'vuex';
+    import MSLogin from '@/components/MSLogin';
 
     export default {
         name: 'Register' ,
-        components: { GoogleLogin } ,
+        components: { MSLogin , GoogleLogin } ,
         data: () => ({
             email: '' ,
             password: '' ,
@@ -112,26 +116,22 @@
 
     @keyframes slide {
         100% {
-            left: 0;
-            opacity: 1
+            transform: translateY(10px);
         }
     }
 
     @-webkit-keyframes slide {
         100% {
-            left: 0;
-            opacity: 1
+            transform: translateY(10px);
         }
     }
 
     .register {
 
-        position: relative;
-        left: -50px;
-        opacity: 0;
+        transform: translateY(0);
 
-        animation: slide 0.75s forwards;
-        -webkit-animation: slide 0.75s forwards;
+        animation: slide 0.5s forwards;
+        -webkit-animation: slide 0.5s forwards;
 
         width: 100%;
         height: calc(100% - 60px);
