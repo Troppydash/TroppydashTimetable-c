@@ -23,7 +23,7 @@
     // TODO: Optimise
     export default {
         name: 'DisplayCanvas' ,
-        props: ['isMobile'],
+        props: ['isMobile'] ,
         data() {
             return {
                 loading: true ,
@@ -42,9 +42,9 @@
             };
         } ,
         watch: {
-            isMobile(newVal, oldVal) {
+            isMobile( newVal , oldVal ) {
                 if (newVal) {
-                    const mobileWidth = 300, mobileHeight = mobileWidth / 16 * 9;
+                    const mobileWidth = 300 , mobileHeight = mobileWidth / 16 * 9;
 
                     this.ref.renderer.setSize(mobileWidth , mobileHeight);
                 } else {
@@ -53,7 +53,7 @@
                     this.ref.renderer.setSize(width , height);
                 }
             }
-        },
+        } ,
         methods: {
             focusFromCode( code ) {
 
@@ -102,10 +102,10 @@
                 const longdif = originLong - long;
 
                 return {
-                    lat: latdif * 111.32 * 1000,
-                    long: longdif * 40075 * Math.cos(latdif) / 360 * 1000,
-                }
-            },
+                    lat: latdif * 111.32 * 1000 ,
+                    long: longdif * 40075 * Math.cos(latdif) / 360 * 1000 ,
+                };
+            } ,
             setUserInCanvas() {
                 if (!this.location) {
                     return;
@@ -113,7 +113,7 @@
 
                 const hodgeLat = -41.328232;
                 const hodgeLong = 174.818269;
-                const {lat, long} = this.measure(hodgeLat, hodgeLong, this.location.latitude, this.location.longitude)
+                const { lat , long } = this.measure(hodgeLat , hodgeLong , this.location.latitude , this.location.longitude);
                 if (lat > 1000 || long > 1000) {
                     return;
                 }
@@ -248,26 +248,6 @@
         border: none;
     }
 
-
-    @-webkit-keyframes slide {
-        0% {
-            transform: translateX(0px);
-        }
-    }
-
-    @keyframes slide {
-        0% {
-            transform: translateX(0px);
-        }
-    }
-
-    .closed {
-        animation: slide 0.25s forwards;
-        -webkit-animation: slide 0.25s forwards;
-
-        transform: translateX(150%);
-    }
-
     .displayCanvas {
         position: absolute;
         bottom: 1rem;
@@ -277,7 +257,7 @@
 
     .displayCanvas:hover:not(:focus):not(:active) {
         transition-duration: 500ms;
-        transition-delay: 1s;
+        transition-delay: 1.5s;
 
         opacity: 0.3;
     }
@@ -286,14 +266,33 @@
         width: 100%;
         height: 342px;
 
-        box-shadow: 3px 3px 5px 2px gray;
+        box-shadow: 0 0 5px 2px gray;
         border: 2px solid var(--scots-red);
     }
 
-    @media only screen and (max-width: 1024px) {
+    .closed {
+        transition: all .25s ease;
+        transform: translateX(1000px);
+        visibility: hidden;
+    }
+
+    @media only screen and (max-width: 1023px) {
         #schoolMap {
             width: 100%;
             height: 172.75px;
+        }
+
+        .closed {
+            display: none;
+            transition: none;
+            transform: none;
+        }
+
+        .displayCanvas:hover:not(:focus):not(:active) {
+            transition-duration: initial;
+            transition-delay: initial;
+
+            opacity: initial;
         }
     }
 </style>

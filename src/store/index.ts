@@ -74,7 +74,7 @@ export default new Vuex.Store( {
         verifyEmail(context) {
             const actionCodeSettings = {
                 handleCodeInApp: true,
-                url: 'http://localhost:8080/home'
+                url: 'http://stimetable.now.sh/home'
             }
             firebase.auth().currentUser?.sendEmailVerification(actionCodeSettings)
                 .then(res => {

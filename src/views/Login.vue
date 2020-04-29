@@ -82,9 +82,15 @@
         width: 400px;
     }
 
+    @media only screen and (max-width: 1023px) {
+        input:not([type=submit]) {
+            width: 300px;
+        }
+    }
+
     h1 {
         margin: 1rem 0;
-        font-family: "Roboto Light", "Helvetica";
+        font-family: "Roboto Light", Sans, sans-serif;
         font-weight: lighter;
         font-size: 5rem;
     }

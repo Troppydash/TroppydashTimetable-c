@@ -24,13 +24,13 @@
     body {
         height: 100%;
         width: 100%;
-
         overflow-x: hidden;
 
         font-family: Roboto, sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
+
 
     * {
         box-sizing: border-box;
