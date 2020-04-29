@@ -4,7 +4,7 @@
             <p class="banner-text">You haven't verified your email yet, please go to Settings to verified your email</p>
         </div>
         <div class="action-buttons">
-            <button class="button">Settings</button>
+            <button class="button"><router-link to="/settings">Settings</router-link></button>
             <button class="button" @click="handleDismiss">Dismiss</button>
         </div>
     </div>
