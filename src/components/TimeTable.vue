@@ -30,6 +30,9 @@
         } ,
         methods: {
             handleClick( code, item ) {
+                if (!code) {
+                    return
+                }
                 this.selectedItem = item;
                 this.$refs.map.focusFromCode(code);
             },

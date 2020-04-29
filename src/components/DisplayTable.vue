@@ -145,8 +145,8 @@
         transition: max-height 1s;
         overflow: hidden;
 
-        animation: slide 0.75s ease;
-        -webkit-animation: slide 0.75s ease;
+        animation: slide 0.75s forwards;
+        -webkit-animation: slide 0.75s forwards;
     }
 
 
@@ -200,7 +200,7 @@
 
             th {
                 color: white;
-                font-family: "Roboto Light", Sans, sans-serif;
+                font-family: "Roboto Light", "Helvetica";
                 font-weight: normal;
                 font-size: 1.25rem;
             }
