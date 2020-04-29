@@ -23,6 +23,7 @@
     // TODO: Optimise
     export default {
         name: 'DisplayCanvas' ,
+        props: ['isMobile'],
         data() {
             return {
                 loading: true ,
@@ -40,6 +41,19 @@
                 location: null ,
             };
         } ,
+        watch: {
+            isMobile(newVal, oldVal) {
+                if (newVal) {
+                    const mobileWidth = 300, mobileHeight = mobileWidth / 16 * 9;
+
+                    this.ref.renderer.setSize(mobileWidth , mobileHeight);
+                } else {
+                    const width = 600 , height = width / 16 * 9;
+
+                    this.ref.renderer.setSize(width , height);
+                }
+            }
+        },
         methods: {
             focusFromCode( code ) {
 
@@ -274,5 +288,12 @@
 
         box-shadow: 3px 3px 5px 2px gray;
         border: 2px solid var(--scots-red);
+    }
+
+    @media only screen and (max-width: 1024px) {
+        #schoolMap {
+            width: 100%;
+            height: 172.75px;
+        }
     }
 </style>

@@ -5,7 +5,7 @@
         <DisplayTable :table-data="timetable.data" :on-click="handleClick" :selected-item="selectedItem" :is-mobile="isMobile"/>
 
         <!--Canvas-->
-        <DisplayCanvas ref="map" />
+        <DisplayCanvas ref="map" :is-mobile="isMobile"/>
     </div>
 </template>
 
