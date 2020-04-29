@@ -34,7 +34,7 @@
 
         .username {
             color: white;
-
+            margin: 0;
         }
     }
 

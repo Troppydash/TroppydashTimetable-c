@@ -2,7 +2,7 @@
     <div class="timeTable">
         <p v-if="timetable.error">{{ timetable.error }}</p>
         <!--Table-->
-        <DisplayTable v-bind:table-data="timetable.data" :on-click="handleClick" />
+        <DisplayTable :table-data="timetable.data" :on-click="handleClick" :selected-item="selectedItem" :is-mobile="isMobile"/>
 
         <!--Canvas-->
         <DisplayCanvas ref="map" />
@@ -18,7 +18,10 @@
         name: 'TimeTable' ,
         components: { DisplayCanvas , DisplayTable } ,
         data() {
-            return {};
+            return {
+                isMobile: false,
+                selectedItem: ''
+            };
         } ,
         computed: {
             ...mapState([
@@ -26,9 +29,17 @@
             ])
         } ,
         methods: {
-            handleClick( code ) {
+            handleClick( code, item ) {
+                this.selectedItem = item;
                 this.$refs.map.focusFromCode(code);
-            }
+            },
+            onResize() {
+                this.isMobile = window.innerWidth < 1024;
+            },
+        },
+        mounted() {
+            this.onResize();
+            window.addEventListener('resize', this.onResize, { passive: true })
         }
     };
 </script>
@@ -37,6 +48,6 @@
     .timeTable {
         width: 100%;
 
-        margin: 50px 0 500px;
+        margin: 50px 0 400px;
     }
 </style>

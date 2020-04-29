@@ -17,7 +17,7 @@
 
                 <p class="error" v-if="error">{{ error }}</p>
                 <div>
-                    <input type="submit" value="Login" class="button button-form" :disabled="loaded">
+                    <input type="submit" value="Login" class="button button-form button-primary" :disabled="loaded">
                 </div>
             </form>
             <div class="google-login__container">
@@ -99,6 +99,7 @@
 
     .login-form__container {
         min-width: 500px;
+        width: 100%;
         min-height: 40%;
         text-align: center;
     }
@@ -138,5 +139,6 @@
         & > div {
             margin-bottom: 50px;
         }
+
     }
 </style>

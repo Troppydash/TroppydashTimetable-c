@@ -96,6 +96,25 @@
         }
     }
 
+    .button-primary {
+        background: var(--scots-red);
+        color: white;
+
+        border: none;
+
+        &:hover {
+            background: #7f0814;
+            border: none;
+
+        }
+
+        &:active {
+            background: #63050d;
+            border: none;
+
+        }
+    }
+
     .button-form {
         width: 200px;
         font-size: 1.2rem;

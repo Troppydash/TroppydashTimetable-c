@@ -5,7 +5,8 @@
                  :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }">
                 <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }"
                         @click="toggleCanvas">
-                    {{ closed ? '+' : '&#10005;' }}
+                    <i class="fa fa-angle-left" v-if="closed"></i>
+                    <i class="fa fa-times" v-else></i>
                 </button>
             </div>
             <div id="schoolMap" :class="{ closed: closed }"></div>
