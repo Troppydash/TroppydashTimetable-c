@@ -4,6 +4,7 @@ import api from '../service/api';
 import * as firebase from "firebase";
 import router from "@/router";
 import axios from 'axios';
+import moment from "moment";
 
 Vue.use( Vuex )
 
@@ -31,6 +32,22 @@ export default new Vuex.Store( {
     getters: {
         lastMessage( state ) {
             return state.messages[state.messages.length - 1];
+        },
+        today( state ) {
+            const REFERENCE = moment();
+            const TODAY = REFERENCE.clone().startOf( 'day' );
+
+            return state.timetable.data.findIndex( ( day: any ) => {
+                return moment( day.Date, 'DD/MM/YYYY ss/mm/hh' ).isSame( TODAY );
+            } )
+        },
+        currentLesson( state, getters ) {
+            const todayIndex = getters.today;
+            const today: any = state.timetable.data[todayIndex];
+            const period = today.periodData.findIndex( ( period: any) => {
+                return moment( Date.now() ).isBetween( moment( period.FromTime, 'h.mm' ), moment( period.ToTime, 'h.mm' ) );
+            } )
+            return "" + todayIndex + (period+1);
         }
     },
     mutations: {
@@ -84,10 +101,10 @@ export default new Vuex.Store( {
             }
             firebase.auth().currentUser?.sendEmailVerification( actionCodeSettings )
                 .then( () => {
-                    context.commit('addMessages', { message: 'Successfully sent email'})
+                    context.commit( 'addMessages', { message: 'Successfully sent email' } )
                 } )
                 .catch( err => {
-                    console.error(err);
+                    console.error( err );
                     context.commit( 'addMessages', { message: 'Unable to send email' } );
                 } )
         },

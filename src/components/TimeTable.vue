@@ -2,10 +2,11 @@
     <div class="timeTable">
         <p v-if="timetable.error">{{ timetable.error }}</p>
         <!--Table-->
-        <DisplayTable :table-data="timetable.data" :on-click="handleClick" :selected-item="selectedItem" :is-mobile="isMobile"/>
+        <DisplayTable :table-data="timetable.data" :on-click="handleClick" :selected-item="selectedItem"
+                      :is-mobile="isMobile" />
 
         <!--Canvas-->
-        <DisplayCanvas ref="map" :is-mobile="isMobile"/>
+        <DisplayCanvas ref="map" :is-mobile="isMobile" />
     </div>
 </template>
 
@@ -19,7 +20,7 @@
         components: { DisplayCanvas , DisplayTable } ,
         data() {
             return {
-                isMobile: false,
+                isMobile: false ,
                 selectedItem: ''
             };
         } ,
@@ -29,20 +30,20 @@
             ])
         } ,
         methods: {
-            handleClick( code, item ) {
+            handleClick( code , item ) {
                 if (!code) {
-                    return
+                    return;
                 }
                 this.selectedItem = item;
                 this.$refs.map.focusFromCode(code);
-            },
+            } ,
             onResize() {
                 this.isMobile = window.innerWidth < 1024;
-            },
-        },
+            } ,
+        } ,
         mounted() {
             this.onResize();
-            window.addEventListener('resize', this.onResize, { passive: true })
+            window.addEventListener('resize' , this.onResize , { passive: true });
         }
     };
 </script>

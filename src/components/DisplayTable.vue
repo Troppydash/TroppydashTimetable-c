@@ -10,11 +10,17 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(day, index) in tableData" :key="day.Date">
+            <tr v-for="(day, index) in tableData" :key="day.Date" :class="{ 'today': index === today }">
                 <td class="date-column">{{ day.DateFormatted }}</td>
                 <td v-for="period in day.periodData" :key="period.PeriodID"
                     v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
-                    :class="{ selected: selectedItem === ''+index+period.PeriodID }">
+                    :class="{
+                        'selected': selectedItem === ''+index+period.PeriodID,
+                        'lesson': currentLesson === ''+index+period.PeriodID ,
+                        'hovered': selectedItem !== ''+index+period.PeriodID && hoveredItem === period.AdditionalData.Desc
+                    }"
+                    @mouseover="() => hoverItem(period.AdditionalData.Desc)"
+                    @mouseleave="() => unhoverItem()">
                     {{ period.AdditionalData.Desc }}
                 </td>
             </tr>
@@ -24,7 +30,7 @@
     <div class="displayTable" v-else>
         <div class="main-list__container">
             <div class="main-list" v-for="(day, index) in tableData" :key="day.Date">
-                <div class="main-list-title" @click="() => handleToggle(index)">
+                <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
                     <div class="arrow">
                         <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>
@@ -34,7 +40,10 @@
                 <ul v-if="days[index]" class="main-list-item" :class="{ open: days[index] }">
                     <li v-for="period in day.periodData" :key="period.PeriodID"
                         v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
-                        :class="{ selected: selectedItem === ''+index+period.PeriodID }">
+                        :class="{
+                            selected: selectedItem === ''+index+period.PeriodID,
+                            'lesson': currentLesson === ''+index+period.PeriodID
+                        } ">
                         {{ period.AdditionalData.Desc }}
                     </li>
                 </ul>
@@ -44,18 +53,35 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
+
     export default {
         name: 'DisplayTable' ,
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile'] ,
         data() {
             return {
-                days: this.tableData.map(() => false) ,
+                days: this.tableData.map(( _ , index ) => {
+                    return index === this.$store.getters.today;
+                }) ,
+                hoveredItem: ''
             };
         } ,
         methods: {
+            hoverItem( desc ) {
+                if (this.isMobile) {
+                    return;
+                }
+                this.hoveredItem = desc;
+            } ,
+            unhoverItem() {
+                if (this.isMobile) {
+                    return;
+                }
+                this.hoveredItem = '';
+            } ,
             handleToggle( index ) {
                 this.days.splice(index , 1 , !this.days[index]);
-            } ,
+            }
         } ,
         computed: {
             tableHeaders() {
@@ -66,18 +92,31 @@
                 }
                 return [];
             } ,
+            ...mapGetters([
+                'today',
+                'currentLesson'
+            ])
         }
     };
 </script>
 
 <style scoped lang="scss">
-    .selected {
-        background: #ff5d63;
+    .selected:not(.lesson) {
         color: white;
+        background: var(--scots-grey1);
 
         &:hover {
-            background: var(--scots-red) !important;
+            background: var(--scots-grey1);
         }
+    }
+
+    .today {
+        border-left: 0.7rem solid var(--scots-red);
+    }
+
+    .lesson {
+        background: var(--scots-red) !important;
+        color: white !important;
     }
 
 
@@ -92,6 +131,12 @@
     }
 
     .main-list {
+        outline: none;
+
+        * {
+            outline: none;
+        }
+
         cursor: pointer;
 
         margin: 0;
@@ -170,10 +215,6 @@
             &:hover {
                 background: var(--scots-lightgrey);
             }
-
-            td:hover {
-                background: lightgray;
-            }
         }
 
         td, th {
@@ -205,6 +246,13 @@
                 font-size: 1.25rem;
             }
         }
+    }
+
+    .hovered {
+        transition-delay: 1s;
+        transition-duration: 200ms;
+        background: #9e9e9e;
+        color: white;
     }
 
 </style>

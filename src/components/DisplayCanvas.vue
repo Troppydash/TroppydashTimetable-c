@@ -19,6 +19,7 @@
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
     import similarity from 'similarity';
+    import { mapGetters } from 'vuex';
 
     // TODO: Optimise
     export default {
@@ -40,6 +41,12 @@
 
                 location: null ,
             };
+        } ,
+        computed: {
+            currentLesson() {
+                return this.$store.getters.currentLesson;
+
+            }
         } ,
         watch: {
             isMobile( newVal , oldVal ) {
@@ -134,6 +141,7 @@
                 mesh.position.y = 30;
 
                 this.ref.scene.add(mesh);
+
             } ,
             init() {
                 // Init ThreeJS
@@ -167,6 +175,8 @@
                     this.loading = false;
                     this.models = gltf.scene.children;
                     this.ref.scene.add(gltf.scene);
+
+                    this.focusFromCode(this.$store.state.timetable.data[this.currentLesson[0]].periodData[this.currentLesson[1]-1].AdditionalData.Room);
                 } , undefined , err => {
                     this.error = err;
                     console.error(err);
