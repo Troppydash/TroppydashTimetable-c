@@ -65,11 +65,13 @@
                         password: this.password
                     })
                     .then(( { error } ) => {
-                        this.submitted = false;
                         if (error) {
+                            this.submitted = false;
                             this.error = error;
                         } else {
-                            this.$router.replace('home');
+                            this.$router.replace('home', () => {
+                                this.submitted = false;
+                            });
                         }
                     });
             }

@@ -68,8 +68,9 @@
                             this.error = error;
                             this.submitted = false;
                         } else {
-                            this.$router.replace('home');
-                            this.submitted = false;
+                            this.$router.replace('home', () => {
+                                this.submitted = false;
+                            });
                         }
                     });
             }

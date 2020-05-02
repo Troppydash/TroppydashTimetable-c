@@ -14,6 +14,7 @@
     import DisplayTable from '@/components/DisplayTable';
     import { mapState } from 'vuex';
     import DisplayCanvas from '@/components/DisplayCanvas';
+    import store from '@/store';
 
     export default {
         name: 'TimeTable' ,
@@ -49,6 +50,9 @@
             this.onResize();
             window.addEventListener('resize' , this.onResize , { passive: true });
 
+            if (!this.$store.state.token) {
+                this.$store.dispatch('handleGetUser');
+            }
             this.$store.dispatch('handleGetTimetable', { force: false, date: this.$route.query.date || '' })
         }
     };
