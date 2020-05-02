@@ -78,9 +78,6 @@
             };
         } ,
         methods: {
-            change(){
-                this.$router.push('/home?date=' + '20-5-2020')
-            },
             hoverItem( desc ) {
                 if (this.isMobile) {
                     return;
@@ -135,21 +132,39 @@
 
     .period {
         position: relative;
-        overflow-y: hidden;
+        overflow-y: visible;
+        overflow-x: visible;
     }
 
     .room-number {
         color: var(--scots-red);
         font-weight: bold;
-        text-shadow: 1px 1px 1px var(--scots-grey1);
+    }
 
-        transition-duration: 100ms;
+    .selected > .room-number {
+        color: #ffffff;
+    }
+
+    @-webkit-keyframes zoom {
+        0% {
+            transform: scale(1.2);
+        }
+    }
+
+    @keyframes zoom {
+        0% {
+            transform: scale(1.2);
+        }
     }
 
     .room-number-desktop {
         position: absolute;
-        bottom: 1px;
-        right: 1px;
+        bottom: 2px;
+        right: 2px;
+
+        transform: scale(1.0);
+        animation: zoom 0.25s forwards ease;
+        -webkit-animation: zoom 0.25s forwards ease;
     }
 
     .room-number-mobile {

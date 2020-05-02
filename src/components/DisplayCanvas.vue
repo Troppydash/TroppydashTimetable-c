@@ -290,12 +290,12 @@
         height: auto;
     }
 
-    .displayCanvas:hover:not(:focus):not(:active) {
-        transition-duration: 500ms;
-        transition-delay: 1.5s;
+    /*.displayCanvas:hover:not(:focus):not(:active) {*/
+    /*    transition-duration: 500ms;*/
+    /*    transition-delay: 1.5s;*/
 
-        opacity: 0.3;
-    }
+    /*    opacity: 0.3;*/
+    /*}*/
 
     #schoolMap {
         width: 100%;

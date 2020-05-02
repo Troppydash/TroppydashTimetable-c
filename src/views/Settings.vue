@@ -12,19 +12,21 @@
                 <input type="text" v-model="keyCode" />
             </div>
             <p v-if="error">{{ error }}</p>
-            <input type="submit" value="Edit"/>
+            <input type="submit" value="Edit" />
         </form>
 
         <button @click="handleLogout">Logout</button>
         <button @click="handleDelete">Delete user</button>
         <button @click="verifyEmail" v-if="!isVerified">Verify Email</button>
+        <p>{{ lastMessage }}</p>
     </div>
 </template>
 
 <script>
     import api from '../service/api';
-    import { mapState } from 'vuex';
-    import firebase from 'firebase'
+    import { mapGetters , mapState } from 'vuex';
+    import firebase from 'firebase';
+
     export default {
         name: 'Settings' ,
         data() {
@@ -37,15 +39,18 @@
         computed: {
             ...mapState([
                 'isVerified'
-            ]),
+            ]) ,
+            ...mapGetters([
+                'lastMessage'
+            ]) ,
             email() {
-                return firebase.auth().currentUser.email
+                return firebase.auth().currentUser.email;
             }
         } ,
         methods: {
             verifyEmail() {
                 this.$store.dispatch('verifyEmail');
-            },
+            } ,
             handleSubmit() {
                 const username = this.username;
                 api.put('/edituser' , { username: username , keyCode: this.keyCode })
@@ -53,13 +58,13 @@
                         if (username) {
                             this.$store.commit('setUsername' , { username });
                         }
-                        this.$store.dispatch( 'handleGetTimetable', { force: true});
+                        this.$store.dispatch('handleGetTimetable' , { force: true });
                         this.$router.replace('home');
                     })
                     .catch(err => {
                         this.error = err.message;
                     });
-            },
+            } ,
             handleLogout: function () {
                 this.$store.dispatch('handleLogoutUser')
                     .then(() => {

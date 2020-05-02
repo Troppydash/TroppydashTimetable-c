@@ -1,9 +1,21 @@
 <template>
     <div class="displayDatePicker">
+        <div class="date-message">
+            <p>
+                <span>
+                    {{ todayMessage
+                    ? `Welcome, Today's Date is `
+                    : `Greetings, fellow Time traveller. You are currently in the time ` }}
+                </span>
+                <span class="date-message-date">
+                {{ todayMessage ? prettyDate : prettyTimeTravelDate }}
+                </span>
+            </p>
+        </div>
         <div class="wrapper">
-            <Datepicker v-model="date" monday-first :highlighted="highlighted"/>
+            <Datepicker v-model="date" monday-first :highlighted="highlighted" />
             <button class="button button-primary" @click="handleView" :disabled="!viewButtonActive">{{ isToday ? 'Today'
-                : 'GoTo' }}
+                : 'Time Travel' }}
             </button>
         </div>
     </div>
@@ -24,7 +36,7 @@
                 : moment().format('MM-DD-YYYY').toString();
 
             return {
-                date: initialDate,
+                date: initialDate ,
                 highlighted: {
                     dates: [
                         new Date()
@@ -33,10 +45,22 @@
             };
         } ,
         computed: {
+            prettyDate() {
+                return moment().format('dddd, Do MMM YYYY');
+            } ,
+            prettyTimeTravelDate() {
+                return moment(this.$route.query.date , 'DD-MM-YYYY').format('dddd, Do MMM YYYY');
+            } ,
+            todayMessage() {
+                if (this.$route.query.date) {
+                    return this.$route.query.date === moment().format('DD-MM-YYYY');
+                }
+                return true;
+            } ,
             viewButtonActive() {
                 // If no date
                 if (!this.$route.query.date) {
-                    if (moment(this.date).format('DD-MM-YYYY').toString() === moment().format('DD-MM-YYYY')) {
+                    if (moment(this.date , 'MM-DD-YYYY').format('DD-MM-YYYY').toString() === moment().format('DD-MM-YYYY')) {
                         return false;
                     }
                     // If have date, and url date
@@ -77,10 +101,19 @@
 
 <style scoped lang="scss">
 
+    .date-message {
+        font-size: 1.1rem;
+        font-family: "Roboto Light", Sans, sans-serif;
+    }
+
+    .date-message-date {
+        text-decoration: underline;
+    }
+
     .displayDatePicker {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-bottom: 1rem;
     }
 

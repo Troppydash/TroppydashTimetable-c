@@ -19,6 +19,7 @@ export default new Vuex.Store( {
         messages: Array<{
             info: string;
             text: string;
+            from: string;
         }>(),
 
         isVerified: false,
@@ -110,11 +111,15 @@ export default new Vuex.Store( {
             }
             firebase.auth().currentUser?.sendEmailVerification( actionCodeSettings )
                 .then( () => {
-                    context.commit( 'addMessages', { message: 'Successfully sent email' } )
+                    context.commit( 'addMessages', {
+                        message: { type: 'info', text: 'Successfully sent email', from: 'verifyEmail' }
+                    } );
                 } )
                 .catch( err => {
                     console.error( err );
-                    context.commit( 'addMessages', { message: 'Unable to send email' } );
+                    context.commit( 'addMessages', {
+                        message: { type: 'info', text: 'Unable to send email', from: 'verifyEmail' }
+                    } );
                 } )
         },
         handleUserSocialLogin( context, { type } ) {
@@ -132,7 +137,7 @@ export default new Vuex.Store( {
             return firebase.auth().signInWithPopup( provider )
                 .then( () => {
                     // Get jwt token from current user
-                    return firebase.auth().currentUser?.getIdToken(  );
+                    return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -141,7 +146,6 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -159,7 +163,7 @@ export default new Vuex.Store( {
             return firebase.auth().createUserWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
                     // Get jwt token from current user
-                    return firebase.auth().currentUser?.getIdToken(  );
+                    return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -168,7 +172,6 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -184,7 +187,7 @@ export default new Vuex.Store( {
             let token: string;
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
-                    return firebase.auth().currentUser?.getIdToken(  );
+                    return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -193,7 +196,6 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -233,7 +235,7 @@ export default new Vuex.Store( {
                 token: '',
                 username: ''
             };
-            return firebase.auth().currentUser?.getIdToken(  )
+            return firebase.auth().currentUser?.getIdToken()
                 .then( tok => {
                     user.token = tok;
                     api.defaults.headers.common['Authorization'] = `Bearer ${tok}`;
@@ -244,7 +246,6 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
-                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -259,14 +260,14 @@ export default new Vuex.Store( {
         handleGetTimetable( context, { force = false, date } ) {
             if ( !force && context.state.timetable.data.length !== 0 ) {
                 context.commit( 'addMessages', {
-                    message: { type: 'info', text: 'data already exists' }
+                    message: { type: 'info', text: 'data already exists', from: 'handleGetTimetable' }
                 } );
                 return;
             }
 
             if ( !context.state.isVerified ) {
                 context.commit( 'addMessages', {
-                    message: { type: 'info', text: 'email not verified' }
+                    message: { type: 'info', text: 'email not verified', from: 'handleGetTimetable' }
                 } );
                 return;
             }
@@ -279,7 +280,7 @@ export default new Vuex.Store( {
                 context.state.timetable.error = '';
                 context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
                 context.commit( 'addMessages', {
-                    message: { type: 'info', text: 'received cache item' }
+                    message: { type: 'info', text: 'received cache item', from: 'handleGetTimetable' }
                 } );
             }
 
@@ -293,7 +294,7 @@ export default new Vuex.Store( {
                     context.state.timetable.data = JSON.parse( res.data.data );
                     localStorage.setItem( "TIMETABLE", res.data.data );
                     context.commit( 'addMessages', {
-                        message: { type: 'info', text: 'received network item' }
+                        message: { type: 'info', text: 'received network item', from: 'handleGetTimetable' }
                     } );
                     return;
                 } )
@@ -301,7 +302,7 @@ export default new Vuex.Store( {
                     console.log( err );
                     context.state.timetable.error = err.response.data.message;
                     context.commit( 'addMessages', {
-                        message: { type: 'error', text: err.response.data.message }
+                        message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
                     } );
                     return;
                 } )
