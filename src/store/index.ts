@@ -34,8 +34,14 @@ export default new Vuex.Store( {
             return state.messages[state.messages.length - 1];
         },
         today( state ) {
-            const REFERENCE = moment();
-            const TODAY = REFERENCE.clone().startOf( 'day' );
+            let REFERENCE = moment();
+            let TODAY = REFERENCE.clone().startOf( 'day' );
+
+            if ( router.currentRoute.query.date ) {
+                const date: string = router.currentRoute.query.date as string;
+                REFERENCE = moment( date, 'DD-MM-YYYY' );
+                TODAY = REFERENCE.clone().startOf( 'day' );
+            }
 
             return state.timetable.data.findIndex( ( day: any ) => {
                 return moment( day.Date, 'DD/MM/YYYY ss/mm/hh' ).isSame( TODAY );
@@ -44,10 +50,13 @@ export default new Vuex.Store( {
         currentLesson( state, getters ) {
             const todayIndex = getters.today;
             const today: any = state.timetable.data[todayIndex];
-            const period = today.periodData.findIndex( ( period: any) => {
+            if ( !today ) {
+                return "";
+            }
+            const period = today.periodData.findIndex( ( period: any ) => {
                 return moment( Date.now() ).isBetween( moment( period.FromTime, 'h.mm' ), moment( period.ToTime, 'h.mm' ) );
             } )
-            return "" + todayIndex + (period+1);
+            return "" + todayIndex + (period + 1);
         }
     },
     mutations: {
@@ -123,7 +132,7 @@ export default new Vuex.Store( {
             return firebase.auth().signInWithPopup( provider )
                 .then( () => {
                     // Get jwt token from current user
-                    return firebase.auth().currentUser?.getIdToken( true );
+                    return firebase.auth().currentUser?.getIdToken(  );
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -132,7 +141,7 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    context.dispatch( 'handleGetTimetable', { force: false } );
+                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -150,7 +159,7 @@ export default new Vuex.Store( {
             return firebase.auth().createUserWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
                     // Get jwt token from current user
-                    return firebase.auth().currentUser?.getIdToken( true );
+                    return firebase.auth().currentUser?.getIdToken(  );
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -159,7 +168,7 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    context.dispatch( 'handleGetTimetable', { force: false } );
+                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -175,7 +184,7 @@ export default new Vuex.Store( {
             let token: string;
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
-                    return firebase.auth().currentUser?.getIdToken( true );
+                    return firebase.auth().currentUser?.getIdToken(  );
                 } )
                 .then( tok => {
                     token = tok || '';
@@ -184,7 +193,7 @@ export default new Vuex.Store( {
                 } )
                 .then( res => {
                     context.commit( 'setUser', { token, username: res.data.username } );
-                    context.dispatch( 'handleGetTimetable', { force: false } );
+                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -224,7 +233,7 @@ export default new Vuex.Store( {
                 token: '',
                 username: ''
             };
-            return firebase.auth().currentUser?.getIdToken( true )
+            return firebase.auth().currentUser?.getIdToken(  )
                 .then( tok => {
                     user.token = tok;
                     api.defaults.headers.common['Authorization'] = `Bearer ${tok}`;
@@ -235,7 +244,7 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
-                    context.dispatch( 'handleGetTimetable', { force: false } );
+                    // context.dispatch( 'handleGetTimetable', { force: false } );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -247,7 +256,7 @@ export default new Vuex.Store( {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
-        handleGetTimetable( context, { force = false } ) {
+        handleGetTimetable( context, { force = false, date } ) {
             if ( !force && context.state.timetable.data.length !== 0 ) {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'data already exists' }
@@ -264,7 +273,7 @@ export default new Vuex.Store( {
 
             context.commit( 'setTimetableLoading', { isLoading: true } );
 
-            if ( localStorage.getItem( "TIMETABLE" ) ) {
+            if ( !force && localStorage.getItem( "TIMETABLE" ) ) {
                 context.commit( 'setTimetableLoading', { isLoading: false } );
 
                 context.state.timetable.error = '';
@@ -274,8 +283,9 @@ export default new Vuex.Store( {
                 } );
             }
 
+            const formtDate = date.split( '-' ).join( '/' );
 
-            return axios.post( 'https://frozen-hamlet-21795.herokuapp.com/timetable', {}, {
+            return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formtDate}`, {
                 headers: { 'Authorization': `Bearer ${context.state.token}` }
             } )
                 .then( res => {

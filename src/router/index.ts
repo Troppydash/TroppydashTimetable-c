@@ -26,10 +26,10 @@ const routes: Array<RouteConfig> = [
         component: Register
     },
     {
-        path: '/',
+        path: '/home',
         name: 'Home',
         component: Home,
-        alias: '/home',
+        alias: '/',
         meta: {
             requireAuth: true
         }

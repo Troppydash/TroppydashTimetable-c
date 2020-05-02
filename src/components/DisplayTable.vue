@@ -1,5 +1,6 @@
 <template>
     <div class="displayTable" v-if="!isMobile">
+        <DisplayDatePicker />
         <table class="main-table">
             <thead>
             <tr>
@@ -19,15 +20,20 @@
                         'lesson': currentLesson === ''+index+period.PeriodID ,
                         'hovered': selectedItem !== ''+index+period.PeriodID && hoveredItem === period.AdditionalData.Desc
                     }"
+                    class="period"
                     @mouseover="() => hoverItem(period.AdditionalData.Desc)"
                     @mouseleave="() => unhoverItem()">
                     {{ period.AdditionalData.Desc }}
+                    <span v-if="closed" class="room-number room-number-desktop">
+                        {{ period.AdditionalData.Room }}
+                    </span>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
     <div class="displayTable" v-else>
+        <DisplayDatePicker />
         <div class="main-list__container">
             <div class="main-list" v-for="(day, index) in tableData" :key="day.Date">
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
@@ -45,6 +51,9 @@
                             'lesson': currentLesson === ''+index+period.PeriodID
                         } ">
                         {{ period.AdditionalData.Desc }}
+                        <span v-if="closed" class="room-number room-number-mobile">
+                        {{ period.AdditionalData.Room }}
+                    </span>
                     </li>
                 </ul>
             </div>
@@ -54,10 +63,12 @@
 
 <script>
     import { mapGetters } from 'vuex';
+    import DisplayDatePicker from '@/components/DisplayDatePicker';
 
     export default {
         name: 'DisplayTable' ,
-        props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile'] ,
+        components: { DisplayDatePicker } ,
+        props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile', 'closed'] ,
         data() {
             return {
                 days: this.tableData.map(( _ , index ) => {
@@ -67,6 +78,9 @@
             };
         } ,
         methods: {
+            change(){
+                this.$router.push('/home?date=' + '20-5-2020')
+            },
             hoverItem( desc ) {
                 if (this.isMobile) {
                     return;
@@ -119,10 +133,31 @@
         color: white !important;
     }
 
+    .period {
+        position: relative;
+        overflow-y: hidden;
+    }
+
+    .room-number {
+        color: var(--scots-red);
+        font-weight: bold;
+        text-shadow: 1px 1px 1px var(--scots-grey1);
+
+        transition-duration: 100ms;
+    }
+
+    .room-number-desktop {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+    }
+
+    .room-number-mobile {
+        float: right;
+    }
 
     /*Mobile*/
     .main-list__container {
-        width: 90%;
         margin: 0 auto;
     }
 
@@ -131,6 +166,7 @@
     }
 
     .main-list {
+        -webkit-tap-highlight-color: transparent;
         outline: none;
 
         * {
@@ -199,6 +235,8 @@
     .displayTable {
         text-align: left;
         width: 100%;
+
+        padding: 0 5%;
     }
 
     .date-column {
@@ -206,7 +244,7 @@
     }
 
     .main-table {
-        width: 90%;
+        width: 100%;
         margin: 0 auto;
         border-collapse: collapse;
 
@@ -228,7 +266,6 @@
 
         td {
             height: 4rem;
-            overflow-y: auto;
         }
 
         tr + tr {

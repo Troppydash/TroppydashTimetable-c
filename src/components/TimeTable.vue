@@ -3,10 +3,10 @@
         <p v-if="timetable.error">{{ timetable.error }}</p>
         <!--Table-->
         <DisplayTable :table-data="timetable.data" :on-click="handleClick" :selected-item="selectedItem"
-                      :is-mobile="isMobile" />
+                      :is-mobile="isMobile" :closed="isCanvasClosed" />
 
         <!--Canvas-->
-        <DisplayCanvas ref="map" :is-mobile="isMobile" />
+        <DisplayCanvas ref="map" :is-mobile="isMobile" :toggle-canvas="toggleCanvas" :closed="isCanvasClosed"/>
     </div>
 </template>
 
@@ -21,7 +21,8 @@
         data() {
             return {
                 isMobile: false ,
-                selectedItem: ''
+                selectedItem: '',
+                isCanvasClosed: false,
             };
         } ,
         computed: {
@@ -40,10 +41,15 @@
             onResize() {
                 this.isMobile = window.innerWidth < 1024;
             } ,
+            toggleCanvas() {
+                this.isCanvasClosed = !this.isCanvasClosed;
+            }
         } ,
         mounted() {
             this.onResize();
             window.addEventListener('resize' , this.onResize , { passive: true });
+
+            this.$store.dispatch('handleGetTimetable', { force: false, date: this.$route.query.date || '' })
         }
     };
 </script>

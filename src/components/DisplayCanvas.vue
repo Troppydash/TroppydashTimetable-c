@@ -24,7 +24,7 @@
     // TODO: Optimise
     export default {
         name: 'DisplayCanvas' ,
-        props: ['isMobile'] ,
+        props: ['isMobile', 'toggleCanvas', 'closed'] ,
         data() {
             return {
                 loading: true ,
@@ -37,18 +37,26 @@
                     renderer: null ,
                 } ,
 
-                closed: false ,
-
                 location: null ,
+
+                shouldFocus: false
             };
         } ,
         computed: {
-            currentLesson() {
-                return this.$store.getters.currentLesson;
-
+            ...mapGetters([
+                'currentLesson'
+            ]) ,
+            data() {
+                return this.$store.state.timetable.data;
             }
         } ,
         watch: {
+            data( val ) {
+                if (val) {
+                    this.shouldFocus = true;
+                }
+            } ,
+
             isMobile( newVal , oldVal ) {
                 if (newVal) {
                     const mobileWidth = 300 , mobileHeight = mobileWidth / 16 * 9;
@@ -59,7 +67,7 @@
 
                     this.ref.renderer.setSize(width , height);
                 }
-            }
+            } ,
         } ,
         methods: {
             focusFromCode( code ) {
@@ -143,6 +151,23 @@
                 this.ref.scene.add(mesh);
 
             } ,
+            tryFocusFromCode(val) {
+                const currentLesson = this.currentLesson;
+                if (!currentLesson) {
+                    return;
+                }
+                if (val.length < 1) {
+                    return;
+                }
+                if (!val[currentLesson[0]]) {
+                    return;
+                }
+                if (!val[this.currentLesson[0]].periodData[currentLesson[1] - 1]) {
+                    return;
+                }
+
+                this.focusFromCode(val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room);
+            } ,
             init() {
                 // Init ThreeJS
                 const width = 600 , height = width / 16 * 9;
@@ -176,7 +201,10 @@
                     this.models = gltf.scene.children;
                     this.ref.scene.add(gltf.scene);
 
-                    this.focusFromCode(this.$store.state.timetable.data[this.currentLesson[0]].periodData[this.currentLesson[1]-1].AdditionalData.Room);
+                    if (this.shouldFocus) {
+                        this.tryFocusFromCode(this.$store.state.timetable.data);
+                        this.shouldFocus = false;
+                    }
                 } , undefined , err => {
                     this.error = err;
                     console.error(err);
@@ -189,9 +217,6 @@
                 requestAnimationFrame(this.animate);
                 this.ref.controls.update();
                 this.ref.renderer.render(this.ref.scene , this.ref.camera);
-            } ,
-            toggleCanvas() {
-                this.closed = !this.closed;
             } ,
             getLocation() {
                 if (navigator.geolocation) {
