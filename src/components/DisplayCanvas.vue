@@ -18,13 +18,13 @@
     import * as THREE from 'three';
     import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
     import similarity from 'similarity';
     import { mapGetters } from 'vuex';
 
-    // TODO: Optimise
     export default {
         name: 'DisplayCanvas' ,
-        props: ['isMobile', 'toggleCanvas', 'closed'] ,
+        props: ['isMobile' , 'toggleCanvas' , 'closed'] ,
         data() {
             return {
                 loading: true ,
@@ -36,10 +36,10 @@
                     scene: null ,
                     renderer: null ,
                 } ,
+                lastSelected: -1,
 
                 location: null ,
-
-                shouldFocus: false
+                shouldFocus: false ,
             };
         } ,
         computed: {
@@ -51,31 +51,29 @@
             }
         } ,
         watch: {
-            data( val ) {
-                if (val) {
+            data( newData ) {
+                if (newData) {
                     this.shouldFocus = true;
                 }
             } ,
-
-            isMobile( newVal , oldVal ) {
-                if (newVal) {
-                    const mobileWidth = 300 , mobileHeight = mobileWidth / 16 * 9;
-
-                    this.ref.renderer.setSize(mobileWidth , mobileHeight);
-                } else {
-                    const width = 600 , height = width / 16 * 9;
-
-                    this.ref.renderer.setSize(width , height);
+            isMobile( isMobile ) {
+                let width = 600 , height = width / 16 * 9;
+                if (isMobile) {
+                    width = 300;
+                    height = width / 16 * 9;
                 }
+
+                this.ref.renderer.setSize(width , height);
             } ,
         } ,
         methods: {
             focusFromCode( code ) {
 
-                this.clearAll();
-                code = code.toLowerCase();
+                this.clearLastSelected();
 
+                // Get the most likely name
                 let susIndex = [];
+                code = code.toLowerCase();
                 this.models.forEach(( model , index ) => {
                     let temp = [];
                     model.name.split('_').forEach(( value ) => {
@@ -93,24 +91,24 @@
                 susIndex = susIndex.sort(( x , y ) => y.percent - x.percent);
                 const selectedIndex = susIndex[0].index;
 
-                this.models[selectedIndex].material.color.set('#ff0000');
+                this.lastSelected = selectedIndex;
+                this.models[selectedIndex].material.color.set('#b82832');
                 this.ref.controls.target = new THREE.Vector3(this.models[selectedIndex].position.x , this.models[selectedIndex].position.y , this.models[selectedIndex].position.z);
 
-                const zoomDistance = Number(30) ,
-                    currDistance = this.ref.camera.position.length() ,
-                    factor = zoomDistance / currDistance;
+                const zoomDistance = Number(30)
+                const currDistance = this.ref.camera.position.length()
+                const factor = zoomDistance / currDistance;
 
                 this.ref.camera.position.x *= factor;
                 this.ref.camera.position.z *= factor;
                 this.ref.camera.position.y = 80;
                 this.ref.controls.update();
             } ,
-            clearAll() {
-                this.models.forEach(model => {
-                    if (model.material) {
-                        model.material.color.set('#fff');
-                    }
-                });
+            clearLastSelected() {
+                if (this.lastSelected === -1) {
+                    return;
+                }
+                this.models[this.lastSelected].material.color.set('#6b6b6b');
             } ,
             measure( originLat , originLong , lat , long ) {  // generally used geo measurement function
                 const latdif = originLat - lat;
@@ -151,7 +149,8 @@
                 this.ref.scene.add(mesh);
 
             } ,
-            tryFocusFromCode(val) {
+            tryFocusFromCode() {
+                const val = this.$store.state.timetable.data;
                 const currentLesson = this.currentLesson;
                 if (!currentLesson) {
                     return;
@@ -167,6 +166,14 @@
                 }
 
                 this.focusFromCode(val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room);
+            } ,
+            getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        this.location = position.coords;
+                        this.setUserInCanvas();
+                    });
+                }
             } ,
             init() {
                 // Init ThreeJS
@@ -185,13 +192,16 @@
                 this.ref.camera.position.y = 200;
                 this.ref.scene.add(this.ref.camera);
 
-                const light = new THREE.DirectionalLight(0xffffff);
-                light.position.set(0 , 100 , 50);
+                let light = new THREE.SpotLight(0xeeeeee, 1);
+                light.position.set(300 , 300 , 300);
+                this.ref.scene.add(light);
+
+                light = new THREE.AmbientLight( 0x404040);
                 this.ref.scene.add(light);
 
                 this.ref.controls = new OrbitControls(this.ref.camera , this.ref.renderer.domElement);
                 this.ref.controls.rotateSpeed = 1.0;
-                this.ref.controls.zoomSpeed = 5;
+                this.ref.controls.zoomSpeed = 3;
                 this.ref.controls.panSpeed = 2;
                 this.ref.controls.enableZoom = true;
 
@@ -201,30 +211,26 @@
                     this.models = gltf.scene.children;
                     this.ref.scene.add(gltf.scene);
 
+                    this.models.forEach(model => {
+                        if (model.material && !model.name.includes('Ground')) {
+                            model.material.color.set('#6b6b6b');
+                        }
+                    });
+
                     if (this.shouldFocus) {
-                        this.tryFocusFromCode(this.$store.state.timetable.data);
+                        this.tryFocusFromCode();
                         this.shouldFocus = false;
                     }
                 } , undefined , err => {
                     this.error = err;
                     console.error(err);
                 });
-
-                this.clearAll();
                 this.animate();
             } ,
             animate() {
                 requestAnimationFrame(this.animate);
                 this.ref.controls.update();
                 this.ref.renderer.render(this.ref.scene , this.ref.camera);
-            } ,
-            getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        this.location = position.coords;
-                        this.setUserInCanvas();
-                    });
-                }
             }
         } ,
         mounted() {
@@ -263,7 +269,7 @@
 
     .button__closed {
         color: black;
-        background: lightgray !important;
+        background: #d3d3d3 !important;
         border-radius: 50%;
 
         &:hover {
