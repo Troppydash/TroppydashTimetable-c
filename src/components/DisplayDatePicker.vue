@@ -120,11 +120,13 @@
     .displayDatePicker {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         justify-content: space-between;
         margin-bottom: 1rem;
     }
 
     .wrapper {
+        width: auto;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -132,6 +134,12 @@
 
         & > * {
             margin-right: 5px;
+        }
+    }
+    @media only screen and (max-width: 760px) {
+        .wrapper {
+            width: 100%;
+            justify-content: flex-end;
         }
     }
 

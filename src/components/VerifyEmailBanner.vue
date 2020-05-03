@@ -77,6 +77,25 @@
         justify-content: space-between;
     }
 
+    @media only screen and (max-width: 768px) {
+        .verifyEmailBanner {
+            width: 100%;
+            bottom: 0;
+            left: 0;
+            flex-wrap: wrap;
+            height: auto;
+            padding: 0.5rem;
+        }
+
+        .banner-text {
+            margin: 0;
+        }
+
+        .action-buttons {
+            margin-left: auto;
+        }
+    }
+
     .banner-text {
         font-size: 1.2rem;
         font-family: "Roboto Light", Sans, sans-serif ;
