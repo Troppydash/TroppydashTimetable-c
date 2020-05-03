@@ -6,7 +6,7 @@ import Settings from '../views/Settings.vue'
 import Register from '../views/Register.vue'
 import store from '../store';
 
-import * as firebase from 'firebase';
+import firebase from 'firebase/app';
 
 Vue.use( VueRouter )
 

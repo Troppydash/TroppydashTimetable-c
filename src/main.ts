@@ -3,7 +3,9 @@ import App from './App.vue'
 import './registerServiceWorker'
 import router from './router'
 import store from './store'
-import * as firebase from 'firebase';
+
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 
 import "../node_modules/normalize.css/normalize.css";
 Vue.config.productionTip = false

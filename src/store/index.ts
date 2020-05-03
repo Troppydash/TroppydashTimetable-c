@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import api from '../service/api';
-import * as firebase from "firebase";
+
+import firebase from 'firebase/app';
+
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
@@ -297,7 +299,7 @@ export default new Vuex.Store( {
                 context.commit( 'setTimetableLoading', { isLoading: true } );
             }
 
-            const formtDate = date.split( '-' ).join( '/' );
+            const formtDate = date ? date.split( '-' ).join( '/' ) : '';
             return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formtDate}`, {
                 headers: { 'Authorization': `Bearer ${context.state.token}` }
             } )

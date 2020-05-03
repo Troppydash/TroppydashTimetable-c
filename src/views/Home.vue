@@ -20,7 +20,7 @@
 </style>
 
 <script>
-    import { mapGetters , mapState } from 'vuex';
+    import { mapState } from 'vuex';
     import TimeTable from '@/components/TimeTable';
     import VerifyEmailBanner from '@/components/VerifyEmailBanner';
 

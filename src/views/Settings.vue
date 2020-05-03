@@ -25,7 +25,7 @@
 <script>
     import api from '../service/api';
     import { mapGetters , mapState } from 'vuex';
-    import firebase from 'firebase';
+    import firebase from 'firebase/app';
 
     export default {
         name: 'Settings' ,
