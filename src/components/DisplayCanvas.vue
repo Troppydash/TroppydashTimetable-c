@@ -41,8 +41,6 @@
 
                 location: null ,
                 shouldFocus: false ,
-
-                forceShadow: false
             };
         } ,
         computed: {
@@ -53,7 +51,7 @@
                 return this.$store.state.timetable.data;
             } ,
             doesShowShadow() {
-                if (this.forceShadow) {
+                if (localStorage.getItem("FORCE_SHADOW") === 'true') {
                     return true;
                 }
                 if (/Mobi/i.test(window.navigator.userAgent)) {
@@ -308,7 +306,6 @@
         mounted() {
             this.init();
             this.getLocation();
-            this.forceShadow = localStorage.getItem("FORCE_SHADOW") === 'true';
         }
     };
 </script>

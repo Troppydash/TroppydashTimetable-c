@@ -71,9 +71,7 @@
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile', 'closed'] ,
         data() {
             return {
-                days: this.tableData.map(( _ , index ) => {
-                    return index === this.$store.getters.today;
-                }) ,
+                days: [],
                 hoveredItem: ''
             };
         } ,
@@ -105,9 +103,16 @@
             } ,
             ...mapGetters([
                 'today',
-                'currentLesson'
+                'currentLesson',
             ])
-        }
+        },
+        mounted() {
+            setTimeout(() => {
+                this.days = this.tableData.map(( _ , index ) => {
+                    return index === this.$store.getters.today;
+                })
+            }, 100);
+        },
     };
 </script>
 

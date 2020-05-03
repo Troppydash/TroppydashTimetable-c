@@ -44,7 +44,7 @@
         } ,
         watch: {
             forceShadow(value) {
-                localStorage.setItem('FORCE_SHADOW', value);
+                localStorage.setItem('FORCE_SHADOW', ''+value);
             }
         },
         computed: {
