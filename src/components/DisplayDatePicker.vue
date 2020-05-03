@@ -14,7 +14,7 @@
         </div>
         <div class="wrapper">
             <Datepicker v-model="date" monday-first :highlighted="highlighted" />
-            <button class="button button-primary" @click="handleView" :disabled="!viewButtonActive">{{ isToday ? 'Today'
+            <button class="button button-primary timetravel-button" @click="handleView" :disabled="!viewButtonActive">{{ isToday ? 'Today'
                 : 'Time Travel' }}
             </button>
         </div>
@@ -24,6 +24,7 @@
 <script>
     import Datepicker from 'vuejs-datepicker';
     import moment from 'moment';
+    import { mapState } from 'vuex';
 
     export default {
         name: 'DisplayDatePicker' ,
@@ -32,7 +33,7 @@
         } ,
         data() {
             const initialDate = this.$route.query.date
-                ? moment(this.$route.query.date , 'DD-MM-YYYY').toString()
+                ? moment(this.$route.query.date , 'DD-MM-YYYY').format('MM-DD-YYYY').toString()
                 : moment().format('MM-DD-YYYY').toString();
 
             return {
@@ -45,6 +46,9 @@
             };
         } ,
         computed: {
+            ...mapState([
+                'isVerified'
+            ]),
             prettyDate() {
                 return moment().format('dddd, Do MMM YYYY');
             } ,
@@ -58,13 +62,16 @@
                 return true;
             } ,
             viewButtonActive() {
+                if (!this.isVerified) {
+                    return false;
+                }
                 // If no date
                 if (!this.$route.query.date) {
                     if (moment(this.date , 'MM-DD-YYYY').format('DD-MM-YYYY').toString() === moment().format('DD-MM-YYYY')) {
                         return false;
                     }
                     // If have date, and url date
-                } else if (this.$route.query.date === moment(this.date).format('DD-MM-YYYY').toString()) {
+                } else if (this.$route.query.date === moment(this.date, 'MM-DD-YYYY').format('DD-MM-YYYY').toString()) {
                     return false;
                 }
                 return true;
@@ -75,7 +82,7 @@
                         return false;
                     }
                 }
-                return moment(this.date).format('DD-MM-YYYY').toString() === moment().format('DD-MM-YYYY');
+                return moment(this.date, 'MM-DD-YYYY').format('DD-MM-YYYY').toString() === moment().format('DD-MM-YYYY');
             }
         } ,
         methods: {

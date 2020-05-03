@@ -131,8 +131,8 @@
     .login {
         transform: translateY(0);
 
-        animation: slide 0.5s forwards;
-        -webkit-animation: slide 0.5s forwards;
+        animation: slide 0.5s forwards ease;
+        -webkit-animation: slide 0.5s forwards ease;
 
         width: 100%;
         height: calc(100% - 60px);

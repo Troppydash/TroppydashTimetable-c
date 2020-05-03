@@ -64,6 +64,9 @@ export default new Vuex.Store( {
         addMessages( state, { message } ) {
             state.messages.push( message );
         },
+        clearMessages(state) {
+            state.messages = [];
+        },
         setUsername( state, payload ) {
             state.username = payload.username;
         },
@@ -104,6 +107,7 @@ export default new Vuex.Store( {
         },
     },
     actions: {
+        // Called: Settings
         verifyEmail( context ) {
             const actionCodeSettings = {
                 handleCodeInApp: true,
@@ -122,6 +126,7 @@ export default new Vuex.Store( {
                     } );
                 } )
         },
+        // Called: Register, Login
         handleUserSocialLogin( context, { type } ) {
             let provider = new firebase.auth.GoogleAuthProvider();
 
@@ -129,7 +134,7 @@ export default new Vuex.Store( {
                 provider = new firebase.auth.OAuthProvider( 'microsoft.com' );
             } else if ( type === 'google' ) {
                 let _ = 'fuckyoutypescript';
-                _ = '1';
+                _ = 'fuckyoutypescript';
             }
 
             let token: string;
@@ -149,15 +154,17 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
-                    firebase.auth().signOut();
+                    context.dispatch('handleLogoutUser');
                     return { error: err.message };
                 } )
                 .finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
+        // Called: Register
         handleRegisterUser( context, payload ) {
             let token: string;
+            let createUserSuccess = false;
             context.commit( 'setLoading', { isLoading: true } );
             // Create a user
             return firebase.auth().createUserWithEmailAndPassword( payload.email, payload.password )
@@ -166,6 +173,7 @@ export default new Vuex.Store( {
                     return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( tok => {
+                    createUserSuccess = true;
                     token = tok || '';
                     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                     return api.post( '/createuser' );
@@ -175,13 +183,18 @@ export default new Vuex.Store( {
                     return { error: '' };
                 } )
                 .catch( err => {
-                    context.commit( 'setLoading', { isLoading: false } );
+                    // If firebase register doesn't fail but api endpoint did
+                    if (createUserSuccess) {
+                        firebase.auth().currentUser?.delete();
+                    }
+                    context.dispatch('handleLogoutUser');
                     return { error: err.message };
                 } )
                 .finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
+        // Called: Login
         handleLoginUser( context, payload ) {
             context.commit( 'setLoading', { isLoading: true } );
             let token: string;
@@ -199,28 +212,27 @@ export default new Vuex.Store( {
                     return { error: '' };
                 } )
                 .catch( err => {
-                    firebase.auth().signOut();
+                    context.dispatch('handleLogoutUser');
                     return { error: err.message };
                 } )
                 .finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
+        // Called: Settings
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
                     localStorage.removeItem( 'TIMETABLE' );
+                    context.commit('clearMessages');
                     context.commit( 'signoutUser' );
                 } );
         },
+        // Called: Settings
         handleDeleteUser( context ) {
-            return firebase.auth().signOut()
+            return api.delete( '/deleteuser' )
                 .then( () => {
-                    return api.delete( '/deleteuser' )
-                } )
-                .then( () => {
-                    localStorage.removeItem( 'TIMETABLE' );
-                    context.commit( 'signoutUser' );
+                    return context.dispatch('handleLogoutUser');
                 } )
                 .catch( err => {
                     context.commit( 'setUserError', {
@@ -228,6 +240,7 @@ export default new Vuex.Store( {
                     } )
                 } )
         },
+        // Called: TimeTable
         handleGetUser( context ) {
             context.commit( 'setLoading', { isLoading: true } );
 
@@ -249,6 +262,7 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
+                    context.dispatch('handleLogoutUser');
                     context.commit( 'setUserError', {
                         error: err.message
                     } )
@@ -257,6 +271,7 @@ export default new Vuex.Store( {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
+        // Called: DisplayDatePicker, TimeTable
         handleGetTimetable( context, { force = false, date } ) {
             if ( !force && context.state.timetable.data.length !== 0 ) {
                 context.commit( 'addMessages', {
@@ -267,25 +282,22 @@ export default new Vuex.Store( {
 
             if ( !context.state.isVerified ) {
                 context.commit( 'addMessages', {
-                    message: { type: 'info', text: 'email not verified', from: 'handleGetTimetable' }
+                    message: { type: 'error', text: 'email not verified', from: 'handleGetTimetable' }
                 } );
                 return;
             }
 
-            context.commit( 'setTimetableLoading', { isLoading: true } );
-
             if ( !force && localStorage.getItem( "TIMETABLE" ) ) {
-                context.commit( 'setTimetableLoading', { isLoading: false } );
-
                 context.state.timetable.error = '';
                 context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'received cache item', from: 'handleGetTimetable' }
                 } );
+            } else {
+                context.commit( 'setTimetableLoading', { isLoading: true } );
             }
 
             const formtDate = date.split( '-' ).join( '/' );
-
             return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formtDate}`, {
                 headers: { 'Authorization': `Bearer ${context.state.token}` }
             } )

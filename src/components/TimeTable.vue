@@ -14,7 +14,6 @@
     import DisplayTable from '@/components/DisplayTable';
     import { mapState } from 'vuex';
     import DisplayCanvas from '@/components/DisplayCanvas';
-    import store from '@/store';
 
     export default {
         name: 'TimeTable' ,
