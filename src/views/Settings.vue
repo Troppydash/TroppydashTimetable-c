@@ -15,6 +15,11 @@
             <input type="submit" value="Edit" />
         </form>
 
+        <div>
+            Force Shadow?
+            <input type="checkbox" value="force shadow" v-model="forceShadow">
+        </div>
+
         <button @click="handleLogout">Logout</button>
         <button @click="handleDelete">Delete user</button>
         <button @click="verifyEmail" v-if="!isVerified">Verify Email</button>
@@ -33,9 +38,15 @@
             return {
                 username: this.$store.state.username ,
                 keyCode: '' ,
-                error: ''
+                error: '',
+                forceShadow: localStorage.getItem('FORCE_SHADOW') === 'true'
             };
         } ,
+        watch: {
+            forceShadow(value) {
+                localStorage.setItem('FORCE_SHADOW', value);
+            }
+        },
         computed: {
             ...mapState([
                 'isVerified'

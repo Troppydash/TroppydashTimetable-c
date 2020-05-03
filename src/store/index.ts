@@ -225,6 +225,7 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
+                    localStorage.removeItem('FORCE_SHADOW');
                     localStorage.removeItem( 'TIMETABLE' );
                     context.commit('clearMessages');
                     context.commit( 'signoutUser' );

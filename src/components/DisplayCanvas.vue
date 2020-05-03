@@ -35,11 +35,14 @@
                     controls: null ,
                     scene: null ,
                     renderer: null ,
+                    raycaster: null ,
                 } ,
-                lastSelected: -1,
+                lastSelected: -1 ,
 
                 location: null ,
                 shouldFocus: false ,
+
+                forceShadow: false
             };
         } ,
         computed: {
@@ -48,6 +51,15 @@
             ]) ,
             data() {
                 return this.$store.state.timetable.data;
+            } ,
+            doesShowShadow() {
+                if (this.forceShadow) {
+                    return true;
+                }
+                if (/Mobi/i.test(window.navigator.userAgent)) {
+                    return false;
+                }
+                return !this.isMobile;
             }
         } ,
         watch: {
@@ -95,8 +107,8 @@
                 this.models[selectedIndex].material.color.set('#b82832');
                 this.ref.controls.target = new THREE.Vector3(this.models[selectedIndex].position.x , this.models[selectedIndex].position.y , this.models[selectedIndex].position.z);
 
-                const zoomDistance = Number(30)
-                const currDistance = this.ref.camera.position.length()
+                const zoomDistance = Number(30);
+                const currDistance = this.ref.camera.position.length();
                 const factor = zoomDistance / currDistance;
 
                 this.ref.camera.position.x *= factor;
@@ -108,7 +120,7 @@
                 if (this.lastSelected === -1) {
                     return;
                 }
-                this.models[this.lastSelected].material.color.set('#6b6b6b');
+                this.models[this.lastSelected].material.color.set('#fff');
             } ,
             measure( originLat , originLong , lat , long ) {  // generally used geo measurement function
                 const latdif = originLat - lat;
@@ -175,29 +187,79 @@
                     });
                 }
             } ,
+            removeOldCanvas() {
+                const targetElement = document.getElementById('schoolMap');
+                targetElement.innerHTML = '';
+
+                this.ref = {
+                    camera: null ,
+                    controls: null ,
+                    scene: null ,
+                    renderer: null ,
+                };
+                this.models = [];
+                this.loading = false;
+                this.error = '';
+            } ,
             init() {
+                this.removeOldCanvas();
+
                 // Init ThreeJS
                 const width = 600 , height = width / 16 * 9;
 
+                const doesShowShadow = this.doesShowShadow;
                 const targetElement = document.getElementById('schoolMap');
                 this.ref.renderer = new THREE.WebGLRenderer({ antialias: true });
                 this.ref.renderer.setSize(width , height);
 
+                if (doesShowShadow) {
+                    this.ref.renderer.shadowMap.enabled = true;
+                    this.ref.renderer.shadowMapSize = 20;
+                }
+
                 targetElement.appendChild(this.ref.renderer.domElement);
 
                 this.ref.scene = new THREE.Scene();
-                this.ref.camera = new THREE.PerspectiveCamera(45 , 16 / 9 , 0.1 , 10000);
+                this.ref.scene.background = new THREE.Color('#87ceeb');
+                this.ref.camera = new THREE.PerspectiveCamera(45 , 16 / 9 , 0.1 , 1000);
 
                 this.ref.camera.position.z = 200;
                 this.ref.camera.position.y = 200;
                 this.ref.scene.add(this.ref.camera);
 
-                let light = new THREE.SpotLight(0xeeeeee, 1);
-                light.position.set(300 , 300 , 300);
-                this.ref.scene.add(light);
+                const light = new THREE.SpotLight('#defaf8' , 0.3);
+                light.position.set(0 , 300 , 0);
+                light.target.position.set(0 , 0 , 0);
 
-                light = new THREE.AmbientLight( 0x404040);
+                if (doesShowShadow) {
+                    light.castShadow = true;
+                    light.shadow.camera.near = 0.008;
+                    light.shadow.camera.far = 300;
+                    light.shadow.mapSize.width = 1000;  // default
+                    light.shadow.mapSize.height = 1000;
+                    light.shadow.bias = -0.0000005;
+                }
+
                 this.ref.scene.add(light);
+                // this.ref.scene.add(new THREE.CameraHelper(light.shadow.camera));
+
+                const sidelight = new THREE.SpotLight('#defaf8' , 1);
+                sidelight.position.set(70 , 150 , 70);
+
+                if (doesShowShadow) {
+                    sidelight.castShadow = true;
+                    sidelight.shadow.camera.near = 0.008;
+                    sidelight.shadow.camera.far = 300;
+                    sidelight.shadow.mapSize.width = 5000;  // default
+                    sidelight.shadow.mapSize.height = 5000;
+                    sidelight.shadow.bias = -0.0000005;
+                }
+
+                this.ref.scene.add(sidelight);
+                // this.ref.scene.add(new THREE.CameraHelper(sidelight.shadow.camera));
+
+                const ambientLight = new THREE.AmbientLight('#fff' , 0.2);
+                this.ref.scene.add(ambientLight);
 
                 this.ref.controls = new OrbitControls(this.ref.camera , this.ref.renderer.domElement);
                 this.ref.controls.rotateSpeed = 1.0;
@@ -206,16 +268,26 @@
                 this.ref.controls.enableZoom = true;
 
                 const loader = new GLTFLoader();
-                loader.load('/img/map.glb' , gltf => {
+                loader.load('/img/map.gltf' , gltf => {
                     this.loading = false;
                     this.models = gltf.scene.children;
-                    this.ref.scene.add(gltf.scene);
+                    gltf.scene.traverse(function ( child ) {
+                        if (child.isMesh) {
+                            if (child.material && !child.name.includes('Ground')) {
+                                child.material.color.set('#fff');
 
-                    this.models.forEach(model => {
-                        if (model.material && !model.name.includes('Ground')) {
-                            model.material.color.set('#6b6b6b');
+                                if (doesShowShadow) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            } else if (doesShowShadow) {
+                                child.castShadow = false;
+                                child.receiveShadow = true;
+                            }
                         }
                     });
+
+                    this.ref.scene.add(gltf.scene);
 
                     if (this.shouldFocus) {
                         this.tryFocusFromCode();
@@ -236,6 +308,7 @@
         mounted() {
             this.init();
             this.getLocation();
+            this.forceShadow = localStorage.getItem("FORCE_SHADOW") === 'true';
         }
     };
 </script>
