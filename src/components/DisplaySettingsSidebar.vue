@@ -20,25 +20,6 @@
                 menuInfo: []
             };
         } ,
-        watch: {
-            isMobile(val) {
-                // if (!val && this.menuInfo.length === 0) {
-                //     const info = [];
-                //     document.getElementsByClassName('settings-section__container').forEach(section => {
-                //         const current = {};
-                //         current.heading = section.getElementsByClassName('settings-section__title')[0].children[0].innerText;
-                //         current.subHeadings = [];
-                //
-                //         section.getElementsByClassName('settings-group__container').forEach(subHeading => {
-                //             current.subHeadings.push(subHeading.getElementsByClassName('settings-group__title')[0].children[0].innerText);
-                //         });
-                //
-                //         info.push(current);
-                //     });
-                //     this.menuInfo = info;
-                // }
-            }
-        },
         methods: {
             setInfo() {
                 const info = [];

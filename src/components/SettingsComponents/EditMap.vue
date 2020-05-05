@@ -93,15 +93,17 @@
 
         span {
             margin: 0 0.5rem;
+            user-select: none;
+
         }
 
         i {
             cursor: pointer;
             color: var(--scots-red);
 
-            /*&:hover {*/
-            /*    color: #7f0814;*/
-            /*}*/
+            &:hover {
+                color: #7f0814;
+            }
         }
     }
 
@@ -176,7 +178,7 @@
         box-shadow: 0 0 1px var(--scots-red);
     }
 
-    input:hover + .slider {
+    input:hover:checked + .slider {
         background: #7f0814;
     }
 

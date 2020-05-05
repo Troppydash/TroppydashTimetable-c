@@ -197,7 +197,12 @@
             } ,
             removeOldCanvas() {
                 const targetElement = document.getElementById('schoolMap');
+                if (!targetElement) {
+                    return;
+                }
                 targetElement.innerHTML = '';
+
+
 
                 this.ref = {
                     camera: null ,
@@ -211,7 +216,6 @@
             } ,
             init() {
                 this.removeOldCanvas();
-
                 // Init ThreeJS
                 const width = 600 , height = width / 16 * 9;
 
@@ -262,9 +266,9 @@
                 if (doesShowShadow) {
                     sidelight.castShadow = true;
                     sidelight.shadow.camera.near = 0.008;
-                    sidelight.shadow.camera.far = 300;
-                    sidelight.shadow.mapSize.width = shadowQuality ** 2 * 200;
-                    sidelight.shadow.mapSize.height = shadowQuality ** 2 * 200;
+                    sidelight.shadow.camera.far = 500;
+                    sidelight.shadow.mapSize.width = shadowQuality ** 2 * 150;
+                    sidelight.shadow.mapSize.height = shadowQuality ** 2 * 150;
                     sidelight.shadow.bias = -0.0000005;
                 }
 
@@ -334,11 +338,13 @@
             }
         } ,
         mounted() {
+            this.unmounted = false;
             this.init();
             this.getLocation();
         } ,
         beforeDestroy() {
             this.unmounted = true;
+            this.removeOldCanvas();
         }
     };
 </script>
