@@ -150,6 +150,10 @@
         color: #ffffff;
     }
 
+    .lesson > .room-number {
+        color: white;
+    }
+
     @-webkit-keyframes zoom {
         0% {
             transform: scale(1.2);
