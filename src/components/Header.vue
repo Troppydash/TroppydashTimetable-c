@@ -1,19 +1,19 @@
 <template>
     <div class="header-outside" v-if="!loading">
-        <div class="header p-3" v-if="authenticated">
+        <div class="header" v-if="authenticated">
             <router-link to="/home">Home</router-link>
             <router-link to="/settings">Settings</router-link>
             <div class="username-container">
                 <p class="username">Hello {{ username }}</p>
             </div>
         </div>
-        <div class="header p-3" v-else>
+        <div class="header" v-else>
             <router-link to="/login">Login</router-link>
             <router-link to="/register">Register</router-link>
         </div>
     </div>
     <div v-else class="header-outside">
-        <div class="header p-3">
+        <div class="header">
             <a>Loading...</a>
         </div>
     </div>
@@ -58,6 +58,8 @@
 
         width: 1024px;
         height: 100%;
+
+        padding: 1rem;
 
         align-items: center;
         justify-content: left;

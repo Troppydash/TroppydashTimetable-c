@@ -6,7 +6,9 @@
 
             <form @submit.prevent="handleLogin" class="login-form">
                 <div>
-                    <input class="input" type="text" placeholder="Email" v-model="email" :disabled="loaded" />
+                    <label>
+                        <input class="input" type="text" placeholder="Email" v-model="email" :disabled="loaded" />
+                    </label>
                 </div>
                 <div>
                     <label>
@@ -68,7 +70,7 @@
                             this.error = error;
                             this.submitted = false;
                         } else {
-                            this.$router.replace('home', () => {
+                            this.$router.replace('home' , () => {
                                 this.submitted = false;
                             });
                         }

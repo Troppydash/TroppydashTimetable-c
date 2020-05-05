@@ -7,7 +7,7 @@ import firebase from 'firebase/app';
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
-import { SHADOWS_ON, TIMETABLE } from "@/StoageKeys";
+import { SHADOWS_ON, TIMETABLE } from "@/StorageKeys";
 
 Vue.use( Vuex )
 
@@ -67,7 +67,7 @@ export default new Vuex.Store( {
         addMessages( state, { message } ) {
             state.messages.push( message );
         },
-        clearMessages(state) {
+        clearMessages( state ) {
             state.messages = [];
         },
         setUsername( state, payload ) {
@@ -157,7 +157,7 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
-                    context.dispatch('handleLogoutUser');
+                    context.dispatch( 'handleLogoutUser' );
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -187,10 +187,10 @@ export default new Vuex.Store( {
                 } )
                 .catch( err => {
                     // If firebase register doesn't fail but api endpoint did
-                    if (createUserSuccess) {
+                    if ( createUserSuccess ) {
                         firebase.auth().currentUser?.delete();
                     }
-                    context.dispatch('handleLogoutUser');
+                    context.dispatch( 'handleLogoutUser' );
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -215,7 +215,7 @@ export default new Vuex.Store( {
                     return { error: '' };
                 } )
                 .catch( err => {
-                    context.dispatch('handleLogoutUser');
+                    context.dispatch( 'handleLogoutUser' );
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -226,9 +226,9 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
-                    localStorage.removeItem(SHADOWS_ON);
-                    localStorage.removeItem( TIMETABLE);
-                    context.commit('clearMessages');
+                    // Clear only timetable caching
+                    localStorage.removeItem( TIMETABLE );
+                    context.commit( 'clearMessages' );
                     context.commit( 'signoutUser' );
                 } );
         },
@@ -236,7 +236,7 @@ export default new Vuex.Store( {
         handleDeleteUser( context ) {
             return api.delete( '/deleteuser' )
                 .then( () => {
-                    return context.dispatch('handleLogoutUser');
+                    return context.dispatch( 'handleLogoutUser' );
                 } )
                 .catch( err => {
                     context.commit( 'setUserError', {
@@ -266,7 +266,7 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
-                    context.dispatch('handleLogoutUser');
+                    context.dispatch( 'handleLogoutUser' );
                     context.commit( 'setUserError', {
                         error: err.message
                     } )

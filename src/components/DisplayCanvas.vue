@@ -21,7 +21,8 @@
 
     import similarity from 'similarity';
     import { mapGetters } from 'vuex';
-    import { SHADOWS_ON } from '@/StoageKeys';
+    import { MAP_QUALITY , SHADOWS_ON } from '@/StorageKeys';
+    import { clamp } from '@/Helpers';
 
     export default {
         name: 'DisplayCanvas' ,
@@ -61,6 +62,12 @@
                     return false;
                 }
                 return !this.isMobile;
+            } ,
+            shadowQuality() {
+                if (!localStorage.getItem(MAP_QUALITY)) {
+                    return 5;
+                }
+                return clamp(parseInt(localStorage.getItem(MAP_QUALITY)) , 1 , 10);
             }
         } ,
         watch: {
@@ -209,8 +216,13 @@
                 const width = 600 , height = width / 16 * 9;
 
                 const doesShowShadow = this.doesShowShadow;
+                const shadowQuality = this.shadowQuality;
+
                 const targetElement = document.getElementById('schoolMap');
-                this.ref.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.ref.renderer = new THREE.WebGLRenderer({
+                    antialias: shadowQuality > 3 ,
+                    powerPreference: shadowQuality > 8 ? 'high-performance' : 'default'
+                });
                 this.ref.renderer.setSize(width , height);
 
                 if (doesShowShadow) {
@@ -222,7 +234,7 @@
 
                 this.ref.scene = new THREE.Scene();
                 this.ref.scene.background = new THREE.Color('#87ceeb');
-                this.ref.camera = new THREE.PerspectiveCamera(45 , 16 / 9 , 0.1 , 1000);
+                this.ref.camera = new THREE.PerspectiveCamera(45 , 16 / 9 , 0.1 , 5000);
 
                 this.ref.camera.position.z = 200;
                 this.ref.camera.position.y = 200;
@@ -251,8 +263,8 @@
                     sidelight.castShadow = true;
                     sidelight.shadow.camera.near = 0.008;
                     sidelight.shadow.camera.far = 300;
-                    sidelight.shadow.mapSize.width = 5000;  // default
-                    sidelight.shadow.mapSize.height = 5000;
+                    sidelight.shadow.mapSize.width = shadowQuality ** 2 * 200;
+                    sidelight.shadow.mapSize.height = shadowQuality ** 2 * 200;
                     sidelight.shadow.bias = -0.0000005;
                 }
 
@@ -269,24 +281,36 @@
                 this.ref.controls.enableZoom = true;
 
                 const loader = new GLTFLoader();
+
                 loader.load('/img/map.gltf' , gltf => {
                     this.loading = false;
                     this.models = gltf.scene.children;
-                    gltf.scene.traverse(function ( child ) {
+
+                    const remove = [];
+                    gltf.scene.traverse(( child ) => {
                         if (child.isMesh) {
                             if (child.material && !child.name.includes('Ground')) {
                                 child.material.color.set('#fff');
-
                                 if (doesShowShadow) {
                                     child.castShadow = true;
                                     child.receiveShadow = true;
                                 }
-                            } else if (doesShowShadow) {
-                                child.castShadow = false;
-                                child.receiveShadow = true;
+                            } else {
+                                if (shadowQuality < 2) {
+                                    remove.push(child);
+                                } else if (doesShowShadow) {
+                                    child.castShadow = false;
+                                    child.receiveShadow = true;
+                                }
                             }
                         }
                     });
+
+                    if (shadowQuality < 2) {
+                        for (let i = 0; i < remove.length; i++) {
+                            gltf.scene.remove(remove[i]);
+                        }
+                    }
 
                     this.ref.scene.add(gltf.scene);
 
@@ -312,7 +336,7 @@
         mounted() {
             this.init();
             this.getLocation();
-        },
+        } ,
         beforeDestroy() {
             this.unmounted = true;
         }
