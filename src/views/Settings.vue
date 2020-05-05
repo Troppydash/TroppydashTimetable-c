@@ -16,9 +16,14 @@
         </form>
 
         <div>
-            Force Shadow?
-            <input type="checkbox" value="force shadow" v-model="forceShadow">
+            Advance Shadow Setting
+            <input type="checkbox" v-model="advanceShadow">
+            <div v-if="advanceShadow">
+                Shadows on?
+                <input type="checkbox" value="force shadow" v-model="advanceShadowOn">
+            </div>
         </div>
+
 
         <button @click="handleLogout">Logout</button>
         <button @click="handleDelete">Delete user</button>
@@ -31,6 +36,7 @@
     import api from '../service/api';
     import { mapGetters , mapState } from 'vuex';
     import firebase from 'firebase/app';
+    import { SHADOWS_ON } from '@/StoageKeys';
 
     export default {
         name: 'Settings' ,
@@ -38,15 +44,29 @@
             return {
                 username: this.$store.state.username ,
                 keyCode: '' ,
-                error: '',
-                forceShadow: localStorage.getItem('FORCE_SHADOW') === 'true'
+                error: '' ,
+
+                advanceShadow: localStorage.getItem(SHADOWS_ON) ,
+                advanceShadowOn: localStorage.getItem(SHADOWS_ON) === 'true' ,
             };
         } ,
         watch: {
-            forceShadow(value) {
-                localStorage.setItem('FORCE_SHADOW', ''+value);
+            advanceShadow( value ) {
+                if (value) {
+                    localStorage.setItem(SHADOWS_ON , '' + !(window.innerWidth < 1024));
+                    this.advanceShadowOn = !(window.innerWidth < 1024);
+                } else {
+                    localStorage.removeItem(SHADOWS_ON);
+                    this.advanceShadowOn = !(window.innerWidth < 1024);
+                }
+            } ,
+            advanceShadowOn( value ) {
+                if (!this.advanceShadow) {
+                    return;
+                }
+                localStorage.setItem(SHADOWS_ON , '' + value);
             }
-        },
+        } ,
         computed: {
             ...mapState([
                 'isVerified'

@@ -7,6 +7,7 @@ import firebase from 'firebase/app';
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
+import { SHADOWS_ON, TIMETABLE } from "@/StoageKeys";
 
 Vue.use( Vuex )
 
@@ -225,8 +226,8 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
-                    localStorage.removeItem('FORCE_SHADOW');
-                    localStorage.removeItem( 'TIMETABLE' );
+                    localStorage.removeItem(SHADOWS_ON);
+                    localStorage.removeItem( TIMETABLE);
                     context.commit('clearMessages');
                     context.commit( 'signoutUser' );
                 } );
@@ -290,9 +291,9 @@ export default new Vuex.Store( {
                 return;
             }
 
-            if ( !force && localStorage.getItem( "TIMETABLE" ) ) {
+            if ( !force && localStorage.getItem( TIMETABLE ) ) {
                 context.state.timetable.error = '';
-                context.state.timetable.data = JSON.parse( localStorage.getItem( "TIMETABLE" )! );
+                context.state.timetable.data = JSON.parse( localStorage.getItem( TIMETABLE )! );
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'received cache item', from: 'handleGetTimetable' }
                 } );
@@ -307,7 +308,7 @@ export default new Vuex.Store( {
                 .then( res => {
                     context.state.timetable.error = '';
                     context.state.timetable.data = JSON.parse( res.data.data );
-                    localStorage.setItem( "TIMETABLE", res.data.data );
+                    localStorage.setItem( TIMETABLE, res.data.data );
                     context.commit( 'addMessages', {
                         message: { type: 'info', text: 'received network item', from: 'handleGetTimetable' }
                     } );

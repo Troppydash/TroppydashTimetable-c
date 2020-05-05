@@ -21,6 +21,7 @@
 
     import similarity from 'similarity';
     import { mapGetters } from 'vuex';
+    import { SHADOWS_ON } from '@/StoageKeys';
 
     export default {
         name: 'DisplayCanvas' ,
@@ -41,6 +42,8 @@
 
                 location: null ,
                 shouldFocus: false ,
+
+                unmounted: false
             };
         } ,
         computed: {
@@ -51,8 +54,8 @@
                 return this.$store.state.timetable.data;
             } ,
             doesShowShadow() {
-                if (localStorage.getItem("FORCE_SHADOW") === 'true') {
-                    return true;
+                if (localStorage.getItem(SHADOWS_ON) !== null) {
+                    return localStorage.getItem(SHADOWS_ON) === 'true';
                 }
                 if (/Mobi/i.test(window.navigator.userAgent)) {
                     return false;
@@ -298,6 +301,9 @@
                 this.animate();
             } ,
             animate() {
+                if (this.unmounted) {
+                    return;
+                }
                 requestAnimationFrame(this.animate);
                 this.ref.controls.update();
                 this.ref.renderer.render(this.ref.scene , this.ref.camera);
@@ -306,6 +312,9 @@
         mounted() {
             this.init();
             this.getLocation();
+        },
+        beforeDestroy() {
+            this.unmounted = true;
         }
     };
 </script>
