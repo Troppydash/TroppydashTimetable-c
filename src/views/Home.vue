@@ -38,6 +38,10 @@
                 'isVerified'
             ])
         } ,
-        methods: {}
+        mounted() {
+            if (!this.$store.state.token) {
+                this.$store.dispatch('handleGetUser');
+            }
+        }
     };
 </script>

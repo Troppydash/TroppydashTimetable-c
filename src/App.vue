@@ -7,17 +7,18 @@
 
 <script>
     import Header from '@/components/Header';
+
     export default {
-        components: { Header }
+        components: { Header } ,
     };
 </script>
 
 <style lang="scss">
     :root {
         --scots-red: #b82832;
-        --scots-grey1 : #6b6b6b;
-        --scots-grey2 : #4b4b4b;
-        --scots-lightgrey : #f2f2f2;
+        --scots-grey1: #6b6b6b;
+        --scots-grey2: #4b4b4b;
+        --scots-lightgrey: #f2f2f2;
     }
 
     html,

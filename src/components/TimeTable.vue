@@ -49,9 +49,6 @@
             this.onResize();
             window.addEventListener('resize' , this.onResize );
 
-            if (!this.$store.state.token) {
-                this.$store.dispatch('handleGetUser');
-            }
             this.$store.dispatch('handleGetTimetable', { force: false, date: this.$route.query.date || '' })
         },
         beforeDestroy() {

@@ -38,6 +38,9 @@
             } ,
         },
         mounted() {
+            if (!this.$store.state.token) {
+                this.$store.dispatch('handleGetUser');
+            }
             this.onResize();
             window.addEventListener('resize' , this.onResize);
         },

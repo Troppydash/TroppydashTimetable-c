@@ -277,7 +277,7 @@ export default new Vuex.Store( {
         },
         // Called: DisplayDatePicker, TimeTable
         handleGetTimetable( context, { force = false, date } ) {
-            if ( !force && context.state.timetable.data.length !== 0 ) {
+            if ( !force && context.state.timetable.data.length > 0 ) {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'data already exists', from: 'handleGetTimetable' }
                 } );
