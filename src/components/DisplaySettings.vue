@@ -31,10 +31,10 @@
                 <span>User Preferences</span>
             </div>
             <div class="settings-section__content">
-                <div class="settings-group__container" id="shadowsettings">
+                <div class="settings-group__container" id="mapsettings">
 
                     <div class="settings-group__title">
-                        <a href="#shadowsettings">Map Settings</a>
+                        <a href="#mapsettings">Map Settings</a>
                     </div>
                     <div class="settings-group__content">
                         <EditMap/>
