@@ -54,7 +54,6 @@
         background: var(--scots-lightgrey);
 
         margin: 0 2rem;
-
     }
 
     .section {
@@ -65,7 +64,7 @@
         font-family: "Roboto Light", Sans, sans-serif;
         padding: 0.75rem;
 
-        font-size: 1.25rem;
+        font-size: 1rem;
 
         a {
             color: black;
@@ -74,11 +73,11 @@
     }
 
     .main-header {
-        background: var(--scots-grey1);
+        background: var(--scots-grey2);
         color: white;
 
         font-family: "Roboto Light", Sans, sans-serif;
-        font-size: 1.5rem;
+        font-size: 1.25rem;
 
         padding: 0.75rem;
     }

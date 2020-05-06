@@ -71,7 +71,7 @@
 
     .settings-group__title {
         font-family: "Roboto Light", Sans, sans-serif;
-        font-size: 1.7rem;
+        font-size: 1.5rem;
         a {
             color: black;
             text-decoration: underline;
@@ -79,11 +79,11 @@
     }
 
     .settings-section__title {
-        background: var(--scots-grey1);
+        background: var(--scots-grey2);
         color: white;
 
         font-family: "Roboto Light", Sans, sans-serif;
-        font-size: 2rem;
+        font-size: 1.75rem;
 
         padding: 0.75rem;
     }

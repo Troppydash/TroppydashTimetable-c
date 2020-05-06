@@ -1,22 +1,20 @@
 <template>
     <div class="home" v-if="!loading">
-
-
         <TimeTable v-if="!timetable.loading" />
-
         <div v-else>
-            <p>Loading... Please wait</p>
+            <p>Retrieving Timetable, Please Wait...</p>
         </div>
-
         <VerifyEmailBanner v-if="!loading && !isVerified" />
     </div>
     <div v-else>
-        <p>Getting Current User...</p>
+        <p>Getting Current User, Please Wait...</p>
     </div>
 </template>
 
 <style>
-
+    .home {
+        text-align: center;
+    }
 </style>
 
 <script>

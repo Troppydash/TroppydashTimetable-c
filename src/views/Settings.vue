@@ -1,14 +1,15 @@
 <template>
-    <div class="settings">
-        <!--<h1>Settings</h1>-->
-        <!--<h5>{{ email }}</h5>-->
+    <div class="settings" v-if="!loading">
         <DisplaySettingsSidebar :is-mobile="isMobile" />
         <DisplaySettings />
+    </div>
+    <div class="settings" v-else>
+        <p>Getting Current User, Please Wait...</p>
     </div>
 </template>
 
 <script>
-    import { mapGetters} from 'vuex';
+    import { mapGetters , mapState } from 'vuex';
     import firebase from 'firebase/app';
     import DisplaySettings from '@/components/DisplaySettings';
     import DisplaySettingsSidebar from '@/components/DisplaySettingsSidebar';
@@ -19,7 +20,6 @@
         data() {
             return {
                 isMobile: false ,
-
             };
         } ,
         watch: {
@@ -28,9 +28,9 @@
             ...mapGetters([
                 'lastMessage'
             ]) ,
-            email() {
-                return firebase.auth().currentUser.email;
-            }
+            ...mapState([
+                'loading'
+            ])
         } ,
         methods: {
             onResize() {

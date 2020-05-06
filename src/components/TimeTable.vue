@@ -49,7 +49,9 @@
             this.onResize();
             window.addEventListener('resize' , this.onResize );
 
-            this.$store.dispatch('handleGetTimetable', { force: false, date: this.$route.query.date || '' })
+            setTimeout(() => {
+                this.$store.dispatch('handleGetTimetable', { force: false, date: this.$route.query.date || null })
+            }, 50);
         },
         beforeDestroy() {
             window.removeEventListener('resize', this.onResize);

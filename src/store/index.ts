@@ -7,7 +7,8 @@ import firebase from 'firebase/app';
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
-import { SHADOWS_ON, TIMETABLE } from "@/StorageKeys";
+import { SHADOWS_ON, TIMETABLE, TIMETRAVEL_TIMETABLES, TT_TIMETABLE, USER_INFO } from "@/StorageKeys";
+import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
 
 Vue.use( Vuex )
 
@@ -78,12 +79,15 @@ export default new Vuex.Store( {
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
-
-            if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
-                || firebase.auth().currentUser?.providerData[0]?.providerId === 'google.com' ) {
-                state.isVerified = true;
+            if (payload.isVerified) {
+                state.isVerified = payload.isVerified;
             } else {
-                state.isVerified = firebase.auth().currentUser?.emailVerified || false;
+                if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
+                    || firebase.auth().currentUser?.providerData[0]?.providerId === 'google.com' ) {
+                    state.isVerified = true;
+                } else {
+                    state.isVerified = firebase.auth().currentUser?.emailVerified || false;
+                }
             }
         },
         setLoading( state, { isLoading } ) {
@@ -226,8 +230,10 @@ export default new Vuex.Store( {
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
-                    // Clear only timetable caching
+                    // Clear only timetable/user caching
                     localStorage.removeItem( TIMETABLE );
+                    localStorage.removeItem( USER_INFO );
+                    localStorage.removeItem( TIMETRAVEL_TIMETABLES );
                     context.commit( 'clearMessages' );
                     context.commit( 'signoutUser' );
                 } );
@@ -248,6 +254,30 @@ export default new Vuex.Store( {
         handleGetUser( context ) {
             context.commit( 'setLoading', { isLoading: true } );
 
+            const userInfo = GetFromLocalStorageOrNull( USER_INFO, null, value => JSON.parse( value ) );
+            if ( userInfo !== null ) {
+
+                const username = userInfo.username;
+                const token = userInfo.token;
+                if ( username !== null && token !== null ) {
+
+                    let isVerified = false;
+                    if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
+                        || firebase.auth().currentUser?.providerData[0]?.providerId === 'google.com' ) {
+                        isVerified = true;
+                    } else {
+                        isVerified = firebase.auth().currentUser?.emailVerified || false;
+                    }
+                    context.commit( 'setUser', {
+                        username,
+                        token,
+                        isVerified
+                    } );
+                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+                    context.commit( 'setLoading', { isLoading: false } );
+                }
+            }
+
             const user = {
                 token: '',
                 username: ''
@@ -263,20 +293,19 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
+                    SetLocalStorage( USER_INFO, JSON.stringify( { ...user } ) );
                     return { error: '' }
                 } )
                 .catch( err => {
                     context.dispatch( 'handleLogoutUser' );
-                    context.commit( 'setUserError', {
-                        error: err.message
-                    } )
+                    console.log( err );
                     return { error: err.message }
                 } ).finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
         // Called: DisplayDatePicker, TimeTable
-        handleGetTimetable( context, { force = false, date } ) {
+        handleGetTimetable( context, { force = false, date = null } ) {
             if ( !force && context.state.timetable.data.length > 0 ) {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'data already exists', from: 'handleGetTimetable' }
@@ -291,40 +320,79 @@ export default new Vuex.Store( {
                 return;
             }
 
-            if ( !force && localStorage.getItem( TIMETABLE ) ) {
-                context.state.timetable.error = '';
-                context.state.timetable.data = JSON.parse( localStorage.getItem( TIMETABLE )! );
-                context.commit( 'addMessages', {
-                    message: { type: 'info', text: 'received cache item', from: 'handleGetTimetable' }
-                } );
+            context.commit( 'setTimetableLoading', { isLoading: true } );
+            if ( date === null ) {
+                if ( !force && localStorage.getItem( TIMETABLE ) ) {
+                    context.state.timetable.error = '';
+                    context.state.timetable.data = JSON.parse( localStorage.getItem( TIMETABLE )! );
+                    context.commit( 'addMessages', {
+                        message: { type: 'info', text: 'received cache item', from: 'handleGetTimetable' }
+                    } );
+                    context.commit( 'setTimetableLoading', { isLoading: false } );
+                }
+                return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable`, {
+                    headers: { 'Authorization': `Bearer ${context.state.token}` }
+                } )
+                    .then( res => {
+                        context.state.timetable.error = '';
+                        context.state.timetable.data = JSON.parse( res.data.data );
+                        localStorage.setItem( TIMETABLE, res.data.data );
+                        context.commit( 'addMessages', {
+                            message: { type: 'info', text: 'received network item', from: 'handleGetTimetable' }
+                        } );
+                        return;
+                    } )
+                    .catch( err => {
+                        console.log( err );
+                        context.state.timetable.error = err.response.data.message;
+                        context.commit( 'addMessages', {
+                            message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
+                        } );
+                        return;
+                    } )
+                    .finally( () => {
+                        context.commit( 'setTimetableLoading', { isLoading: false } );
+                    } )
             } else {
-                context.commit( 'setTimetableLoading', { isLoading: true } );
+                const cacheKey = TT_TIMETABLE + date;
+                const cachedData = GetFromLocalStorageOrNull(
+                    cacheKey, TIMETRAVEL_TIMETABLES, value => JSON.parse( value ) );
+                if ( cachedData !== null && !force ) {
+                    context.commit( 'setTimetableLoading', { isLoading: false } );
+                    context.state.timetable.error = '';
+                    context.state.timetable.data = cachedData;
+                    context.commit( 'addMessages', {
+                        message: { type: 'info', text: 'received cache timetravel item', from: 'handleGetTimetable' }
+                    } );
+                }
+
+                const formattedDate = date ? date.split( '-' ).join( '/' ) : '';
+                return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formattedDate}`, {
+                    headers: { 'Authorization': `Bearer ${context.state.token}` }
+                } )
+                    .then( res => {
+                        context.state.timetable.error = '';
+                        context.state.timetable.data = JSON.parse( res.data.data );
+                        SetLocalStorage(cacheKey, res.data.data, TIMETRAVEL_TIMETABLES);
+                        context.commit( 'addMessages', {
+                            message: { type: 'info', text: 'received network timetravel item', from: 'handleGetTimetable' }
+                        } );
+                        return;
+                    } )
+                    .catch( err => {
+                        console.log( err );
+                        context.state.timetable.error = err.response.data.message;
+                        context.commit( 'addMessages', {
+                            message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
+                        } );
+                        return;
+                    } )
+                    .finally( () => {
+                        context.commit( 'setTimetableLoading', { isLoading: false } );
+                    } )
+
             }
 
-            const formtDate = date ? date.split( '-' ).join( '/' ) : '';
-            return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formtDate}`, {
-                headers: { 'Authorization': `Bearer ${context.state.token}` }
-            } )
-                .then( res => {
-                    context.state.timetable.error = '';
-                    context.state.timetable.data = JSON.parse( res.data.data );
-                    localStorage.setItem( TIMETABLE, res.data.data );
-                    context.commit( 'addMessages', {
-                        message: { type: 'info', text: 'received network item', from: 'handleGetTimetable' }
-                    } );
-                    return;
-                } )
-                .catch( err => {
-                    console.log( err );
-                    context.state.timetable.error = err.response.data.message;
-                    context.commit( 'addMessages', {
-                        message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
-                    } );
-                    return;
-                } )
-                .finally( () => {
-                    context.commit( 'setTimetableLoading', { isLoading: false } );
-                } )
         }
     },
     modules: {}

@@ -1,5 +1,6 @@
 <template>
     <div class="editUser">
+        <span>{{currentUserEmail}}</span>
         <form @submit.prevent="handleSubmit" class="edituser-form">
             <div>
                 <p class="input-label">Username</p>
@@ -23,6 +24,7 @@
 
 <script>
     import api from '@/service/api';
+    import firebase from 'firebase';
 
     export default {
         name: 'EditUser' ,
@@ -32,6 +34,11 @@
                 keyCode: '' ,
                 error: '' ,
             };
+        } ,
+        computed: {
+            currentUserEmail() {
+                return firebase.auth().currentUser.email;
+            }
         } ,
         methods: {
             handleSubmit() {

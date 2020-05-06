@@ -21,8 +21,8 @@
 
     import similarity from 'similarity';
     import { mapGetters } from 'vuex';
-    import { MAP_QUALITY , SHADOWS_ON } from '@/StorageKeys';
-    import { clamp } from '@/Helpers';
+    import { MAP_QUALITY , SHADOWS_ON , USER_PREFERENCES } from '@/StorageKeys';
+    import { clamp , GetFromLocalStorageOrDefault } from '@/Helpers';
 
     export default {
         name: 'DisplayCanvas' ,
@@ -54,20 +54,13 @@
             data() {
                 return this.$store.state.timetable.data;
             } ,
-            doesShowShadow() {
-                if (localStorage.getItem(SHADOWS_ON) !== null) {
-                    return localStorage.getItem(SHADOWS_ON) === 'true';
-                }
-                if (/Mobi/i.test(window.navigator.userAgent)) {
-                    return false;
-                }
-                return !this.isMobile;
+            isShadowsOn() {
+                return GetFromLocalStorageOrDefault(SHADOWS_ON, !this.isMobile,  USER_PREFERENCES,value => value === 'true');
             } ,
-            shadowQuality() {
-                if (!localStorage.getItem(MAP_QUALITY)) {
-                    return 5;
-                }
-                return clamp(parseInt(localStorage.getItem(MAP_QUALITY)) , 1 , 10);
+            mapQuality() {
+                return GetFromLocalStorageOrDefault(MAP_QUALITY, 5,  USER_PREFERENCES,value => {
+                    return clamp(parseInt(value), 1, 10);
+                });
             }
         } ,
         watch: {
@@ -88,7 +81,9 @@
         } ,
         methods: {
             focusFromCode( code ) {
-
+                if (!code) {
+                    return;
+                }
                 this.clearLastSelected();
 
                 // Get the most likely name
@@ -185,6 +180,10 @@
                     return;
                 }
 
+                if (!val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room) {
+                    return;
+                }
+
                 this.focusFromCode(val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room);
             } ,
             getLocation() {
@@ -219,17 +218,17 @@
                 // Init ThreeJS
                 const width = 600 , height = width / 16 * 9;
 
-                const doesShowShadow = this.doesShowShadow;
-                const shadowQuality = this.shadowQuality;
+                const isShadowsOn = this.isShadowsOn;
+                const mapQuality = this.mapQuality;
 
                 const targetElement = document.getElementById('schoolMap');
                 this.ref.renderer = new THREE.WebGLRenderer({
-                    antialias: shadowQuality > 3 ,
-                    powerPreference: shadowQuality > 8 ? 'high-performance' : 'default'
+                    antialias: mapQuality > 3 ,
+                    powerPreference: mapQuality > 8 ? 'high-performance' : 'default'
                 });
                 this.ref.renderer.setSize(width , height);
 
-                if (doesShowShadow) {
+                if (isShadowsOn) {
                     this.ref.renderer.shadowMap.enabled = true;
                     this.ref.renderer.shadowMapSize = 20;
                 }
@@ -248,12 +247,12 @@
                 light.position.set(0 , 300 , 0);
                 light.target.position.set(0 , 0 , 0);
 
-                if (doesShowShadow) {
+                if (isShadowsOn) {
                     light.castShadow = true;
                     light.shadow.camera.near = 0.008;
                     light.shadow.camera.far = 300;
-                    light.shadow.mapSize.width = 1000;  // default
-                    light.shadow.mapSize.height = 1000;
+                    light.shadow.mapSize.width = 500;  // default
+                    light.shadow.mapSize.height = 500;
                     light.shadow.bias = -0.0000005;
                 }
 
@@ -263,12 +262,12 @@
                 const sidelight = new THREE.SpotLight('#defaf8' , 1);
                 sidelight.position.set(70 , 150 , 70);
 
-                if (doesShowShadow) {
+                if (isShadowsOn) {
                     sidelight.castShadow = true;
                     sidelight.shadow.camera.near = 0.008;
                     sidelight.shadow.camera.far = 500;
-                    sidelight.shadow.mapSize.width = shadowQuality ** 2 * 150;
-                    sidelight.shadow.mapSize.height = shadowQuality ** 2 * 150;
+                    sidelight.shadow.mapSize.width = (mapQuality-1) ** 2 * 150;
+                    sidelight.shadow.mapSize.height = (mapQuality-1) ** 2 * 150;
                     sidelight.shadow.bias = -0.0000005;
                 }
 
@@ -295,14 +294,14 @@
                         if (child.isMesh) {
                             if (child.material && !child.name.includes('Ground')) {
                                 child.material.color.set('#fff');
-                                if (doesShowShadow) {
+                                if (isShadowsOn) {
                                     child.castShadow = true;
                                     child.receiveShadow = true;
                                 }
                             } else {
-                                if (shadowQuality < 2) {
+                                if (mapQuality < 2) {
                                     remove.push(child);
-                                } else if (doesShowShadow) {
+                                } else if (isShadowsOn) {
                                     child.castShadow = false;
                                     child.receiveShadow = true;
                                 }
@@ -310,7 +309,7 @@
                         }
                     });
 
-                    if (shadowQuality < 2) {
+                    if (mapQuality < 2) {
                         for (let i = 0; i < remove.length; i++) {
                             gltf.scene.remove(remove[i]);
                         }

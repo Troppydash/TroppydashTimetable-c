@@ -27,18 +27,16 @@
 </template>
 
 <script>
-    import { MAP_QUALITY  , SHADOWS_ON } from '@/StorageKeys';
-    import { clamp } from '@/Helpers';
+    import { MAP_QUALITY , SHADOWS_ON , USER_PREFERENCES } from '@/StorageKeys';
+    import { clamp , GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
 
     export default {
         name: 'EditMap' ,
         data() {
-            const shadows = localStorage.getItem(SHADOWS_ON) === null
-                ? !(window.innerWidth < 1024)
-                : localStorage.getItem(SHADOWS_ON) === 'true';
-            const quality = localStorage.getItem(MAP_QUALITY) === null
-                ? 5
-                : clamp(parseInt(localStorage.getItem(MAP_QUALITY)), 1, 10);
+            const shadows = GetFromLocalStorageOrDefault(SHADOWS_ON , !(window.innerWidth < 1024) , USER_PREFERENCES, value => value === 'true');
+            const quality = GetFromLocalStorageOrDefault(MAP_QUALITY , 5 ,  USER_PREFERENCES,value => {
+                return clamp(parseInt(value), 1, 10);
+            });
             return {
                 enableShadows: shadows ,
                 shadowQuality: quality
@@ -47,24 +45,24 @@
         watch: {
             enableShadows( isOn ) {
                 if (isOn) {
-                    localStorage.setItem(SHADOWS_ON , 'true');
+                    SetLocalStorage(SHADOWS_ON , 'true', USER_PREFERENCES);
                 } else {
-                    localStorage.setItem(SHADOWS_ON , 'false');
+                    SetLocalStorage(SHADOWS_ON , 'false', USER_PREFERENCES);
                 }
             } ,
             shadowQuality( quality ) {
-                localStorage.setItem(MAP_QUALITY , quality);
+                SetLocalStorage(MAP_QUALITY, quality, USER_PREFERENCES);
             }
         } ,
         methods: {
             incrShadowQuality() {
-                if (this.shadowQuality === 1) {
-                    this.enableShadows = true;
-                }
                 if (this.shadowQuality < 10) {
                     this.shadowQuality++;
                 }
-            },
+                if (this.shadowQuality > 1) {
+                    this.enableShadows = true;
+                }
+            } ,
             decrShadowQuality() {
                 if (this.shadowQuality > 1) {
                     this.shadowQuality--;
