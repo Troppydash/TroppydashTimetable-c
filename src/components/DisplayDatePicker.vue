@@ -99,7 +99,7 @@
                 }
 
                 // Do stuff
-                this.$router.replace(`/home?date=${ selectedDate }`);
+                this.$router.push(`/home?date=${ selectedDate }`);
                 this.$store.dispatch('handleGetTimetable' , { force: true , date: selectedDate });
             }
         }

@@ -14,6 +14,7 @@
     import DisplayTable from '@/components/DisplayTable';
     import { mapState } from 'vuex';
     import DisplayCanvas from '@/components/DisplayCanvas';
+    import moment from 'moment';
 
     export default {
         name: 'TimeTable' ,
@@ -28,8 +29,16 @@
         computed: {
             ...mapState([
                 'timetable' ,
-            ])
+            ]),
+            routerDate() {
+                return this.$route.query.date;
+            }
         } ,
+        watch: {
+            routerDate(newVal) {
+                this.$store.dispatch('handleGetTimetable', { force: true, date: newVal || null })
+            }
+        },
         methods: {
             handleClick( code , item ) {
                 if (!code) {
