@@ -7,8 +7,8 @@ import firebase from 'firebase/app';
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
-import { SHADOWS_ON, TIMETABLE, TIMETRAVEL_TIMETABLES, TT_TIMETABLE, USER_INFO } from "@/StorageKeys";
-import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
+import { TIMETABLE, TIMETRAVEL_TIMETABLES, TT_TIMETABLE, USER_INFO, USERNAME } from "@/StorageKeys";
+import { GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
 
 Vue.use( Vuex )
 
@@ -72,14 +72,17 @@ export default new Vuex.Store( {
             state.messages = [];
         },
         setUsername( state, payload ) {
+            SetLocalStorage( USERNAME, payload.username, USER_INFO );
             state.username = payload.username;
         },
         setUser( state, payload ) {
+            SetLocalStorage( USER_INFO, JSON.stringify( { token: payload.token, username: payload.username } ) );
+
             state.token = payload.token;
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
-            if (payload.isVerified) {
+            if ( payload.isVerified ) {
                 state.isVerified = payload.isVerified;
             } else {
                 if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
@@ -226,7 +229,7 @@ export default new Vuex.Store( {
                     context.commit( 'setLoading', { isLoading: false } );
                 } );
         },
-        // Called: Settings
+        // Called: UserActions
         handleLogoutUser( context ) {
             return firebase.auth().signOut()
                 .then( () => {
@@ -238,7 +241,7 @@ export default new Vuex.Store( {
                     context.commit( 'signoutUser' );
                 } );
         },
-        // Called: Settings
+        // Called: UserActions
         handleDeleteUser( context ) {
             return api.delete( '/deleteuser' )
                 .then( () => {
@@ -250,7 +253,7 @@ export default new Vuex.Store( {
                     } )
                 } )
         },
-        // Called: TimeTable
+        // Called: TimeTable, Settings
         handleGetUser( context ) {
             context.commit( 'setLoading', { isLoading: true } );
 
@@ -293,7 +296,6 @@ export default new Vuex.Store( {
                     context.commit( 'setUser', {
                         ...user
                     } );
-                    SetLocalStorage( USER_INFO, JSON.stringify( { ...user } ) );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -373,9 +375,13 @@ export default new Vuex.Store( {
                     .then( res => {
                         context.state.timetable.error = '';
                         context.state.timetable.data = JSON.parse( res.data.data );
-                        SetLocalStorage(cacheKey, res.data.data, TIMETRAVEL_TIMETABLES);
+                        SetLocalStorage( cacheKey, res.data.data, TIMETRAVEL_TIMETABLES );
                         context.commit( 'addMessages', {
-                            message: { type: 'info', text: 'received network timetravel item', from: 'handleGetTimetable' }
+                            message: {
+                                type: 'info',
+                                text: 'received network timetravel item',
+                                from: 'handleGetTimetable'
+                            }
                         } );
                         return;
                     } )
@@ -393,6 +399,21 @@ export default new Vuex.Store( {
 
             }
 
+        },
+        handleEditUser( context, { username, keyCode } ) {
+            if ( username === '' ) {
+                return { error: 'username must not be empty' }
+            }
+
+            return api.put( '/edituser', { username, keyCode } )
+                .then( () => {
+                    context.commit( 'setUsername', { username } );
+                    context.dispatch( 'handleGetTimetable', { force: true } );
+                    return { error: '' }
+                } )
+                .catch( err => {
+                    return { error: err.message };
+                } );
         }
     },
     modules: {}

@@ -23,7 +23,6 @@
 </template>
 
 <script>
-    import api from '@/service/api';
     import firebase from 'firebase';
 
     export default {
@@ -42,18 +41,18 @@
         } ,
         methods: {
             handleSubmit() {
-                const username = this.username;
-                api.put('/edituser' , { username: username , keyCode: this.keyCode })
-                    .then(() => {
-                        if (username) {
-                            this.$store.commit('setUsername' , { username });
-                        }
-                        this.$store.dispatch('handleGetTimetable' , { force: true });
+                this.$store.dispatch('handleEditUser' , {
+                    username: this.username ,
+                    keyCode: this.keyCode
+                }).then(( { error } ) => {
+                    console.log(error);
+
+                    if (error) {
+                        this.error = error;
+                    } else {
                         this.$router.replace('home');
-                    })
-                    .catch(err => {
-                        this.error = err.message;
-                    });
+                    }
+                });
             } ,
         }
     };
