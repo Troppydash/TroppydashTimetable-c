@@ -14,7 +14,6 @@ Vue.use( Vuex )
 
 export default new Vuex.Store( {
     state: {
-        token: '',
         username: '',
         authenticated: false,
         error: '',
@@ -72,13 +71,9 @@ export default new Vuex.Store( {
             state.messages = [];
         },
         setUsername( state, payload ) {
-            SetLocalStorage( USERNAME, payload.username, USER_INFO );
             state.username = payload.username;
         },
         setUser( state, payload ) {
-            SetLocalStorage( USER_INFO, JSON.stringify( { token: payload.token, username: payload.username } ) );
-
-            state.token = payload.token;
             state.username = payload.username;
             state.authenticated = true;
             state.error = '';
@@ -100,7 +95,6 @@ export default new Vuex.Store( {
             state.timetable.loading = isLoading;
         },
         signoutUser( state ) {
-            state.token = '';
             state.username = '';
             state.authenticated = false;
             state.timetable = {
@@ -121,7 +115,7 @@ export default new Vuex.Store( {
         verifyEmail( context ) {
             const actionCodeSettings = {
                 handleCodeInApp: true,
-                url: 'http://stimetable.now.sh/home'
+                url: window.location.href || 'http://stimetable.now.sh/home'
             }
             firebase.auth().currentUser?.sendEmailVerification( actionCodeSettings )
                 .then( () => {
@@ -147,20 +141,19 @@ export default new Vuex.Store( {
                 _ = 'fuckyoutypescript';
             }
 
-            let token: string;
             context.commit( 'setLoading', { isLoading: true } );
             return firebase.auth().signInWithPopup( provider )
                 .then( () => {
                     // Get jwt token from current user
                     return firebase.auth().currentUser?.getIdToken();
                 } )
-                .then( tok => {
-                    token = tok || '';
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    return api.post( '/createsocialuser' )
+                .then( token => {
+                    return api.post( '/createsocialuser', null, { headers: {
+                            Authorization: `Bearer ${token}`
+                        }} )
                 } )
                 .then( res => {
-                    context.commit( 'setUser', { token, username: res.data.username } );
+                    context.commit( 'setUser', { username: res.data.username } );
                     return { error: '' }
                 } )
                 .catch( err => {
@@ -173,7 +166,6 @@ export default new Vuex.Store( {
         },
         // Called: Register
         handleRegisterUser( context, payload ) {
-            let token: string;
             let createUserSuccess = false;
             context.commit( 'setLoading', { isLoading: true } );
             // Create a user
@@ -182,14 +174,14 @@ export default new Vuex.Store( {
                     // Get jwt token from current user
                     return firebase.auth().currentUser?.getIdToken();
                 } )
-                .then( tok => {
+                .then( token => {
                     createUserSuccess = true;
-                    token = tok || '';
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    return api.post( '/createuser' );
+                    return api.post( '/createuser' , null, { headers: {
+                            Authorization: `Bearer ${token}`
+                        }});
                 } )
                 .then( res => {
-                    context.commit( 'setUser', { token, username: res.data.username } );
+                    context.commit( 'setUser', { username: res.data.username } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -207,18 +199,19 @@ export default new Vuex.Store( {
         // Called: Login
         handleLoginUser( context, payload ) {
             context.commit( 'setLoading', { isLoading: true } );
-            let token: string;
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
                     return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( tok => {
-                    token = tok || '';
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    return api.post( '/loginuser' );
+                    return api.post( '/loginuser', null, {
+                        headers: {
+                            Authorization: `Bearer ${tok}`
+                        }
+                    } );
                 } )
                 .then( res => {
-                    context.commit( 'setUser', { token, username: res.data.username } );
+                    context.commit( 'setUser', { username: res.data.username } );
                     return { error: '' };
                 } )
                 .catch( err => {
@@ -243,7 +236,14 @@ export default new Vuex.Store( {
         },
         // Called: UserActions
         handleDeleteUser( context ) {
-            return api.delete( '/deleteuser' )
+            return firebase.auth().currentUser?.getIdToken()
+                .then( token => {
+                    return api.delete( '/deleteuser', {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    } )
+                } )
                 .then( () => {
                     return context.dispatch( 'handleLogoutUser' );
                 } )
@@ -257,39 +257,16 @@ export default new Vuex.Store( {
         handleGetUser( context ) {
             context.commit( 'setLoading', { isLoading: true } );
 
-            const userInfo = GetFromLocalStorageOrNull( USER_INFO, null, value => JSON.parse( value ) );
-            if ( userInfo !== null ) {
-
-                const username = userInfo.username;
-                const token = userInfo.token;
-                if ( username !== null && token !== null ) {
-
-                    let isVerified = false;
-                    if ( firebase.auth().currentUser?.providerData[0]?.providerId === 'microsoft.com'
-                        || firebase.auth().currentUser?.providerData[0]?.providerId === 'google.com' ) {
-                        isVerified = true;
-                    } else {
-                        isVerified = firebase.auth().currentUser?.emailVerified || false;
-                    }
-                    context.commit( 'setUser', {
-                        username,
-                        token,
-                        isVerified
-                    } );
-                    api.defaults.headers.common['Authorization'] = `Bearer ${token}`
-                    context.commit( 'setLoading', { isLoading: false } );
-                }
-            }
-
             const user = {
-                token: '',
                 username: ''
             };
             return firebase.auth().currentUser?.getIdToken()
                 .then( tok => {
-                    user.token = tok;
-                    api.defaults.headers.common['Authorization'] = `Bearer ${tok}`;
-                    return api.post( '/loginuser' );
+                    return api.post( '/loginuser', null, {
+                        headers: {
+                            Authorization: `Bearer ${tok}`
+                        }
+                    } );
                 } )
                 .then( res => {
                     user.username = res.data.username;
@@ -332,9 +309,13 @@ export default new Vuex.Store( {
                     } );
                     context.commit( 'setTimetableLoading', { isLoading: false } );
                 }
-                return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable`, {
-                    headers: { 'Authorization': `Bearer ${context.state.token}` }
-                } )
+
+                return firebase.auth().currentUser?.getIdToken()
+                    .then(token => {
+                        return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        } )
+                    })
                     .then( res => {
                         context.state.timetable.error = '';
                         context.state.timetable.data = JSON.parse( res.data.data );
@@ -369,9 +350,12 @@ export default new Vuex.Store( {
                 }
 
                 const formattedDate = date ? date.split( '-' ).join( '/' ) : '';
-                return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formattedDate}`, {
-                    headers: { 'Authorization': `Bearer ${context.state.token}` }
-                } )
+                return firebase.auth().currentUser?.getIdToken()
+                    .then(token => {
+                        return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formattedDate}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        } )
+                    })
                     .then( res => {
                         context.state.timetable.error = '';
                         context.state.timetable.data = JSON.parse( res.data.data );
@@ -404,8 +388,12 @@ export default new Vuex.Store( {
             if ( username === '' ) {
                 return { error: 'username must not be empty' }
             }
-
-            return api.put( '/edituser', { username, keyCode } )
+            return firebase.auth().currentUser?.getIdToken()
+                .then(token => {
+                    return api.put( '/edituser', { username, keyCode },  {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                })
                 .then( () => {
                     context.commit( 'setUsername', { username } );
                     context.dispatch( 'handleGetTimetable', { force: true } );
