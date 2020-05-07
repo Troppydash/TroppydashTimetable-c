@@ -2,17 +2,6 @@
     <ul class="editMap">
         <li>
             <div class="mapsetting-label">
-                <span>Enable Shadows?</span>
-            </div>
-            <div class="mapsetting-content">
-                <label class="switch">
-                    <input type="checkbox" v-model="enableShadows">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </li>
-        <li>
-            <div class="mapsetting-label">
                 <span>Map Quality</span>
             </div>
             <div class="mapsetting-content">
@@ -23,11 +12,63 @@
                 </div>
             </div>
         </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Shadows</span>
+            </div>
+            <div class="mapsetting-content">
+                <label class="switch">
+                    <input type="checkbox" v-model="enableShadows">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Smooth Camera</span>
+            </div>
+            <div class="mapsetting-content">
+                <label class="switch">
+                    <input type="checkbox" v-model="enableSmoothCamera">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Auto Rotate Camera</span>
+            </div>
+            <div class="mapsetting-content">
+                <label class="switch">
+                    <input type="checkbox" v-model="enableAutoRotate">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </li>
+        <li v-if="enableAutoRotate">
+            <div class="mapsetting-label">
+                <span>Rotate Delay</span>
+            </div>
+            <div class="mapsetting-content">
+                <div class="counter">
+                    <i class="fas fa-minus fa-lg" @click="decrTimeout"></i>
+                    <span>{{ enableAutoRotateTimeout }}</span>
+                    <i class="fas fa-plus fa-lg" @click="incrTimeout"></i>
+                </div>
+            </div>
+        </li>
     </ul>
 </template>
 
 <script>
-    import { MAP_QUALITY , SHADOWS_ON , USER_PREFERENCES } from '@/StorageKeys';
+    import {
+        AUTO_ROTATE ,
+        AUTO_ROTATE_TIMEOUT ,
+        MAP_QUALITY ,
+        SHADOWS_ON ,
+        SMOOTH_CAMERA ,
+        USER_PREFERENCES
+    } from '@/StorageKeys';
     import { clamp , GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
 
     export default {
@@ -37,9 +78,21 @@
             const quality = GetFromLocalStorageOrDefault(MAP_QUALITY , 5 ,  USER_PREFERENCES,value => {
                 return clamp(parseInt(value), 1, 10);
             });
+
+            const smooth = GetFromLocalStorageOrDefault(SMOOTH_CAMERA , false , USER_PREFERENCES , value => value === 'true');
+
+
+            const autoRotate = GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');
+            const autoRotateTimeout = GetFromLocalStorageOrDefault(AUTO_ROTATE_TIMEOUT , 3 ,  USER_PREFERENCES,value => {
+                return clamp(parseInt(value), 1, 10);
+            });
+
             return {
                 enableShadows: shadows ,
-                shadowQuality: quality
+                shadowQuality: quality,
+                enableSmoothCamera: smooth,
+                enableAutoRotate: autoRotate,
+                enableAutoRotateTimeout: autoRotateTimeout,
             };
         } ,
         watch: {
@@ -52,6 +105,23 @@
             } ,
             shadowQuality( quality ) {
                 SetLocalStorage(MAP_QUALITY, quality, USER_PREFERENCES);
+            },
+            enableSmoothCamera(isOn) {
+                if (isOn) {
+                    SetLocalStorage(SMOOTH_CAMERA , 'true', USER_PREFERENCES);
+                } else {
+                    SetLocalStorage(SMOOTH_CAMERA , 'false', USER_PREFERENCES);
+                }
+            },
+            enableAutoRotateTimeout( timeout ) {
+                SetLocalStorage(AUTO_ROTATE_TIMEOUT, timeout, USER_PREFERENCES);
+            },
+            enableAutoRotate(isOn) {
+                if (isOn) {
+                    SetLocalStorage(AUTO_ROTATE , 'true', USER_PREFERENCES);
+                } else {
+                    SetLocalStorage(AUTO_ROTATE , 'false', USER_PREFERENCES);
+                }
             }
         } ,
         methods: {
@@ -70,6 +140,14 @@
                 if (this.shadowQuality === 1) {
                     this.enableShadows = false;
                 }
+            },
+            incrTimeout() {
+                this.enableAutoRotateTimeout++;
+                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout, 1, 10);
+            },
+            decrTimeout() {
+                this.enableAutoRotateTimeout--;
+                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout, 1, 10);
             }
         }
     };

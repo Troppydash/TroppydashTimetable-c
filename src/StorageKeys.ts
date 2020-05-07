@@ -17,3 +17,5 @@ export const SHADOWS_ON = "shadows_on";
 export const MAP_QUALITY = "map_quality";
 
 export const SMOOTH_CAMERA = "smooth_camera";
+export const AUTO_ROTATE = "auto_rotate_camera";
+export const AUTO_ROTATE_TIMEOUT = "auto_rotate_camera_timeout";
