@@ -25,24 +25,37 @@ interface ControlsEventListeners {
     end: () => void;
 }
 
+interface DocumentEventListeners {
+    focus: () => void;
+    blur: () => void;
+}
+
+interface GeoLocation {
+    latitude: number;
+    longitude: number;
+}
+
 export class MapRenderer {
 
     public size: CanvasSettings
 
-    private camera: THREE.Camera
-    private controls: OrbitControls.OrbitControls
-    private scene: THREE.Scene
-    private renderer: THREE.WebGLRenderer
+    private readonly camera: THREE.Camera
+    private readonly controls: OrbitControls.OrbitControls
+    private readonly scene: THREE.Scene
+    private readonly renderer: THREE.WebGLRenderer
 
     private models: THREE.Object3D[]
 
-    private controlsEventListeners: ControlsEventListeners | null
+    private controlsEventListeners: ControlsEventListeners | null = null
+    private documentEventListeners: DocumentEventListeners | null = null
 
     private settings: QualitySettings
 
     private selected: number[] = []
 
     private doesStop = false
+
+    private rotateTimeoutHandler: number | null = null
 
     constructor(
         targetElement: HTMLElement,
@@ -108,8 +121,8 @@ export class MapRenderer {
             sidelight.castShadow = true;
             sidelight.shadow.camera.near = 0.008;
             sidelight.shadow.camera.far = 500;
-            sidelight.shadow.mapSize.width = (mapQuality - 1) ** 2 * 150;
-            sidelight.shadow.mapSize.height = (mapQuality - 1) ** 2 * 150;
+            sidelight.shadow.mapSize.width = (mapQuality) ** 2 * 150;
+            sidelight.shadow.mapSize.height = (mapQuality) ** 2 * 150;
             sidelight.shadow.bias = -0.0000005;
         }
 
@@ -133,18 +146,24 @@ export class MapRenderer {
         }
 
         if ( haveAutoRotate ) {
-            setTimeout( () => {
-                this.controls.autoRotate = true;
-            }, autoRotateTimeout * 1000 );
+            this.startRotationTimer();
+            this.documentEventListeners = {
+                blur: () => {
+                    this.stopRotationTimer();
+                },
+                focus: () => {
+                    this.startRotationTimer();
+                }
+            }
+            window.addEventListener('blur', this.documentEventListeners.blur);
+            window.addEventListener('focus', this.documentEventListeners.focus);
 
             this.controlsEventListeners = {
                 start: () => {
-                    this.controls.autoRotate = false;
+                    this.stopRotationTimer();
                 },
                 end: () => {
-                    setTimeout( () => {
-                        this.controls.autoRotate = true;
-                    }, autoRotateTimeout * 1000 );
+                    this.startRotationTimer();
                 }
             };
             this.controls.addEventListener( 'start', this.controlsEventListeners.start )
@@ -158,7 +177,25 @@ export class MapRenderer {
         this.animate();
     }
 
-    loadMap =() => {
+    private startRotationTimer = () => {
+        if (this.rotateTimeoutHandler) {
+            clearTimeout(this.rotateTimeoutHandler);
+            this.controls.autoRotate = false;
+        }
+        this.rotateTimeoutHandler = setTimeout( () => {
+            this.controls.autoRotate = true;
+        }, this.settings.autoRotateTimeout * 1000 );
+    }
+
+    private stopRotationTimer = () => {
+        if (this.rotateTimeoutHandler) {
+            clearTimeout(this.rotateTimeoutHandler);
+            this.rotateTimeoutHandler = null;
+        }
+        this.controls.autoRotate = false;
+    }
+
+    loadMap = () => {
         // Load Map
         return new Promise( (( resolve, reject ) => {
             const loader = new GLTFLoader.GLTFLoader();
@@ -226,7 +263,7 @@ export class MapRenderer {
         }
     }
 
-    focusObject = (roomNumber: string ) => {
+    focusObject = ( roomNumber: string ) => {
         if ( !roomNumber ) {
             return;
         }
@@ -236,7 +273,15 @@ export class MapRenderer {
         const indexes = this.getIndexFromRoomNumber( roomNumber );
         this.selected = indexes;
 
-        const mostLikelyItem = (indexes[0] as any);
+        indexes.forEach( (( value, index ) => {
+            if ( index === 0 ) {
+                return;
+            }
+
+            (this.models[value] as any).material.color.set( '#ba5d64' )
+        }) )
+
+        const mostLikelyItem = (this.models[indexes[0]] as any);
         mostLikelyItem.material.color.set( '#b82832' );
 
         const from = this.camera.position.clone();
@@ -248,10 +293,7 @@ export class MapRenderer {
         };
 
         if ( this.settings.haveAutoRotate ) {
-            this.controls.autoRotate = false;
-            setTimeout( () => {
-                this.controls.autoRotate = true;
-            }, this.settings.autoRotateTimeout * 1000 );
+            this.startRotationTimer();
         }
 
         if ( this.settings.haveSmoothCamera ) {
@@ -285,6 +327,57 @@ export class MapRenderer {
         this.renderer.setSize( this.size.width, this.size.height );
     }
 
+    private static getOffset( pointA: GeoLocation, pointB: GeoLocation ): GeoLocation {
+        const latDif = pointA.latitude - pointB.latitude;
+        const longDif = pointA.longitude - pointB.longitude;
+
+        return {
+            latitude: latDif * 111.32 * 1000,
+            longitude: longDif * 40075 * Math.cos( latDif ) / 360 * 1000
+        };
+    }
+
+    private setUserLocation = ( position: GeoLocation ) => {
+        if ( !position ) {
+            return;
+        }
+
+        const targetLat = -41.328232;
+        const targetLong = 174.818269;
+        const { longitude, latitude } = MapRenderer.getOffset({ latitude: targetLat, longitude: targetLong}, position);
+
+        // Out of Bounds
+        if (longitude > 1000 || latitude > 1000) {
+            return;
+        }
+
+        // filter code
+        //     if (models.filter(m => m.name === 'Player').length > 0) {
+        //         // Already exists, repositioning
+        //         return;
+        //     }
+
+        const geometry = new THREE.BoxGeometry(5, 14, 5);
+        const cubeMaterial = new THREE.MeshNormalMaterial();
+
+        const mesh = new THREE.Mesh(geometry, cubeMaterial);
+        mesh.name = 'User';
+
+        mesh.position.x = (-longitude * 0.65) - 68;
+        mesh.position.z = (latitude * 0.92) - 22;
+        mesh.position.y = 25;
+
+        this.scene.add(mesh);
+    }
+
+    getAndSetUserLocation = () => {
+        if ( navigator.geolocation ) {
+            navigator.geolocation.getCurrentPosition( position => {
+                this.setUserLocation( position.coords )
+            } )
+        }
+    }
+
     private getIndexFromRoomNumber = ( roomNumber: string ) => {
         roomNumber = roomNumber.toLowerCase();
 
@@ -305,36 +398,35 @@ export class MapRenderer {
         } ) as ({ index: number; percent: any })[];
         filteredIndexes = filteredIndexes.sort( ( x, y ) => y.percent - x.percent );
 
-        if ( filteredIndexes.length < 10 ) {
+        if ( filteredIndexes.length < 3 ) {
             return filteredIndexes.map( v => v.index );
         } else {
-            return filteredIndexes.slice( 0, 10 ).map( v => v.index );
+            return filteredIndexes.slice( 0, 3 ).map( v => v.index );
         }
     }
 
-    private dispose3 = (obj: any) => {
+    private static dispose = ( obj: any ) => {
         const children = obj.children;
         let child;
 
-        if (children) {
-            for (let i=0; i<children.length; i+=1) {
+        if ( children ) {
+            for ( let i = 0; i < children.length; i += 1 ) {
                 child = children[i];
-
-                this.dispose3(child);
+                MapRenderer.dispose( child );
             }
         }
 
         const geometry = obj.geometry;
         const material = obj.material;
 
-        if (geometry) {
+        if ( geometry ) {
             geometry.dispose();
         }
 
-        if (material) {
+        if ( material ) {
             const texture = material.map;
 
-            if (texture) {
+            if ( texture ) {
                 texture.dispose();
             }
 
@@ -346,15 +438,19 @@ export class MapRenderer {
     cleanUp = () => {
 
         return new Promise( (( resolve ) => {
-            if ( this.settings.haveAutoRotate && this.controlsEventListeners ) {
+            if ( this.settings.haveAutoRotate && this.controlsEventListeners && this.documentEventListeners ) {
                 this.controls.removeEventListener( 'start', this.controlsEventListeners.start );
                 this.controls.removeEventListener( 'end', this.controlsEventListeners.end );
+                this.controlsEventListeners = null;
+
+                window.removeEventListener('blur', this.documentEventListeners.blur);
+                window.removeEventListener('focus', this.documentEventListeners.focus);
+                this.documentEventListeners = null;
             }
 
-            this.models.forEach(model => {
-                this.dispose3(model);
-            })
-            this.models = [];
+            this.models.forEach( model => {
+                MapRenderer.dispose( model );
+            } )
             this.scene.dispose();
             this.renderer.dispose();
             this.doesStop = true;

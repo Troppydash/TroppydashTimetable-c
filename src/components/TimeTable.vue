@@ -14,7 +14,6 @@
     import DisplayTable from '@/components/DisplayTable';
     import { mapState } from 'vuex';
     import DisplayCanvas from '@/components/DisplayCanvas';
-    import moment from 'moment';
 
     export default {
         name: 'TimeTable' ,
@@ -45,7 +44,7 @@
                     return;
                 }
                 this.selectedItem = item;
-                this.$refs.map.focusFromCode(code);
+                this.$refs.map.focusObject(code);
             } ,
             onResize() {
                 this.isMobile = window.innerWidth < 1024;
@@ -72,6 +71,7 @@
     .timeTable {
         width: 100%;
 
-        margin: 50px 0 400px;
+        padding-bottom: 50vh;
+        margin: 50px 0 0;
     }
 </style>
