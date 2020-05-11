@@ -56,6 +56,12 @@
         margin: 0 2rem;
     }
 
+    @media only screen and (max-width: 1200px) {
+        .displaySettingsSidebar {
+            margin: 0 0.5rem;
+        }
+    }
+
     .section {
 
     }

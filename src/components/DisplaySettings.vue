@@ -14,7 +14,6 @@
                         <EditUser />
                     </div>
                 </div>
-
                 <div class="settings-group__container" id="useractions">
                     <div class="settings-group__title">
                         <a href="#useractions">User Actions</a>
@@ -32,7 +31,6 @@
             </div>
             <div class="settings-section__content">
                 <div class="settings-group__container" id="mapsettings">
-
                     <div class="settings-group__title">
                         <a href="#mapsettings">Map Settings</a>
                     </div>
@@ -41,6 +39,22 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <div class="settings-section__container">
+            <div class="settings-section__title">
+                <span>About</span>
+            </div>
+            <div class="settings-section__content">
+                <div class="settings-group__container" id="aboutstimetable">
+                    <div class="settings-group__title">
+                        <a href="#aboutstimetable">About STimetable</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <p>Made by the roppys'</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -62,7 +76,7 @@
     .displaySettings {
         width: 700px;
         margin: 0 2rem;
-
+        transition: all 0.15s ease-in-out;
     }
 
     .settings-group__container {
@@ -95,6 +109,13 @@
         padding: 0.5rem;
     }
 
+
+    @media only screen and (max-width: 1200px) {
+        .displaySettings {
+            width: 600px;
+            margin: 0 0.5rem;
+        }
+    }
 
     @media only screen and (max-width: 1023px) {
         .displaySettings {

@@ -230,11 +230,11 @@
             transform: none;
         }
 
-        .displayCanvas:hover:not(:focus):not(:active) {
-            transition-duration: initial;
-            transition-delay: initial;
+        /*.displayCanvas:hover:not(:focus):not(:active) {*/
+        /*    transition-duration: initial;*/
+        /*    transition-delay: initial;*/
 
-            opacity: initial;
-        }
+        /*    opacity: initial;*/
+        /*}*/
     }
 </style>

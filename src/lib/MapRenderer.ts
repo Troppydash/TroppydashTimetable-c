@@ -65,7 +65,7 @@ export class MapRenderer {
         const {
             mapQuality, haveShadow,
             haveSmoothCamera,
-            haveAutoRotate, autoRotateTimeout
+            haveAutoRotate
         } = qualitySettings;
 
         this.size = canvasSettings;

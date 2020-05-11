@@ -10,7 +10,6 @@
 
 <script>
     import { mapGetters , mapState } from 'vuex';
-    import firebase from 'firebase/app';
     import DisplaySettings from '@/components/DisplaySettings';
     import DisplaySettingsSidebar from '@/components/DisplaySettingsSidebar';
 
@@ -34,7 +33,7 @@
         } ,
         methods: {
             onResize() {
-                this.isMobile = window.innerWidth < 1300;
+                this.isMobile = window.innerWidth < 1024;
             } ,
         },
         mounted() {
@@ -60,7 +59,6 @@
         padding-bottom: 60vh;
 
         position: relative;
-        flex-wrap: wrap;
         display: flex;
         justify-content: center;
     }
