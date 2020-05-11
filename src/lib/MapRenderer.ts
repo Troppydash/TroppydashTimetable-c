@@ -273,13 +273,13 @@ export class MapRenderer {
         const indexes = this.getIndexFromRoomNumber( roomNumber );
         this.selected = indexes;
 
-        indexes.forEach( (( value, index ) => {
-            if ( index === 0 ) {
-                return;
-            }
-
-            (this.models[value] as any).material.color.set( '#ba5d64' )
-        }) )
+        // indexes.forEach( (( value, index ) => {
+        //     if ( index === 0 ) {
+        //         return;
+        //     }
+        //
+        //     (this.models[value] as any).material.color.set( '#ba5d64' )
+        // }) )
 
         const mostLikelyItem = (this.models[indexes[0]] as any);
         mostLikelyItem.material.color.set( '#b82832' );

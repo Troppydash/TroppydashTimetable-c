@@ -38,7 +38,14 @@
                         <EditMap/>
                     </div>
                 </div>
-
+                <div class="settings-group__container" id="tablesettings">
+                    <div class="settings-group__title">
+                        <a href="#tablesettings">Table Settings</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <EditTable/>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -64,10 +71,11 @@
     import EditUser from '@/components/SettingsComponents/EditUser';
     import UserActions from '@/components/SettingsComponents/UserActions';
     import EditMap from '@/components/SettingsComponents/EditMap';
+    import EditTable from '@/components/SettingsComponents/EditTable';
 
     export default {
         name: 'DisplaySettings' ,
-        components: { EditMap , UserActions , EditUser }
+        components: { EditTable , EditMap , UserActions , EditUser }
     };
 </script>
 

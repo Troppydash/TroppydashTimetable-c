@@ -11,7 +11,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(day, index) in tableData" :key="day.Date" :class="{ 'today': index === today }">
+            <tr v-for="(day, index) in timetable" :key="day.Date" :class="{ 'today': index === today }">
                 <td class="date-column">{{ day.DateFormatted }}</td>
                 <td v-for="period in day.periodData" :key="period.PeriodID"
                     v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
@@ -35,7 +35,7 @@
     <div class="displayTable" v-else>
         <DisplayDatePicker />
         <div class="main-list__container">
-            <div class="main-list" v-for="(day, index) in tableData" :key="day.Date">
+            <div class="main-list" v-for="(day, index) in timetable" :key="day.Date">
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
                     <div class="arrow">
@@ -64,25 +64,36 @@
 <script>
     import { mapGetters } from 'vuex';
     import DisplayDatePicker from '@/components/DisplayDatePicker';
+    import { GetFromLocalStorageOrDefault } from '@/Helpers';
+    import { DISABLE_HIGHLIGHTING_LIKE_TERMS , USER_PREFERENCES } from '@/StorageKeys';
 
     export default {
         name: 'DisplayTable' ,
         components: { DisplayDatePicker } ,
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile', 'closed'] ,
         data() {
+            const disableHighlighting = GetFromLocalStorageOrDefault(DISABLE_HIGHLIGHTING_LIKE_TERMS , false , USER_PREFERENCES , value => value === 'true');
+
             return {
+                disableHighlighting,
                 days: [],
-                hoveredItem: ''
+                hoveredItem: '',
             };
         } ,
         methods: {
             hoverItem( desc ) {
+                if (this.disableHighlighting) {
+                    return;
+                }
                 if (this.isMobile) {
                     return;
                 }
                 this.hoveredItem = desc;
             } ,
             unhoverItem() {
+                if (this.disableHighlighting) {
+                    return;
+                }
                 if (this.isMobile) {
                     return;
                 }
@@ -104,11 +115,12 @@
             ...mapGetters([
                 'today',
                 'currentLesson',
+                'timetable'
             ])
         },
         mounted() {
             setTimeout(() => {
-                this.days = this.tableData.map(( _ , index ) => {
+                this.days = this.timetable.map(( _ , index ) => {
                     return index === this.$store.getters.today;
                 })
             }, 100);

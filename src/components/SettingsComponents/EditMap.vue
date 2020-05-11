@@ -79,7 +79,7 @@
                 return clamp(parseInt(value), 1, 10);
             });
 
-            const smooth = GetFromLocalStorageOrDefault(SMOOTH_CAMERA , false , USER_PREFERENCES , value => value === 'true');
+            const smooth = GetFromLocalStorageOrDefault(SMOOTH_CAMERA , true , USER_PREFERENCES , value => value === 'true');
 
 
             const autoRotate = GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');

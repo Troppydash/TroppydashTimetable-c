@@ -53,7 +53,7 @@
                 });
             } ,
             isSmoothCamera() {
-                return GetFromLocalStorageOrDefault(SMOOTH_CAMERA , false , USER_PREFERENCES , value => value === 'true');
+                return GetFromLocalStorageOrDefault(SMOOTH_CAMERA , true , USER_PREFERENCES , value => value === 'true');
             } ,
             isAutoRotate() {
                 return GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');
@@ -129,9 +129,7 @@
             this.mapRenderer.loadMap()
                 .then(() => {
                     // success
-                    console.log('Map Successfully loaded');
                     if (this.mapRenderer) {
-                        console.log('Setting User Location');
                         this.mapRenderer.getAndSetUserLocation();
                     }
                 })

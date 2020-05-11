@@ -7,8 +7,14 @@ import firebase from 'firebase/app';
 import router from "@/router";
 import axios from 'axios';
 import moment from "moment";
-import { TIMETABLE, TIMETRAVEL_TIMETABLES, TT_TIMETABLE, USER_INFO, USERNAME } from "@/StorageKeys";
-import { GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
+import {
+    DISPLAY_PREVIOUS_DAYS,
+    TIMETABLE,
+    TIMETRAVEL_TIMETABLES,
+    TT_TIMETABLE,
+    USER_INFO, USER_PREFERENCES,
+} from "@/StorageKeys";
+import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
 
 Vue.use( Vuex )
 
@@ -37,7 +43,35 @@ export default new Vuex.Store( {
         lastMessage( state ) {
             return state.messages[state.messages.length - 1];
         },
-        today( state ) {
+        timetable( state, getters ) {
+            if ( GetFromLocalStorageOrDefault( DISPLAY_PREVIOUS_DAYS, false, USER_PREFERENCES, value => value === 'true' ) ) {
+                return state.timetable.data;
+            } else {
+                const today = getters.unbiasedToday;
+                return state.timetable.data.filter( ( day: any, index ) => {
+                    return today === index
+                        || moment( day.Date, 'DD/MM/YYYY hh:mm:ss' ).isAfter( router.currentRoute.query.date
+                            ? moment( router.currentRoute.query.date as string, 'DD-MM-YYYY' )
+                            : moment() );
+                } );
+            }
+
+        },
+        today( state, getters ) {
+            let REFERENCE = moment();
+            let TODAY = REFERENCE.clone().startOf( 'day' );
+
+            if ( router.currentRoute.query.date ) {
+                const date: string = router.currentRoute.query.date as string;
+                REFERENCE = moment( date, 'DD-MM-YYYY' );
+                TODAY = REFERENCE.clone().startOf( 'day' );
+            }
+
+            return getters.timetable.findIndex( ( day: any ) => {
+                return moment( day.Date, 'DD/MM/YYYY ss/mm/hh' ).isSame( TODAY );
+            } )
+        },
+        unbiasedToday( state ) {
             let REFERENCE = moment();
             let TODAY = REFERENCE.clone().startOf( 'day' );
 
@@ -148,9 +182,11 @@ export default new Vuex.Store( {
                     return firebase.auth().currentUser?.getIdToken();
                 } )
                 .then( token => {
-                    return api.post( '/createsocialuser', null, { headers: {
+                    return api.post( '/createsocialuser', null, {
+                        headers: {
                             Authorization: `Bearer ${token}`
-                        }} )
+                        }
+                    } )
                 } )
                 .then( res => {
                     context.commit( 'setUser', { username: res.data.username } );
@@ -176,9 +212,11 @@ export default new Vuex.Store( {
                 } )
                 .then( token => {
                     createUserSuccess = true;
-                    return api.post( '/createuser' , null, { headers: {
+                    return api.post( '/createuser', null, {
+                        headers: {
                             Authorization: `Bearer ${token}`
-                        }});
+                        }
+                    } );
                 } )
                 .then( res => {
                     context.commit( 'setUser', { username: res.data.username } );
@@ -311,11 +349,11 @@ export default new Vuex.Store( {
                 }
 
                 return firebase.auth().currentUser?.getIdToken()
-                    .then(token => {
+                    .then( token => {
                         return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable`, {
                             headers: { Authorization: `Bearer ${token}` }
                         } )
-                    })
+                    } )
                     .then( res => {
                         context.state.timetable.error = '';
                         context.state.timetable.data = JSON.parse( res.data.data );
@@ -351,11 +389,11 @@ export default new Vuex.Store( {
 
                 const formattedDate = date ? date.split( '-' ).join( '/' ) : '';
                 return firebase.auth().currentUser?.getIdToken()
-                    .then(token => {
+                    .then( token => {
                         return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formattedDate}`, {
                             headers: { Authorization: `Bearer ${token}` }
                         } )
-                    })
+                    } )
                     .then( res => {
                         context.state.timetable.error = '';
                         context.state.timetable.data = JSON.parse( res.data.data );
@@ -389,11 +427,11 @@ export default new Vuex.Store( {
                 return { error: 'username must not be empty' }
             }
             return firebase.auth().currentUser?.getIdToken()
-                .then(token => {
-                    return api.put( '/edituser', { username, keyCode },  {
+                .then( token => {
+                    return api.put( '/edituser', { username, keyCode }, {
                         headers: { 'Authorization': `Bearer ${token}` }
-                    })
-                })
+                    } )
+                } )
                 .then( () => {
                     context.commit( 'setUsername', { username } );
                     context.dispatch( 'handleGetTimetable', { force: true } );
