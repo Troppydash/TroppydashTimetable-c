@@ -22,26 +22,40 @@
                 </label>
             </div>
         </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Room Name Style</span>
+            </div>
+            <div class="mapsetting-content">
+                <select v-model="showRoomName">
+                    <option value="default">Default</option>
+                    <option value="always">Always</option>
+                    <option value="never">Never</option>
+                </select>
+            </div>
+        </li>
     </ul>
 </template>
 
 <script>
     import {
         DISABLE_HIGHLIGHTING_LIKE_TERMS ,
-        DISPLAY_PREVIOUS_DAYS ,
+        DISPLAY_PREVIOUS_DAYS , SHOW_ROOM_NAME ,
         USER_PREFERENCES
     } from '@/StorageKeys';
-    import { clamp , GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
+    import { GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
 
     export default {
         name: 'EditTable' ,
         data() {
             const displayNearbyWeeks = GetFromLocalStorageOrDefault(DISPLAY_PREVIOUS_DAYS , false , USER_PREFERENCES , value => value === 'true');
             const disableHighlighting = GetFromLocalStorageOrDefault(DISABLE_HIGHLIGHTING_LIKE_TERMS , false , USER_PREFERENCES , value => value === 'true');
+            const showRoomName = GetFromLocalStorageOrDefault(SHOW_ROOM_NAME , 'default' , USER_PREFERENCES);
 
             return {
-                displayNearbyWeeks,
-                disableHighlighting
+                displayNearbyWeeks ,
+                disableHighlighting ,
+                showRoomName
             };
         } ,
         watch: {
@@ -54,20 +68,45 @@
                 } else {
                     SetLocalStorage(DISPLAY_PREVIOUS_DAYS , 'false' , USER_PREFERENCES);
                 }
-            },
+            } ,
             disableHighlighting( isOn ) {
                 if (isOn) {
                     SetLocalStorage(DISABLE_HIGHLIGHTING_LIKE_TERMS , 'true' , USER_PREFERENCES);
                 } else {
                     SetLocalStorage(DISABLE_HIGHLIGHTING_LIKE_TERMS , 'false' , USER_PREFERENCES);
                 }
-            },
+            } ,
+
+            showRoomName( newVal ) {
+                SetLocalStorage(SHOW_ROOM_NAME , newVal , USER_PREFERENCES);
+            }
         } ,
         methods: {}
     };
 </script>
 
 <style scoped lang="scss">
+
+    select {
+        font-family: "Roboto", Sans, sans-serif;
+        text-align: right;
+        width: auto;
+        padding: 0.45rem 1rem 0.5rem;
+        color: black;
+        height: 34px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: var(--scots-lightgrey);
+
+        transition: all 120ms ease-in-out;
+
+        &:hover {
+            background: #dcdcdc;
+            border: 1px solid var(--scots-red);
+        }
+    }
+
 
     .counter {
         height: 27px;

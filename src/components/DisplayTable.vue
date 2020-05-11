@@ -24,7 +24,7 @@
                     @mouseover="() => hoverItem(period.AdditionalData.Desc)"
                     @mouseleave="() => unhoverItem()">
                     {{ period.AdditionalData.Desc }}
-                    <span v-if="closed" class="room-number room-number-desktop">
+                    <span v-if="forceRoomName === null ? closed : forceRoomName" class="room-number room-number-desktop">
                         {{ period.AdditionalData.Room }}
                     </span>
                 </td>
@@ -51,9 +51,9 @@
                             'lesson': currentLesson === ''+index+period.PeriodID
                         } ">
                         {{ period.AdditionalData.Desc }}
-                        <span v-if="closed" class="room-number room-number-mobile">
-                        {{ period.AdditionalData.Room }}
-                    </span>
+                        <span v-if="forceRoomName === null ? closed : forceRoomName" class="room-number room-number-mobile">
+                            {{ period.AdditionalData.Room }}
+                        </span>
                     </li>
                 </ul>
             </div>
@@ -65,19 +65,28 @@
     import { mapGetters } from 'vuex';
     import DisplayDatePicker from '@/components/DisplayDatePicker';
     import { GetFromLocalStorageOrDefault } from '@/Helpers';
-    import { DISABLE_HIGHLIGHTING_LIKE_TERMS , USER_PREFERENCES } from '@/StorageKeys';
+    import { DISABLE_HIGHLIGHTING_LIKE_TERMS , SHOW_ROOM_NAME , USER_PREFERENCES } from '@/StorageKeys';
 
     export default {
         name: 'DisplayTable' ,
         components: { DisplayDatePicker } ,
-        props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile', 'closed'] ,
+        props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile' , 'closed'] ,
         data() {
             const disableHighlighting = GetFromLocalStorageOrDefault(DISABLE_HIGHLIGHTING_LIKE_TERMS , false , USER_PREFERENCES , value => value === 'true');
 
+            let forceRoomName = null;
+            const showRoomName = GetFromLocalStorageOrDefault(SHOW_ROOM_NAME , 'default' , USER_PREFERENCES);
+            if (showRoomName === 'always') {
+                forceRoomName = true;
+            } else if (showRoomName === 'never') {
+                forceRoomName = false;
+            }
+
             return {
-                disableHighlighting,
-                days: [],
-                hoveredItem: '',
+                forceRoomName,
+                disableHighlighting ,
+                days: [] ,
+                hoveredItem: '' ,
             };
         } ,
         methods: {
@@ -113,18 +122,18 @@
                 return [];
             } ,
             ...mapGetters([
-                'today',
-                'currentLesson',
+                'today' ,
+                'currentLesson' ,
                 'timetable'
             ])
-        },
+        } ,
         mounted() {
             setTimeout(() => {
                 this.days = this.timetable.map(( _ , index ) => {
                     return index === this.$store.getters.today;
-                })
-            }, 100);
-        },
+                });
+            } , 100);
+        } ,
     };
 </script>
 

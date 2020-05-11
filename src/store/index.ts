@@ -12,7 +12,7 @@ import {
     TIMETABLE,
     TIMETRAVEL_TIMETABLES,
     TT_TIMETABLE,
-    USER_INFO, USER_PREFERENCES,
+    USER_PREFERENCES,
 } from "@/StorageKeys";
 import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
 
@@ -266,7 +266,6 @@ export default new Vuex.Store( {
                 .then( () => {
                     // Clear only timetable/user caching
                     localStorage.removeItem( TIMETABLE );
-                    localStorage.removeItem( USER_INFO );
                     localStorage.removeItem( TIMETRAVEL_TIMETABLES );
                     context.commit( 'clearMessages' );
                     context.commit( 'signoutUser' );
