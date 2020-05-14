@@ -124,6 +124,10 @@
         font-size: 1.2rem;
     }
 
+    .button-reset {
+        margin-left: auto;
+    }
+
     .button-large {
         padding: 1rem 1.3rem;
         font-size: 1.2rem;

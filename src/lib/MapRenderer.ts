@@ -38,6 +38,7 @@ interface GeoLocation {
 export class MapRenderer {
 
     public size: CanvasSettings
+    public backupSize: CanvasSettings
 
     private readonly camera: THREE.Camera
     private readonly controls: OrbitControls.OrbitControls
@@ -57,6 +58,8 @@ export class MapRenderer {
 
     private rotateTimeoutHandler: number | null = null
 
+    private isFullScreen = false
+
     constructor(
         targetElement: HTMLElement,
         qualitySettings: QualitySettings,
@@ -68,7 +71,8 @@ export class MapRenderer {
             haveAutoRotate
         } = qualitySettings;
 
-        this.size = canvasSettings;
+        this.size = { ...canvasSettings };
+        this.backupSize = { ...canvasSettings };
         this.settings = qualitySettings;
 
         // Set up renderer
@@ -155,8 +159,8 @@ export class MapRenderer {
                     this.startRotationTimer();
                 }
             }
-            window.addEventListener('blur', this.documentEventListeners.blur);
-            window.addEventListener('focus', this.documentEventListeners.focus);
+            window.addEventListener( 'blur', this.documentEventListeners.blur );
+            window.addEventListener( 'focus', this.documentEventListeners.focus );
 
             this.controlsEventListeners = {
                 start: () => {
@@ -178,8 +182,8 @@ export class MapRenderer {
     }
 
     private startRotationTimer = () => {
-        if (this.rotateTimeoutHandler) {
-            clearTimeout(this.rotateTimeoutHandler);
+        if ( this.rotateTimeoutHandler ) {
+            clearTimeout( this.rotateTimeoutHandler );
             this.controls.autoRotate = false;
         }
         this.rotateTimeoutHandler = setTimeout( () => {
@@ -188,11 +192,34 @@ export class MapRenderer {
     }
 
     private stopRotationTimer = () => {
-        if (this.rotateTimeoutHandler) {
-            clearTimeout(this.rotateTimeoutHandler);
+        if ( this.rotateTimeoutHandler ) {
+            clearTimeout( this.rotateTimeoutHandler );
             this.rotateTimeoutHandler = null;
         }
         this.controls.autoRotate = false;
+    }
+
+    toggleFullScreen = ( to: boolean ) => {
+        this.isFullScreen = to;
+        if ( this.isFullScreen ) {
+            const height = window.innerHeight;
+            const width = window.innerWidth;
+
+            this.backupSize = { ...this.size };
+            this.size = { width, height };
+
+            (this.camera as any).aspect = width / height;
+            (this.camera as any).updateProjectionMatrix();
+
+            this.renderer.setSize( width, height );
+        } else {
+            this.size = { ...this.backupSize };
+
+            (this.camera as any).aspect = this.size.width / this.size.height;
+            (this.camera as any).updateProjectionMatrix();
+            this.renderer.setSize( this.size.width, this.size.height );
+        }
+
     }
 
     loadMap = () => {
@@ -322,9 +349,39 @@ export class MapRenderer {
         }
     }
 
+    onresize = () => {
+        if ( this.isFullScreen ) {
+            const height = window.innerHeight;
+            const width = window.innerWidth;
+            this.size = { width, height };
+
+            (this.camera as any).aspect = width / height;
+            (this.camera as any).updateProjectionMatrix();
+
+            this.renderer.setSize( width, height );
+        }
+    }
+
     changeSize = ( size: CanvasSettings ) => {
-        this.size = size;
-        this.renderer.setSize( this.size.width, this.size.height );
+        if ( size.width !== this.backupSize.width ) {
+            this.backupSize = { ...size };
+        }
+
+        if ( !this.isFullScreen ) {
+            this.size = size;
+            this.renderer.setSize( this.size.width, this.size.height );
+            (this.camera as any).aspect = this.size.width / this.size.height;
+            (this.camera as any).updateProjectionMatrix();
+        } else {
+            const height = window.innerHeight;
+            const width = window.innerWidth;
+            this.size = { width, height };
+
+            (this.camera as any).aspect = width / height;
+            (this.camera as any).updateProjectionMatrix();
+
+            this.renderer.setSize( width, height );
+        }
     }
 
     private static getOffset( pointA: GeoLocation, pointB: GeoLocation ): GeoLocation {
@@ -344,10 +401,13 @@ export class MapRenderer {
 
         const targetLat = -41.328232;
         const targetLong = 174.818269;
-        const { longitude, latitude } = MapRenderer.getOffset({ latitude: targetLat, longitude: targetLong}, position);
+        const { longitude, latitude } = MapRenderer.getOffset( {
+            latitude: targetLat,
+            longitude: targetLong
+        }, position );
 
         // Out of Bounds
-        if (longitude > 1000 || latitude > 1000) {
+        if ( longitude > 1000 || latitude > 1000 ) {
             return;
         }
 
@@ -357,17 +417,17 @@ export class MapRenderer {
         //         return;
         //     }
 
-        const geometry = new THREE.BoxGeometry(5, 14, 5);
+        const geometry = new THREE.BoxGeometry( 5, 14, 5 );
         const cubeMaterial = new THREE.MeshNormalMaterial();
 
-        const mesh = new THREE.Mesh(geometry, cubeMaterial);
+        const mesh = new THREE.Mesh( geometry, cubeMaterial );
         mesh.name = 'User';
 
         mesh.position.x = (-longitude * 0.65) - 68;
         mesh.position.z = (latitude * 0.92) - 22;
         mesh.position.y = 25;
 
-        this.scene.add(mesh);
+        this.scene.add( mesh );
     }
 
     getAndSetUserLocation = () => {
@@ -443,8 +503,8 @@ export class MapRenderer {
                 this.controls.removeEventListener( 'end', this.controlsEventListeners.end );
                 this.controlsEventListeners = null;
 
-                window.removeEventListener('blur', this.documentEventListeners.blur);
-                window.removeEventListener('focus', this.documentEventListeners.focus);
+                window.removeEventListener( 'blur', this.documentEventListeners.blur );
+                window.removeEventListener( 'focus', this.documentEventListeners.focus );
                 this.documentEventListeners = null;
             }
 

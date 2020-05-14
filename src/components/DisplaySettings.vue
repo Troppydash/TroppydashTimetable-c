@@ -59,7 +59,7 @@
                         <a href="#aboutstimetable">About STimetable</a>
                     </div>
                     <div class="settings-group__content">
-                        <p>Made by the roppys'</p>
+                        <p>Made by the Roppys</p>
                     </div>
                 </div>
             </div>

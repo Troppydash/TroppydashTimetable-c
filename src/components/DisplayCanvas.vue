@@ -1,15 +1,21 @@
 <template>
-    <div class="displayCanvas" :class="{ 'displayCanvas__transp': closed }">
+    <div class="displayCanvas" :class="{ 'displayCanvas__transp': closed, 'd-fullscreen': isFullScreen  }">
         <div class="wrapper">
             <div class="close-button__container"
-                 :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }">
+                 :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }"
+                v-if="!isFullScreen">
                 <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }"
-                        @click="toggleCanvas">
+                        @click="toggleCanv">
                     <i class="fa fa-angle-left" v-if="closed"></i>
                     <i class="fa fa-times" v-else></i>
                 </button>
             </div>
-            <div id="schoolMap" :class="{ closed: closed }"></div>
+            <div class="full-button__container" v-if="!closed">
+                <button class="button full-button" @click="toggleFullScreen">
+                    <i class="fas fa-compress"></i>
+                </button>
+            </div>
+            <div id="schoolMap" :class="{ closed: closed, 'fullscreen': isFullScreen }"></div>
         </div>
     </div>
 </template>
@@ -33,8 +39,8 @@
         data() {
             return {
                 location: null ,
-
                 mapRenderer: null ,
+                isFullScreen: false
             };
         } ,
         computed: {
@@ -87,6 +93,21 @@
             } ,
         } ,
         methods: {
+            toggleFullScreen() {
+                this.isFullScreen = !this.isFullScreen;
+                this.mapRenderer.toggleFullScreen(this.isFullScreen);
+            } ,
+            toggleCanv() {
+                if (this.haveAutoRotate) {
+                    const closed = document.getElementById('schoolMap').classList.contains('closed');
+                    if (closed) {
+                        this.mapRenderer.startRotationTimer();
+                    } else {
+                        this.mapRenderer.stopRotationTimer();
+                    }
+                }
+                this.toggleCanvas();
+            } ,
             tryFocusObject() {
                 const val = this.$store.state.timetable.data;
                 const currentLesson = this.currentLesson;
@@ -136,6 +157,7 @@
                 .catch(err => {
                     console.error(err);
                 });
+            window.onresize = this.mapRenderer.onresize;
         } ,
         beforeDestroy() {
             this.mapRenderer.cleanUp()
@@ -147,6 +169,23 @@
 </script>
 
 <style scoped lang="scss">
+
+    .full-button__container {
+        pointer-events: all;
+
+        position: absolute;
+        top: 1px;
+        left: 2px;
+    }
+
+    .full-button {
+        color: white;
+
+        background: none;
+        border: none;
+        padding: 0.75rem 1rem;
+    }
+
 
     .close-button__container {
         pointer-events: all;
@@ -200,6 +239,22 @@
         bottom: 1rem;
         right: 2rem;
         height: auto;
+    }
+
+    .d-fullscreen {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        right: 0 !important;
+
+        overflow: hidden;
+    }
+
+    .fullscreen {
+        width: 100vw !important;
+        height: 100vh !important;
+        border: none !important;
     }
 
     #schoolMap {

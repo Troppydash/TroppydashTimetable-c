@@ -57,6 +57,9 @@
                 </div>
             </div>
         </li>
+        <li>
+            <button class="button button-primary button-reset" @click="resetMapSettings">Reset</button>
+        </li>
     </ul>
 </template>
 
@@ -74,62 +77,83 @@
     export default {
         name: 'EditMap' ,
         data() {
-            const shadows = GetFromLocalStorageOrDefault(SHADOWS_ON , !(window.innerWidth < 1024) , USER_PREFERENCES, value => value === 'true');
-            const quality = GetFromLocalStorageOrDefault(MAP_QUALITY , 5 ,  USER_PREFERENCES,value => {
-                return clamp(parseInt(value), 1, 10);
+            const shadows = GetFromLocalStorageOrDefault(SHADOWS_ON , !(window.innerWidth < 1024) , USER_PREFERENCES , value => value === 'true');
+            const quality = GetFromLocalStorageOrDefault(MAP_QUALITY , 5 , USER_PREFERENCES , value => {
+                return clamp(parseInt(value) , 1 , 10);
             });
 
             const smooth = GetFromLocalStorageOrDefault(SMOOTH_CAMERA , true , USER_PREFERENCES , value => value === 'true');
 
 
             const autoRotate = GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');
-            const autoRotateTimeout = GetFromLocalStorageOrDefault(AUTO_ROTATE_TIMEOUT , 3 ,  USER_PREFERENCES,value => {
-                return clamp(parseInt(value), 1, 10);
+            const autoRotateTimeout = GetFromLocalStorageOrDefault(AUTO_ROTATE_TIMEOUT , 3 , USER_PREFERENCES , value => {
+                return clamp(parseInt(value) , 1 , 10);
             });
 
             return {
                 enableShadows: shadows ,
-                shadowQuality: quality,
-                enableSmoothCamera: smooth,
-                enableAutoRotate: autoRotate,
-                enableAutoRotateTimeout: autoRotateTimeout,
+                shadowQuality: quality ,
+                enableSmoothCamera: smooth ,
+                enableAutoRotate: autoRotate ,
+                enableAutoRotateTimeout: autoRotateTimeout ,
             };
         } ,
         watch: {
             enableShadows( isOn ) {
                 if (isOn) {
-                    SetLocalStorage(SHADOWS_ON , 'true', USER_PREFERENCES);
+                    SetLocalStorage(SHADOWS_ON , 'true' , USER_PREFERENCES);
                 } else {
-                    SetLocalStorage(SHADOWS_ON , 'false', USER_PREFERENCES);
+                    SetLocalStorage(SHADOWS_ON , 'false' , USER_PREFERENCES);
                 }
             } ,
             shadowQuality( quality ) {
-                SetLocalStorage(MAP_QUALITY, quality, USER_PREFERENCES);
-            },
-            enableSmoothCamera(isOn) {
+                SetLocalStorage(MAP_QUALITY , quality , USER_PREFERENCES);
+            } ,
+            enableSmoothCamera( isOn ) {
                 if (isOn) {
-                    SetLocalStorage(SMOOTH_CAMERA , 'true', USER_PREFERENCES);
+                    SetLocalStorage(SMOOTH_CAMERA , 'true' , USER_PREFERENCES);
                 } else {
-                    SetLocalStorage(SMOOTH_CAMERA , 'false', USER_PREFERENCES);
+                    SetLocalStorage(SMOOTH_CAMERA , 'false' , USER_PREFERENCES);
                 }
-            },
+            } ,
             enableAutoRotateTimeout( timeout ) {
-                SetLocalStorage(AUTO_ROTATE_TIMEOUT, timeout, USER_PREFERENCES);
-            },
-            enableAutoRotate(isOn) {
+                SetLocalStorage(AUTO_ROTATE_TIMEOUT , timeout , USER_PREFERENCES);
+            } ,
+            enableAutoRotate( isOn ) {
                 if (isOn) {
-                    SetLocalStorage(AUTO_ROTATE , 'true', USER_PREFERENCES);
+                    SetLocalStorage(AUTO_ROTATE , 'true' , USER_PREFERENCES);
                 } else {
-                    SetLocalStorage(AUTO_ROTATE , 'false', USER_PREFERENCES);
+                    SetLocalStorage(AUTO_ROTATE , 'false' , USER_PREFERENCES);
                 }
             }
         } ,
         methods: {
+            resetData() {
+                const shadows = !(window.innerWidth < 1024);
+                const quality = 5;
+                const smooth = true;
+                const autoRotate = false;
+                const autoRotateTimeout = 3;
+
+                this.enableShadows = shadows;
+                this.shadowQuality = quality;
+                this.enableSmoothCamera = smooth;
+                this.enableAutoRotate = autoRotate;
+                this.enableAutoRotateTimeout = autoRotateTimeout;
+            } ,
+            resetMapSettings() {
+                // RemoveFromLocalStorage(SMOOTH_CAMERA , USER_PREFERENCES);
+                // RemoveFromLocalStorage(AUTO_ROTATE , USER_PREFERENCES);
+                // RemoveFromLocalStorage(AUTO_ROTATE_TIMEOUT , USER_PREFERENCES);
+                // RemoveFromLocalStorage(MAP_QUALITY , USER_PREFERENCES);
+                // RemoveFromLocalStorage(SHADOWS_ON , USER_PREFERENCES);
+                this.resetData();
+            } ,
             incrShadowQuality() {
                 if (this.shadowQuality < 10) {
                     this.shadowQuality++;
                 }
-                if (this.shadowQuality > 1) {
+                if (this.shadowQuality === 2) {
                     this.enableShadows = true;
                 }
             } ,
@@ -140,14 +164,14 @@
                 if (this.shadowQuality === 1) {
                     this.enableShadows = false;
                 }
-            },
+            } ,
             incrTimeout() {
                 this.enableAutoRotateTimeout++;
-                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout, 1, 10);
-            },
+                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout , 1 , 10);
+            } ,
             decrTimeout() {
                 this.enableAutoRotateTimeout--;
-                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout, 1, 10);
+                this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout , 1 , 10);
             }
         }
     };

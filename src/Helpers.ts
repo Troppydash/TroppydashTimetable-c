@@ -55,6 +55,23 @@ export const GetFromLocalStorageOrNull = (
     return item;
 }
 
+export const RemoveFromLocalStorage = (key: string, collectionName: string | null = null) => {
+    if (collectionName === null) {
+        localStorage.removeItem(key);
+        return;
+    }
+
+    let item: any = localStorage.getItem(collectionName);
+    item = JSON.parse(item);
+    const filtered = Object.keys(item)
+        .filter(k => k !== key)
+        .reduce((obj: any, k) => {
+            obj[k] = item[k];
+            return obj;
+        }, {});
+    localStorage.setItem(collectionName, JSON.stringify(filtered));
+}
+
 export const SetLocalStorage = ( key: string, value: any, collectionName: string | null = null, ) => {
     if ( collectionName !== null ) {
         if ( localStorage.getItem( collectionName ) === null ) {

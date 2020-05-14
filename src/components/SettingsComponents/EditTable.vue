@@ -34,6 +34,9 @@
                 </select>
             </div>
         </li>
+        <li>
+            <button class="button button-primary button-reset" @click="resetTableSettings">Reset</button>
+        </li>
     </ul>
 </template>
 
@@ -81,7 +84,20 @@
                 SetLocalStorage(SHOW_ROOM_NAME , newVal , USER_PREFERENCES);
             }
         } ,
-        methods: {}
+        methods: {
+            resetData() {
+                const displayNearbyWeeks = false;
+                const disableHighlighting = false;
+                const showRoomName = 'default';
+
+                this.displayNearbyWeeks = displayNearbyWeeks;
+                this.disableHighlighting = disableHighlighting;
+                this.showRoomName = showRoomName;
+            } ,
+            resetTableSettings() {
+                this.resetData();
+            }
+        }
     };
 </script>
 
