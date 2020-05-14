@@ -140,9 +140,9 @@ export class MapRenderer {
 
         // Set up Controls
         this.controls = new OrbitControls.OrbitControls( this.camera, this.renderer.domElement );
-        this.controls.rotateSpeed = 1.0;
-        this.controls.zoomSpeed = 3;
-        this.controls.panSpeed = 2;
+        this.controls.rotateSpeed = 0.2;
+        this.controls.zoomSpeed = 1;
+        this.controls.panSpeed = 1;
         this.controls.enableZoom = true;
 
         if ( haveSmoothCamera ) {
