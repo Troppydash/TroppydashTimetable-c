@@ -45,9 +45,8 @@
                     username: this.username ,
                     keyCode: this.keyCode
                 }).then(( { error } ) => {
-                    console.log(error);
-
                     if (error) {
+                        console.log(error);
                         this.error = error;
                     } else {
                         this.$router.replace('home');

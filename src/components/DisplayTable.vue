@@ -1,10 +1,11 @@
 <template>
     <div class="displayTable" v-if="!isMobile">
         <DisplayDatePicker />
+        <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="false" />
         <table class="main-table">
             <thead>
             <tr>
-                <th></th>
+                <th ref="dateCol"></th>
                 <th v-for="heading in tableHeaders" :key="heading">
                     {{ heading }}
                 </th>
@@ -12,7 +13,7 @@
             </thead>
             <tbody>
             <tr v-for="(day, index) in timetable" :key="day.Date" :class="{ 'today': index === today }">
-                <td class="date-column">{{ day.DateFormatted }}</td>
+                <td class="date-column">{{ prettyDate(day.DateFormatted) }}</td>
                 <td v-for="period in day.periodData" :key="period.PeriodID"
                     v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
                     :class="{
@@ -24,9 +25,12 @@
                     @mouseover="() => hoverItem(period.AdditionalData.Desc)"
                     @mouseleave="() => unhoverItem()">
                     {{ period.AdditionalData.Desc }}
-                    <span v-if="forceRoomName === null ? closed : forceRoomName" class="room-number room-number-desktop">
+                    <span v-if="forceRoomName === null ? closed : forceRoomName"
+                          class="room-number room-number-desktop">
                         {{ period.AdditionalData.Room }}
                     </span>
+                   <!-- <span>{{ period.FromTime }}</span>
+                    <span>{{ period.ToTime }}</span>-->
                 </td>
             </tr>
             </tbody>
@@ -34,6 +38,7 @@
     </div>
     <div class="displayTable" v-else>
         <DisplayDatePicker />
+        <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="true" />
         <div class="main-list__container">
             <div class="main-list" v-for="(day, index) in timetable" :key="day.Date">
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
@@ -51,7 +56,8 @@
                             'lesson': currentLesson === ''+index+period.PeriodID
                         } ">
                         {{ period.AdditionalData.Desc }}
-                        <span v-if="forceRoomName === null ? closed : forceRoomName" class="room-number room-number-mobile">
+                        <span v-if="forceRoomName === null ? closed : forceRoomName"
+                              class="room-number room-number-mobile">
                             {{ period.AdditionalData.Room }}
                         </span>
                     </li>
@@ -64,13 +70,13 @@
 <script>
     import { mapGetters } from 'vuex';
     import DisplayDatePicker from '@/components/DisplayDatePicker';
-    import { GetFromLocalStorageOrDefault } from '@/Helpers';
-    import { DISABLE_HIGHLIGHTING_LIKE_TERMS , SHOW_ROOM_NAME , USER_PREFERENCES } from '@/StorageKeys';
     import { getDisableHighlighting , getShowRoomName } from '@/StorageKeysGetters';
+    import DayProgressbar from '@/components/DayProgressbar';
+    import moment from 'moment';
 
     export default {
         name: 'DisplayTable' ,
-        components: { DisplayDatePicker } ,
+        components: { DayProgressbar , DisplayDatePicker } ,
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile' , 'closed'] ,
         data() {
             const disableHighlighting = getDisableHighlighting();
@@ -84,13 +90,20 @@
             }
 
             return {
-                forceRoomName,
+                forceRoomName ,
                 disableHighlighting ,
                 days: [] ,
                 hoveredItem: '' ,
-            };
+
+                offsetWidth: 0 ,
+                handleResize: null,
+                didLoad: false
+            }
         } ,
         methods: {
+            prettyDate( date ) {
+                return moment(date.toString() , 'dddd Do MMMM, YYYY').format('dddd, MMMM Do YYYY');
+            } ,
             hoverItem( desc ) {
                 if (this.disableHighlighting) {
                     return;
@@ -126,15 +139,29 @@
                 'today' ,
                 'currentLesson' ,
                 'timetable'
-            ])
+            ]),
         } ,
         mounted() {
+            setTimeout(() => {
+                this.handleResize();
+            }, 500)
+            this.handleResize = () => {
+                const offsetWidth = this.$refs.dateCol ? this.$refs.dateCol.offsetWidth : null;
+                if (!(!offsetWidth || offsetWidth > (window.innerWidth * 0.6))) {
+                    this.offsetWidth = offsetWidth;
+                }
+            };
+            window.addEventListener( 'resize', this.handleResize );
+
             setTimeout(() => {
                 this.days = this.timetable.map(( _ , index ) => {
                     return index === this.$store.getters.today;
                 });
-            } , 100);
+            } , 500);
         } ,
+        beforeDestroy() {
+            window.removeEventListener('resize', this.handleResize);
+        }
     };
 </script>
 

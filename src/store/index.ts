@@ -254,7 +254,6 @@ export default new Vuex.Store( {
                     return { error: '' };
                 } )
                 .catch( err => {
-                    context.dispatch( 'handleLogoutUser' );
                     return { error: err.message };
                 } )
                 .finally( () => {

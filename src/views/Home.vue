@@ -38,8 +38,25 @@
         } ,
         mounted() {
             if (!this.$store.state.username) {
-                this.$store.dispatch('handleGetUser');
+                this.$store.dispatch('handleGetUser')
+                    .then(() => {
+                        setTimeout(() => {
+                            this.$store.dispatch('handleGetTimetable' , {
+                                force: false ,
+                                date: this.$route.query.date || null
+                            });
+                        } , 100);
+                    });
+            } else {
+                setTimeout(() => {
+                    this.$store.dispatch('handleGetTimetable' , {
+                        force: false ,
+                        date: this.$route.query.date || null
+                    });
+                } , 100);
             }
+
+
         }
     };
 </script>
