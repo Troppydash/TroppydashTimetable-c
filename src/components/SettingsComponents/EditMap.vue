@@ -34,6 +34,31 @@
                 </label>
             </div>
         </li>
+
+        <li>
+            <div class="mapsetting-label">
+                <span>Map X-Offset</span>
+            </div>
+            <div class="mapsetting-content">
+                <div class="counter">
+                    <i class="fas fa-minus fa-lg" @click="decrXOffset"></i>
+                    <span>{{ mapXOffset }}</span>
+                    <i class="fas fa-plus fa-lg" @click="incrXOffset"></i>
+                </div>
+            </div>
+        </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Map Y-Offset</span>
+            </div>
+            <div class="mapsetting-content">
+                <div class="counter">
+                    <i class="fas fa-minus fa-lg" @click="decrYOffset"></i>
+                    <span>{{ mapYOffset }}</span>
+                    <i class="fas fa-plus fa-lg" @click="incrYOffset"></i>
+                </div>
+            </div>
+        </li>
         <li>
             <div class="mapsetting-label">
                 <span>Auto Rotate Camera</span>
@@ -60,6 +85,7 @@
         <li>
             <button class="button button-primary button-reset" @click="resetMapSettings">Reset</button>
         </li>
+
     </ul>
 </template>
 
@@ -67,28 +93,34 @@
     import {
         AUTO_ROTATE ,
         AUTO_ROTATE_TIMEOUT ,
-        MAP_QUALITY ,
+        MAP_QUALITY , MAP_XOFFSET ,
         SHADOWS_ON ,
         SMOOTH_CAMERA ,
         USER_PREFERENCES
     } from '@/StorageKeys';
     import { clamp , GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
+    import {
+        getAutoRotate , getAutoRotateTimeout ,
+        getMapXOffset ,
+        getMapYOffset ,
+        getQuality ,
+        getShadows ,
+        getSmoothCamera
+    } from '@/StorageKeysGetters';
 
     export default {
         name: 'EditMap' ,
         data() {
-            const shadows = GetFromLocalStorageOrDefault(SHADOWS_ON , !(window.innerWidth < 1024) , USER_PREFERENCES , value => value === 'true');
-            const quality = GetFromLocalStorageOrDefault(MAP_QUALITY , 5 , USER_PREFERENCES , value => {
-                return clamp(parseInt(value) , 1 , 10);
-            });
+            const shadows = getShadows();
+            const quality = getQuality();
 
-            const smooth = GetFromLocalStorageOrDefault(SMOOTH_CAMERA , true , USER_PREFERENCES , value => value === 'true');
+            const mapXOffset = getMapXOffset();
+            const mapYOffset = getMapYOffset();
 
+            const smooth = getSmoothCamera();
 
-            const autoRotate = GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');
-            const autoRotateTimeout = GetFromLocalStorageOrDefault(AUTO_ROTATE_TIMEOUT , 3 , USER_PREFERENCES , value => {
-                return clamp(parseInt(value) , 1 , 10);
-            });
+            const autoRotate = getAutoRotate();
+            const autoRotateTimeout = getAutoRotateTimeout();
 
             return {
                 enableShadows: shadows ,
@@ -96,6 +128,8 @@
                 enableSmoothCamera: smooth ,
                 enableAutoRotate: autoRotate ,
                 enableAutoRotateTimeout: autoRotateTimeout ,
+                mapXOffset: mapXOffset,
+                mapYOffset: mapYOffset,
             };
         } ,
         watch: {
@@ -134,7 +168,11 @@
                 const smooth = true;
                 const autoRotate = false;
                 const autoRotateTimeout = 3;
+                const mapXOffset = 0;
+                const mapYOffset = 0;
 
+                this.mapXOffset = mapXOffset;
+                this.mapYOffset = mapYOffset;
                 this.enableShadows = shadows;
                 this.shadowQuality = quality;
                 this.enableSmoothCamera = smooth;
@@ -172,6 +210,22 @@
             decrTimeout() {
                 this.enableAutoRotateTimeout--;
                 this.enableAutoRotateTimeout = clamp(this.enableAutoRotateTimeout , 1 , 10);
+            },
+            incrXOffset() {
+                this.mapXOffset++;
+                this.mapXOffset = clamp(this.mapXOffset , -50 , 50);
+            } ,
+            decrXOffset() {
+                this.mapXOffset--;
+                this.mapXOffset = clamp(this.mapXOffset , -50 , 50);
+            },
+            incrYOffset() {
+                this.mapYOffset++;
+                this.mapYOffset = clamp(this.mapYOffset , -50 , 50);
+            } ,
+            decrYOffset() {
+                this.mapYOffset--;
+                this.mapYOffset = clamp(this.mapYOffset , -50 , 50);
             }
         }
     };

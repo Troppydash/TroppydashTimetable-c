@@ -15,6 +15,7 @@ import {
     USER_PREFERENCES,
 } from "@/StorageKeys";
 import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
+import { getDisplayNearbyWeeks } from "@/StorageKeysGetters";
 
 Vue.use( Vuex )
 
@@ -44,7 +45,7 @@ export default new Vuex.Store( {
             return state.messages[state.messages.length - 1];
         },
         timetable( state, getters ) {
-            if ( GetFromLocalStorageOrDefault( DISPLAY_PREVIOUS_DAYS, false, USER_PREFERENCES, value => value === 'true' ) ) {
+            if ( getDisplayNearbyWeeks() ) {
                 return state.timetable.data;
             } else {
                 const today = getters.unbiasedToday;

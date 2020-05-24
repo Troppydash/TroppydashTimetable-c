@@ -32,7 +32,6 @@
         -moz-osx-font-smoothing: grayscale;
 
         scroll-behavior: smooth;
-
     }
 
 

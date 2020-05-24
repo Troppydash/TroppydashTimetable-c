@@ -66,16 +66,17 @@
     import DisplayDatePicker from '@/components/DisplayDatePicker';
     import { GetFromLocalStorageOrDefault } from '@/Helpers';
     import { DISABLE_HIGHLIGHTING_LIKE_TERMS , SHOW_ROOM_NAME , USER_PREFERENCES } from '@/StorageKeys';
+    import { getDisableHighlighting , getShowRoomName } from '@/StorageKeysGetters';
 
     export default {
         name: 'DisplayTable' ,
         components: { DisplayDatePicker } ,
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile' , 'closed'] ,
         data() {
-            const disableHighlighting = GetFromLocalStorageOrDefault(DISABLE_HIGHLIGHTING_LIKE_TERMS , false , USER_PREFERENCES , value => value === 'true');
+            const disableHighlighting = getDisableHighlighting();
 
             let forceRoomName = null;
-            const showRoomName = GetFromLocalStorageOrDefault(SHOW_ROOM_NAME , 'default' , USER_PREFERENCES);
+            const showRoomName = getShowRoomName();
             if (showRoomName === 'always') {
                 forceRoomName = true;
             } else if (showRoomName === 'never') {

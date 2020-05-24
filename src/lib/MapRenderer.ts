@@ -35,6 +35,11 @@ interface GeoLocation {
     longitude: number;
 }
 
+interface MapOffsets {
+    xOffset: number;
+    yOffset: number;
+}
+
 export class MapRenderer {
 
     public size: CanvasSettings
@@ -60,11 +65,15 @@ export class MapRenderer {
 
     private isFullScreen = false
 
+    private mapOffsets: MapOffsets;
+
     constructor(
         targetElement: HTMLElement,
         qualitySettings: QualitySettings,
-        canvasSettings: CanvasSettings
+        canvasSettings: CanvasSettings,
+        mapOffsets: MapOffsets
     ) {
+        this.mapOffsets = mapOffsets;
         const {
             mapQuality, haveShadow,
             haveSmoothCamera,
@@ -423,8 +432,8 @@ export class MapRenderer {
         const mesh = new THREE.Mesh( geometry, cubeMaterial );
         mesh.name = 'User';
 
-        mesh.position.x = (-longitude * 0.65) - 68;
-        mesh.position.z = (latitude * 0.92) - 22;
+        mesh.position.x = (-longitude * (0.65 + this.mapOffsets.xOffset * 0.01)) - 68;
+        mesh.position.z = (latitude * (0.92 + this.mapOffsets.yOffset * 0.01)) - 22;
         mesh.position.y = 25;
 
         this.scene.add( mesh );

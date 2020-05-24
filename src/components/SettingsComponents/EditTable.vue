@@ -47,13 +47,14 @@
         USER_PREFERENCES
     } from '@/StorageKeys';
     import { GetFromLocalStorageOrDefault , SetLocalStorage } from '@/Helpers';
+    import { getDisableHighlighting , getDisplayNearbyWeeks , getShowRoomName } from '@/StorageKeysGetters';
 
     export default {
         name: 'EditTable' ,
         data() {
-            const displayNearbyWeeks = GetFromLocalStorageOrDefault(DISPLAY_PREVIOUS_DAYS , false , USER_PREFERENCES , value => value === 'true');
-            const disableHighlighting = GetFromLocalStorageOrDefault(DISABLE_HIGHLIGHTING_LIKE_TERMS , false , USER_PREFERENCES , value => value === 'true');
-            const showRoomName = GetFromLocalStorageOrDefault(SHOW_ROOM_NAME , 'default' , USER_PREFERENCES);
+            const displayNearbyWeeks = getDisplayNearbyWeeks();
+            const disableHighlighting = getDisableHighlighting();
+            const showRoomName = getShowRoomName();
 
             return {
                 displayNearbyWeeks ,

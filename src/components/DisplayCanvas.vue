@@ -22,16 +22,14 @@
 
 <script>
     import { mapGetters } from 'vuex';
-    import {
-        AUTO_ROTATE ,
-        AUTO_ROTATE_TIMEOUT ,
-        MAP_QUALITY ,
-        SHADOWS_ON ,
-        SMOOTH_CAMERA ,
-        USER_PREFERENCES
-    } from '@/StorageKeys';
-    import { clamp , GetFromLocalStorageOrDefault } from '@/Helpers';
     import { MapRenderer } from '@/lib/MapRenderer';
+    import {
+        getAutoRotate ,
+        getAutoRotateTimeout , getMapXOffset , getMapYOffset ,
+        getQuality ,
+        getShadows ,
+        getSmoothCamera
+    } from '@/StorageKeysGetters';
 
     export default {
         name: 'DisplayCanvas' ,
@@ -50,28 +48,6 @@
             data() {
                 return this.$store.state.timetable.data;
             } ,
-            isShadowsOn() {
-                return GetFromLocalStorageOrDefault(SHADOWS_ON , !this.isMobile , USER_PREFERENCES , value => value === 'true');
-            } ,
-            mapQuality() {
-                return GetFromLocalStorageOrDefault(MAP_QUALITY , 5 , USER_PREFERENCES , value => {
-                    return clamp(parseInt(value) , 1 , 10);
-                });
-            } ,
-            isSmoothCamera() {
-                return GetFromLocalStorageOrDefault(SMOOTH_CAMERA , true , USER_PREFERENCES , value => value === 'true');
-            } ,
-            isAutoRotate() {
-                return GetFromLocalStorageOrDefault(AUTO_ROTATE , false , USER_PREFERENCES , value => value === 'true');
-            } ,
-            autoRotateTimeout() {
-                if (!this.isAutoRotate) {
-                    return -1;
-                }
-                return GetFromLocalStorageOrDefault(AUTO_ROTATE_TIMEOUT , 5 , USER_PREFERENCES , value => {
-                    return clamp(parseInt(value) , 1 , 10);
-                });
-            }
         } ,
         watch: {
             data( newData ) {
@@ -98,7 +74,7 @@
                 this.mapRenderer.toggleFullScreen(this.isFullScreen);
             } ,
             toggleCanv() {
-                if (this.haveAutoRotate) {
+                if (getAutoRotate()) {
                     const closed = document.getElementById('schoolMap').classList.contains('closed');
                     if (closed) {
                         this.mapRenderer.startRotationTimer();
@@ -136,15 +112,19 @@
             this.mapRenderer = new MapRenderer(
                 document.getElementById('schoolMap') ,
                 {
-                    haveShadow: this.isShadowsOn ,
-                    mapQuality: this.mapQuality ,
-                    haveSmoothCamera: this.isSmoothCamera ,
-                    haveAutoRotate: this.isAutoRotate ,
-                    autoRotateTimeout: this.autoRotateTimeout
+                    haveShadow: getShadows(),
+                    mapQuality: getQuality() ,
+                    haveSmoothCamera: getSmoothCamera() ,
+                    haveAutoRotate: getAutoRotate() ,
+                    autoRotateTimeout: getAutoRotateTimeout()
                 } ,
                 {
                     width: 600 ,
                     height: 600 / 16 * 9
+                },
+                {
+                    xOffset: getMapXOffset(),
+                    yOffset: getMapYOffset(),
                 }
             );
             this.mapRenderer.loadMap()
