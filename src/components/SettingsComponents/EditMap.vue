@@ -93,7 +93,7 @@
     import {
         AUTO_ROTATE ,
         AUTO_ROTATE_TIMEOUT ,
-        MAP_QUALITY , MAP_XOFFSET ,
+        MAP_QUALITY , MAP_XOFFSET , MAP_YOFFSET ,
         SHADOWS_ON ,
         SMOOTH_CAMERA ,
         USER_PREFERENCES
@@ -143,6 +143,12 @@
             shadowQuality( quality ) {
                 SetLocalStorage(MAP_QUALITY , quality , USER_PREFERENCES);
             } ,
+            mapXOffset(value) {
+                SetLocalStorage(MAP_XOFFSET, value, USER_PREFERENCES);
+            },
+            mapYOffset(value) {
+                SetLocalStorage(MAP_YOFFSET, value, USER_PREFERENCES);
+            },
             enableSmoothCamera( isOn ) {
                 if (isOn) {
                     SetLocalStorage(SMOOTH_CAMERA , 'true' , USER_PREFERENCES);
