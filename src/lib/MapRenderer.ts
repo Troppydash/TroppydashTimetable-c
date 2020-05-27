@@ -294,7 +294,11 @@ export class MapRenderer {
     clearSelected = () => {
         if ( this.models.length !== 0 ) {
             this.selected.forEach( index => {
-                (this.models[index] as any).material.color.set( '#fff' );
+                try {
+                    (this.models[index] as any).material.color.set( '#fff' );
+                } catch ( e ) {
+                    console.log(e);
+                }
             } )
         }
     }
@@ -432,8 +436,8 @@ export class MapRenderer {
         const mesh = new THREE.Mesh( geometry, cubeMaterial );
         mesh.name = 'User';
 
-        mesh.position.x = (-longitude * (0.65 + this.mapOffsets.xOffset * 0.01)) - 68;
-        mesh.position.z = (latitude * (0.92 + this.mapOffsets.yOffset * 0.01)) - 22;
+        mesh.position.x = (-longitude * (0.65)) - (68 + this.mapOffsets.xOffset);
+        mesh.position.z = (latitude * (0.92)) - (22 + this.mapOffsets.yOffset);
         mesh.position.y = 25;
 
         this.scene.add( mesh );
@@ -451,6 +455,10 @@ export class MapRenderer {
         roomNumber = roomNumber.toLowerCase();
 
         const indexes = this.models.map( ( model, index ) => {
+            if (!(model as any).material) {
+                return null;
+            }
+
             const temp = model.name.split( '_' ).map( value => ({
                 percent: similarity( value.toLowerCase(), roomNumber ),
                 index

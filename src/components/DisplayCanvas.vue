@@ -96,7 +96,7 @@
                 if (!val[currentLesson[0]]) {
                     return;
                 }
-                if (!val[this.currentLesson[0]].periodData[currentLesson[1] - 1]) {
+                if (!val[currentLesson[0]].periodData[currentLesson[1] - 1]) {
                     return;
                 }
                 if (!val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room) {

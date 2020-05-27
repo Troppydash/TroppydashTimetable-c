@@ -4,7 +4,7 @@
         <div v-else>
             <p>Retrieving Timetable, Please Wait...</p>
         </div>
-        <VerifyEmailBanner v-if="!loading && !isVerified" />
+        <VerifyEmailBanner v-if="!loading && !isVerified && username" />
     </div>
     <div v-else>
         <p>Getting Current User, Please Wait...</p>
