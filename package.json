@@ -9,7 +9,7 @@
   },
   "vue": {
     "pwa": {
-      "name": "STimtable",
+      "name": "STimetable",
       "themeColor": "#b82832"
     }
   },
