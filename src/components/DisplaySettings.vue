@@ -49,6 +49,31 @@
             </div>
         </div>
 
+
+        <div class="settings-section__container">
+            <div class="settings-section__title">
+                <span>Beta Settings</span>
+            </div>
+            <div class="settings-section__content">
+                <div class="settings-group__container" id="beta-map">
+                    <div class="settings-group__title">
+                        <a href="#beta-map">Map Settings</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <!--<EditMap/>-->
+                    </div>
+                </div>
+                <div class="settings-group__container" id="beta-table">
+                    <div class="settings-group__title">
+                        <a href="#beta-table">Table Settings</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <!--<EditTable/>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="settings-section__container">
             <div class="settings-section__title">
                 <span>About</span>

@@ -68,7 +68,7 @@ export class MapRenderer {
     private mapOffsets: MapOffsets;
 
     constructor(
-        targetElement: HTMLElement,
+        private targetElement: HTMLElement,
         qualitySettings: QualitySettings,
         canvasSettings: CanvasSettings,
         mapOffsets: MapOffsets
@@ -235,7 +235,7 @@ export class MapRenderer {
         // Load Map
         return new Promise( (( resolve, reject ) => {
             const loader = new GLTFLoader.GLTFLoader();
-            loader.load( '/img/map.gltf', gltf => {
+            loader.load( '/maps/scots1.gltf', gltf => {
                 this.models = gltf.scene.children;
 
                 const ground: THREE.Object3D[] = [];
@@ -513,8 +513,9 @@ export class MapRenderer {
 
 
     cleanUp = () => {
-
         return new Promise( (( resolve ) => {
+            this.targetElement.innerHTML = '';
+
             if ( this.settings.haveAutoRotate && this.controlsEventListeners && this.documentEventListeners ) {
                 this.controls.removeEventListener( 'start', this.controlsEventListeners.start );
                 this.controls.removeEventListener( 'end', this.controlsEventListeners.end );

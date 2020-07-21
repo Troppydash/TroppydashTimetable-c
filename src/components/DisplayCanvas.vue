@@ -50,6 +50,14 @@
             } ,
         } ,
         watch: {
+            closed( newData) {
+                // TODO: Make this toggleable
+                if (newData) {
+                    this.cleanupMap();
+                }   else {
+                    this.loadMap();
+                }
+            },
             data( newData ) {
                 if (newData) {
                     this.tryFocusObject();
@@ -106,44 +114,52 @@
             } ,
             focusObject( roomName ) {
                 this.mapRenderer.focusObject(roomName);
+            },
+            loadMap() {
+                const width = !this.isMobile ? 600 : 300;
+                this.mapRenderer = new MapRenderer(
+                    document.getElementById('schoolMap') ,
+                    {
+                        haveShadow: getShadows(),
+                        mapQuality: getQuality() ,
+                        haveSmoothCamera: getSmoothCamera() ,
+                        haveAutoRotate: getAutoRotate() ,
+                        autoRotateTimeout: getAutoRotateTimeout()
+                    } ,
+                    {
+                        width: width ,
+                        height: width / 16 * 9
+                    },
+                    {
+                        xOffset: getMapXOffset(),
+                        yOffset: getMapYOffset(),
+                    }
+                );
+                this.mapRenderer.loadMap()
+                    .then(() => {
+                        // success
+                        if (this.mapRenderer) {
+                            this.mapRenderer.getAndSetUserLocation();
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+                window.addEventListener('resize', this.mapRenderer.onresize);
+            },
+            cleanupMap() {
+                window.removeEventListener('resize', this.mapRenderer.onresize);
+                this.mapRenderer.cleanUp()
+                    .then(() => {
+                        this.mapRenderer = null;
+                    });
             }
         } ,
         mounted() {
-            this.mapRenderer = new MapRenderer(
-                document.getElementById('schoolMap') ,
-                {
-                    haveShadow: getShadows(),
-                    mapQuality: getQuality() ,
-                    haveSmoothCamera: getSmoothCamera() ,
-                    haveAutoRotate: getAutoRotate() ,
-                    autoRotateTimeout: getAutoRotateTimeout()
-                } ,
-                {
-                    width: 600 ,
-                    height: 600 / 16 * 9
-                },
-                {
-                    xOffset: getMapXOffset(),
-                    yOffset: getMapYOffset(),
-                }
-            );
-            this.mapRenderer.loadMap()
-                .then(() => {
-                    // success
-                    if (this.mapRenderer) {
-                        this.mapRenderer.getAndSetUserLocation();
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                });
-            window.onresize = this.mapRenderer.onresize;
+            this.loadMap();
         } ,
         beforeDestroy() {
-            this.mapRenderer.cleanUp()
-                .then(() => {
-                    this.mapRenderer = null;
-                });
+            this.cleanupMap();
         }
     };
 </script>

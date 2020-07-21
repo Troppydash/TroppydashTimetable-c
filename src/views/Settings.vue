@@ -56,7 +56,6 @@
         margin: 50px 0;
 
         box-sizing: content-box;
-        padding-bottom: 60vh;
 
         position: relative;
         display: flex;
