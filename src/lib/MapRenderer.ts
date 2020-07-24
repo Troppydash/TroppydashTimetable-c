@@ -4,6 +4,7 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -73,6 +74,8 @@ export class MapRenderer {
         canvasSettings: CanvasSettings,
         mapOffsets: MapOffsets
     ) {
+        this.targetElement.innerHTML = '';
+
         this.mapOffsets = mapOffsets;
         const {
             mapQuality, haveShadow,
@@ -235,7 +238,7 @@ export class MapRenderer {
         // Load Map
         return new Promise( (( resolve, reject ) => {
             const loader = new GLTFLoader.GLTFLoader();
-            loader.load( '/maps/scots1.gltf', gltf => {
+            loader.load( '/maps/compressed/scots.gltf', gltf => {
                 this.models = gltf.scene.children;
 
                 const ground: THREE.Object3D[] = [];
@@ -514,7 +517,6 @@ export class MapRenderer {
 
     cleanUp = () => {
         return new Promise( (( resolve ) => {
-            this.targetElement.innerHTML = '';
 
             if ( this.settings.haveAutoRotate && this.controlsEventListeners && this.documentEventListeners ) {
                 this.controls.removeEventListener( 'start', this.controlsEventListeners.start );
