@@ -38,7 +38,8 @@
             return {
                 location: null ,
                 mapRenderer: null ,
-                isFullScreen: false
+                isFullScreen: false,
+                loaded: false,
             };
         } ,
         computed: {
@@ -156,6 +157,10 @@
             }
         } ,
         mounted() {
+            if (this.loaded) {
+                return;
+            }
+            this.loaded = true;
             this.loadMap();
         } ,
         beforeDestroy() {

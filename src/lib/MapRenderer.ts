@@ -68,6 +68,8 @@ export class MapRenderer {
 
     private mapOffsets: MapOffsets;
 
+    private loaded = false;
+
     constructor(
         private targetElement: HTMLElement,
         qualitySettings: QualitySettings,
@@ -96,6 +98,11 @@ export class MapRenderer {
 
         if ( haveShadow ) {
             this.renderer.shadowMap.enabled = true;
+            this.renderer.shadowMap.autoUpdate = false;
+            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            setInterval( () => {
+                this.renderer.shadowMap.needsUpdate = true;
+            }, 10000 );
         }
 
         targetElement.appendChild( this.renderer.domElement );
@@ -112,7 +119,7 @@ export class MapRenderer {
         this.scene.add( this.camera );
 
 
-        // Top Light
+        //Top Light
         const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
         topLight.position.set( 0, 300, 0 );
         topLight.target.position.set( 0, 0, 0 );
@@ -121,8 +128,8 @@ export class MapRenderer {
             topLight.castShadow = true;
             topLight.shadow.camera.near = 0.008;
             topLight.shadow.camera.far = 300;
-            topLight.shadow.mapSize.width = 500;
-            topLight.shadow.mapSize.height = 500;
+            topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+            topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
             topLight.shadow.bias = -0.0000005;
         }
 
@@ -137,8 +144,9 @@ export class MapRenderer {
             sidelight.castShadow = true;
             sidelight.shadow.camera.near = 0.008;
             sidelight.shadow.camera.far = 500;
-            sidelight.shadow.mapSize.width = (mapQuality) ** 2 * 150;
-            sidelight.shadow.mapSize.height = (mapQuality) ** 2 * 150;
+            sidelight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+            sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
+            // sidelight.shadow.bias = -0.0000005;
             sidelight.shadow.bias = -0.0000005;
         }
 
@@ -188,7 +196,6 @@ export class MapRenderer {
             this.controlsEventListeners = null;
         }
 
-
         this.models = [];
         this.animate();
     }
@@ -235,6 +242,10 @@ export class MapRenderer {
     }
 
     loadMap = () => {
+        if ( this.loaded ) {
+            return;
+        }
+        this.loaded = true;
         // Load Map
         return new Promise( (( resolve, reject ) => {
             const loader = new GLTFLoader.GLTFLoader();
@@ -243,28 +254,22 @@ export class MapRenderer {
 
                 const ground: THREE.Object3D[] = [];
                 gltf.scene.traverse( child => {
-                    if ( child instanceof THREE.Mesh ) {
+                    if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
                         // Buildings
-                        if ( child.material && !child.name.includes( 'Ground' ) ) {
-                            (child.material as any).color.set( '#fff' );
-
-                            if ( this.settings.haveShadow ) {
-                                child.castShadow = true;
-                                child.receiveShadow = true;
-                            }
-
-                        } else {
-
-                            if ( this.settings.mapQuality < 2 ) {
-                                ground.push( child );
-                            }
-
-                            if ( this.settings.haveShadow ) {
-                                child.castShadow = false;
-                                child.receiveShadow = true;
-                            }
+                        (child.material as any).color.set( '#fff' );
+                        if ( this.settings.haveShadow ) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+                            (child.material as any).shadowSide = THREE.BackSide;
                         }
-
+                    } else {
+                        if ( this.settings.mapQuality < 2 ) {
+                            ground.push( child );
+                        }
+                        if ( this.settings.haveShadow ) {
+                            child.castShadow = false;
+                            child.receiveShadow = true;
+                        }
                     }
                 } );
 
@@ -276,10 +281,12 @@ export class MapRenderer {
 
                 this.scene.add( gltf.scene );
 
+                this.renderer.shadowMap.needsUpdate = true;
                 resolve();
             }, undefined, err => {
                 reject( err );
             } );
+
         }) )
     }
 
@@ -300,7 +307,7 @@ export class MapRenderer {
                 try {
                     (this.models[index] as any).material.color.set( '#fff' );
                 } catch ( e ) {
-                    console.log(e);
+                    console.log( e );
                 }
             } )
         }
@@ -458,7 +465,7 @@ export class MapRenderer {
         roomNumber = roomNumber.toLowerCase();
 
         const indexes = this.models.map( ( model, index ) => {
-            if (!(model as any).material) {
+            if ( !(model as any).material ) {
                 return null;
             }
 
@@ -534,6 +541,7 @@ export class MapRenderer {
             this.scene.dispose();
             this.renderer.dispose();
             this.doesStop = true;
+            this.loaded = false;
 
             resolve();
         }) )
