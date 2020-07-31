@@ -120,20 +120,20 @@ export class MapRenderer {
 
 
         //Top Light
-        // const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
-        // topLight.position.set( 0, 300, 0 );
-        // topLight.target.position.set( 0, 0, 0 );
-        //
-        // if ( haveShadow ) {
-        //     topLight.castShadow = true;
-        //     topLight.shadow.camera.near = 0.008;
-        //     topLight.shadow.camera.far = 300;
-        //     topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
-        //     topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
-        //     topLight.shadow.bias = -0.0000005;
-        // }
-        //
-        // this.scene.add( topLight );
+        const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
+        topLight.position.set( 0, 300, 0 );
+        topLight.target.position.set( 0, 0, 0 );
+
+        if ( haveShadow ) {
+            topLight.castShadow = true;
+            topLight.shadow.camera.near = 0.008;
+            topLight.shadow.camera.far = 300;
+            topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+            topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
+            topLight.shadow.bias = -0.0000005;
+        }
+
+        this.scene.add( topLight );
 
 
         // Side light
