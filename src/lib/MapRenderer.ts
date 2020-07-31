@@ -260,7 +260,7 @@ export class MapRenderer {
                         if ( this.settings.haveShadow ) {
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            (child.material as any).shadowSide = THREE.BackSide;
+                            // (child.material as any).shadowSide = THREE.BackSide;
                         }
                     } else {
                         if ( this.settings.mapQuality < 2 ) {
