@@ -88,6 +88,16 @@
                     </div>
                 </div>
             </div>
+            <div class="settings-section__content">
+                <div class="settings-group__container" id="pastcommits">
+                    <div class="settings-group__title">
+                        <a href="#pastcommits">Past Commits</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <PastCommits />
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -97,10 +107,11 @@
     import UserActions from '@/components/SettingsComponents/UserActions';
     import EditMap from '@/components/SettingsComponents/EditMap';
     import EditTable from '@/components/SettingsComponents/EditTable';
+    import PastCommits from '@/components/SettingsComponents/PastCommits';
 
     export default {
         name: 'DisplaySettings' ,
-        components: { EditTable , EditMap , UserActions , EditUser }
+        components: { PastCommits , EditTable , EditMap , UserActions , EditUser }
     };
 </script>
 

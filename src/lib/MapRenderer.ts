@@ -92,6 +92,7 @@ export class MapRenderer {
         // Set up renderer
         this.renderer = new THREE.WebGLRenderer( {
             antialias: mapQuality > 3,
+
             powerPreference: mapQuality > 8 ? 'high-performance' : 'default'
         } );
         this.renderer.setSize( this.size.width, this.size.height );
@@ -100,9 +101,9 @@ export class MapRenderer {
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.autoUpdate = false;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            setInterval( () => {
-                this.renderer.shadowMap.needsUpdate = true;
-            }, 10000 );
+            // setInterval( () => {
+            //     this.renderer.shadowMap.needsUpdate = true;
+            // }, 10000 );
         }
 
         targetElement.appendChild( this.renderer.domElement );
@@ -120,41 +121,57 @@ export class MapRenderer {
 
 
         //Top Light
-        const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
-        topLight.position.set( 0, 300, 0 );
-        topLight.target.position.set( 0, 0, 0 );
-
-        if ( haveShadow ) {
-            topLight.castShadow = true;
-            topLight.shadow.camera.near = 0.008;
-            topLight.shadow.camera.far = 300;
-            topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
-            topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
-            topLight.shadow.bias = -0.0000005;
-        }
-
-        this.scene.add( topLight );
+        // const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
+        // topLight.position.set( 0, 300, 0 );
+        // topLight.target.position.set( 0, 0, 0 );
+        //
+        // if ( haveShadow ) {
+        //     topLight.castShadow = true;
+        //     topLight.shadow.camera.near = 0.008;
+        //     topLight.shadow.camera.far = 300;
+        //     topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+        //     topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
+        //     topLight.shadow.bias = -0.000001;
+        // }
+        //
+        // this.scene.add( topLight );
 
 
         // Side light
-        const sidelight = new THREE.SpotLight( '#defaf8', 1 );
+        const sidelight = new THREE.DirectionalLight( '#defaf8', 1 );
         sidelight.position.set( 70, 150, 70 );
+        sidelight.target.position.set(0, 0, 0,);
 
         if ( haveShadow ) {
             sidelight.castShadow = true;
-            sidelight.shadow.camera.near = 0.008;
-            sidelight.shadow.camera.far = 500;
+
+            // sidelight.shadow.mapSize.width = 2 ** (mapQuality + 6);
             sidelight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+            // sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
             sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
             // sidelight.shadow.bias = -0.0000005;
-            sidelight.shadow.bias = -0.0000005;
+            sidelight.shadow.bias = -0.01;
+            sidelight.shadow.camera.left = -90;
+            sidelight.shadow.camera.right = 200;
+            sidelight.shadow.camera.top = 110;
+            sidelight.shadow.camera.bottom = -75;
+
+            sidelight.shadow.camera.near = 75;
+            sidelight.shadow.camera.far = 270;
+
         }
 
         this.scene.add( sidelight );
 
+        // this.scene.add(new THREE.CameraHelper(sidelight.shadow.camera));
+
+
+        // const spotLightHelper = new THREE.DirectionalLightHelper( sidelight );
+        // this.scene.add( spotLightHelper );
+
 
         // Ambient Light
-        const ambientLight = new THREE.AmbientLight( '#fff', 0.2 );
+        const ambientLight = new THREE.AmbientLight( '#fff', 0.45 );
         this.scene.add( ambientLight );
 
 
@@ -256,7 +273,7 @@ export class MapRenderer {
                 gltf.scene.traverse( child => {
                     if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
                         // Buildings
-                        (child.material as any).color.set( '#fff' );
+                        (child.material as any).color.set( '#8e8e8e' );
                         if ( this.settings.haveShadow ) {
                             child.castShadow = true;
                             child.receiveShadow = true;
@@ -279,9 +296,8 @@ export class MapRenderer {
                     }
                 }
 
-                this.scene.add( gltf.scene );
-
                 this.renderer.shadowMap.needsUpdate = true;
+                this.scene.add( gltf.scene );
                 resolve();
             }, undefined, err => {
                 reject( err );
