@@ -33,7 +33,7 @@
                     });
             },
             getDate(date) {
-                return moment(date).format('DD/mm/YYYY').toString();
+                return moment(date).format('DD/MM/YYYY').toString();
             }
         } ,
         mounted() {
