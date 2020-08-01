@@ -4,7 +4,7 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { Interaction } from 'three.interaction';
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -68,7 +68,11 @@ export class MapRenderer {
 
     private mapOffsets: MapOffsets;
 
+    private interaction: any;
+
     private loaded = false;
+
+    private isAnimating = false;
 
     constructor(
         private targetElement: HTMLElement,
@@ -101,9 +105,6 @@ export class MapRenderer {
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.autoUpdate = false;
             this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            // setInterval( () => {
-            //     this.renderer.shadowMap.needsUpdate = true;
-            // }, 10000 );
         }
 
         targetElement.appendChild( this.renderer.domElement );
@@ -119,6 +120,7 @@ export class MapRenderer {
         this.camera.position.set( 0, 200, 200 );
         this.scene.add( this.camera );
 
+        this.interaction = new Interaction( this.renderer, this.scene, this.camera );
 
         //Top Light
         // const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
@@ -140,7 +142,7 @@ export class MapRenderer {
         // Side light
         const sidelight = new THREE.DirectionalLight( '#defaf8', 1 );
         sidelight.position.set( 70, 150, 70 );
-        sidelight.target.position.set(0, 0, 0,);
+        sidelight.target.position.set( 0, 0, 0, );
 
         if ( haveShadow ) {
             sidelight.castShadow = true;
@@ -279,6 +281,27 @@ export class MapRenderer {
                             child.receiveShadow = true;
                             // (child.material as any).shadowSide = THREE.BackSide;
                         }
+                        const name = child.name.split( '_' )[0];
+                        (child as any).cursor = 'pointer';
+                        (child as any).on( 'mousedown', () => {
+                            (child as any).isMouseDown = true;
+                        } );
+                        (child as any).on( 'mouseup', () => {
+                            if ( (child as any).isMouseDown === true ) {
+                                this.focusObject( name );
+                                (child as any).isMouseDown = false;
+                            }
+                        } );
+                        (child as any).on( 'mouseover', () => {
+                            if ( (child.material as any).color.getHex() !== 12068914 ) {
+                                (child.material as any).color.set( '#fff' );
+                            }
+                        } );
+                        (child as any).on( 'mouseout', () => {
+                            if ( (child.material as any).color.getHex() !== 12068914 ) {
+                                (child.material as any).color.set( '#8e8e8e' );
+                            }
+                        } );
                     } else {
                         if ( this.settings.mapQuality < 2 ) {
                             ground.push( child );
@@ -321,7 +344,7 @@ export class MapRenderer {
         if ( this.models.length !== 0 ) {
             this.selected.forEach( index => {
                 try {
-                    (this.models[index] as any).material.color.set( '#fff' );
+                    (this.models[index] as any).material.color.set( '#8e8e8e' );
                 } catch ( e ) {
                     console.log( e );
                 }
@@ -330,6 +353,9 @@ export class MapRenderer {
     }
 
     focusObject = ( roomNumber: string ) => {
+        if ( this.isAnimating ) {
+            return;
+        }
         if ( !roomNumber ) {
             return;
         }
@@ -358,33 +384,56 @@ export class MapRenderer {
             z: from.z - to.z > 0 ? to.z + 30 : to.z - 30
         };
 
+        const fromRot = this.camera.quaternion.clone();
+        const oldRot = fromRot.clone();
+        const oldPos = from.clone();
+        this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
+        this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
+
+        // console.log(fromRot);
+
+        const toRot = this.camera.quaternion.clone();
+        this.camera.position.set( oldPos.x, oldPos.y, oldPos.z );
+        this.camera.rotation.set( oldRot.x, oldRot.y, oldRot.z );
+        // console.log(toRot);
+
+
         if ( this.settings.haveAutoRotate ) {
             this.startRotationTimer();
         }
 
         if ( this.settings.haveSmoothCamera ) {
+            this.isAnimating = true;
+            setTimeout( () => {
+                this.isAnimating = false;
+            }, 1000 );
+            const time = { t: 0 }
+            new TWEEN.Tween( time )
+                .to( { t: 1 }, 1000 )
+                .easing( TWEEN.Easing.Exponential.InOut )
+                .onUpdate( () => {
+                    THREE.Quaternion.slerp( fromRot, toRot, this.camera.quaternion, time.t );
+                } )
+                .onComplete( () => {
+                    this.camera.quaternion.copy( toRot );
+                } )
+                .start();
 
             new TWEEN.Tween( from )
                 .to( toOffset, 1000 )
                 .easing( TWEEN.Easing.Exponential.InOut )
                 .onUpdate( () => {
                     this.camera.position.set( from.x, from.y, from.z );
-                    this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
-                    this.controls.target = new THREE.Vector3( to.x, to.y, to.z );
                 } )
                 .onComplete( () => {
                     this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
-                    this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
+                    // this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
                     this.controls.target = new THREE.Vector3( to.x, to.y, to.z );
-
                 } )
                 .start();
-
         } else {
-
             this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
             this.controls.target = to;
-
         }
     }
 
@@ -558,6 +607,13 @@ export class MapRenderer {
             this.renderer.dispose();
             this.doesStop = true;
             this.loaded = false;
+
+            try {
+                this.interaction.destroy();
+                this.interaction = null;
+            } catch (e) {
+                this.interaction = null;
+            }
 
             resolve();
         }) )
