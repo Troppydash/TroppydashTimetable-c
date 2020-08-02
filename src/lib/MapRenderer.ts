@@ -313,8 +313,8 @@ export class MapRenderer {
                         } );
                         (child as any).on( 'mouseup', ( ev: any ) => {
                             const { screenX, screenY } = ev.data.originalEvent;
-                            console.log( { screenX, screenY } );
-                            console.log( this.oldPos );
+                            // console.log( { screenX, screenY } );
+                            // console.log( this.oldPos );
                             if ( (child as any).isMouseDown === true
                                 && Math.abs( this.oldPos.screenX - screenX ) < 15
                                 && Math.abs( this.oldPos.screenY - screenY ) < 15 ) {
@@ -328,6 +328,7 @@ export class MapRenderer {
                             }
                         } );
                         (child as any).on( 'mousemove', ( ev: any ) => {
+                            // TODO: Make this tooltip nicer
                             if ( this.isFullScreen && onHover ) {
                                 const { clientX, clientY } = ev.data.originalEvent;
                                 const relX = screenX - (window.outerWidth - this.size.width);
