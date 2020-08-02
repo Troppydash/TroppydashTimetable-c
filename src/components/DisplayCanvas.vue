@@ -3,7 +3,7 @@
         <div class="wrapper">
             <div class="close-button__container"
                  :class="{ 'closed-button__closed': closed, 'closed-button__open': !closed }"
-                v-if="!isFullScreen">
+                 v-if="!isFullScreen">
                 <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }"
                         @click="toggleCanv">
                     <i class="fa fa-angle-left" v-if="closed"></i>
@@ -16,6 +16,10 @@
                 </button>
             </div>
             <div id="schoolMap" :class="{ closed: closed, 'fullscreen': isFullScreen }"></div>
+            <div class="tooltip"
+                 :style="{ display: tooltip.display ? 'block' : 'none', top: tooltip.position.y + 'px', left: tooltip.position.x + 'px' }">
+                <span>{{ tooltip.data.text }}</span>
+            </div>
         </div>
     </div>
 </template>
@@ -38,8 +42,20 @@
             return {
                 location: null ,
                 mapRenderer: null ,
-                isFullScreen: false,
-                loaded: false,
+                isFullScreen: false ,
+                loaded: false ,
+
+                tooltip: {
+                    position: {
+                        x: 0 ,
+                        y: 0 ,
+                    } ,
+                    data: {
+                        text: '' ,
+                        description: '' ,
+                    } ,
+                    display: false
+                }
             };
         } ,
         computed: {
@@ -51,14 +67,17 @@
             } ,
         } ,
         watch: {
-            closed( newData) {
+            isFullScreen( value ) {
+                this.tooltip.display = value;
+            } ,
+            closed( newData ) {
                 // TODO: Make this toggleable
                 if (newData) {
                     this.cleanupMap();
-                }   else {
+                } else {
                     this.loadMap();
                 }
-            },
+            } ,
             data( newData ) {
                 if (newData) {
                     this.tryFocusObject();
@@ -115,13 +134,24 @@
             } ,
             focusObject( roomName ) {
                 this.mapRenderer.focusObject(roomName);
-            },
+            } ,
+            handleHover( ev ) {
+                // console.log(ev);
+                const { x , y } = ev.position;
+                const { name } = ev.mesh;
+                this.tooltip.data = { ...this.tooltip.data , text: name.split('_').join(' ') };
+                this.tooltip.position = { ...this.tooltip.position , x: x + 5 , y: y - 25 };
+                this.tooltip.display = true;
+            } ,
+            handleOnLeave() {
+                this.tooltip.display = false;
+            } ,
             loadMap() {
                 const width = !this.isMobile ? 600 : 300;
                 this.mapRenderer = new MapRenderer(
                     document.getElementById('schoolMap') ,
                     {
-                        haveShadow: getShadows(),
+                        haveShadow: getShadows() ,
                         mapQuality: getQuality() ,
                         haveSmoothCamera: getSmoothCamera() ,
                         haveAutoRotate: getAutoRotate() ,
@@ -130,13 +160,13 @@
                     {
                         width: width ,
                         height: width / 16 * 9
-                    },
+                    } ,
                     {
-                        xOffset: getMapXOffset(),
-                        yOffset: getMapYOffset(),
+                        xOffset: getMapXOffset() ,
+                        yOffset: getMapYOffset() ,
                     }
                 );
-                this.mapRenderer.loadMap()
+                this.mapRenderer.loadMap(this.handleHover , this.handleOnLeave)
                     .then(() => {
                         // success
                         if (this.mapRenderer) {
@@ -146,10 +176,10 @@
                     .catch(err => {
                         console.error(err);
                     });
-                window.addEventListener('resize', this.mapRenderer.onresize);
-            },
+                window.addEventListener('resize' , this.mapRenderer.onresize);
+            } ,
             cleanupMap() {
-                window.removeEventListener('resize', this.mapRenderer.onresize);
+                window.removeEventListener('resize' , this.mapRenderer.onresize);
                 this.mapRenderer.cleanUp()
                     .then(() => {
                         this.mapRenderer = null;
@@ -171,6 +201,20 @@
 
 <style scoped lang="scss">
 
+    .tooltip {
+        position: absolute;
+
+        background: var(--scots-lightgrey);
+        color: var(--scots-grey2);
+        padding: 0.2rem;
+
+        box-shadow: 1px 1px 4px var(--scots-grey2);
+
+        transition-duration: 100ms;
+        pointer-events: none;
+        //transition-delay: 100ms;
+    }
+
     .full-button__container {
         pointer-events: all;
 
@@ -185,6 +229,10 @@
         background: none;
         border: none;
         padding: 0.75rem 1rem;
+
+        &:hover {
+            color: gray;
+        }
     }
 
 

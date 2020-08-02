@@ -1,8 +1,8 @@
 <template>
     <div class="header-outside" v-if="!loading">
         <div class="header" v-if="authenticated">
-            <router-link to="/home">Home</router-link>
-            <router-link to="/settings">Settings</router-link>
+            <router-link to="/home" class="header-link">Home</router-link>
+            <router-link to="/settings" class="header-link">Settings</router-link>
             <div class="username-container">
                 <p class="username">Hello {{ username }}</p>
             </div>
@@ -23,11 +23,11 @@
     import { mapState } from 'vuex';
 
     export default {
-        name: 'Header',
+        name: 'Header' ,
         computed: {
             ...mapState([
                 'username' ,
-                'authenticated',
+                'authenticated' ,
                 'loading'
             ])
         }
@@ -35,6 +35,13 @@
 </script>
 
 <style scoped lang="scss">
+
+    .header-link {
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
     .username-container {
         margin-left: auto;
 
@@ -53,6 +60,7 @@
         display: flex;
         justify-content: center;
     }
+
     .header {
         display: flex;
 

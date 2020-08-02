@@ -5,6 +5,7 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
+import { Mesh } from "three";
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -41,6 +42,14 @@ interface MapOffsets {
     yOffset: number;
 }
 
+interface OnHoverEvent {
+    position: {
+        x: number;
+        y: number;
+    };
+    mesh: Mesh;
+}
+
 export class MapRenderer {
 
     public size: CanvasSettings
@@ -73,6 +82,21 @@ export class MapRenderer {
     private loaded = false;
 
     private isAnimating = false;
+
+    private lastName = '';
+    private countDown = -1;
+    private isShowing = false;
+
+    private tooltipTimeout = 1 * 1000;
+    private tooltipDelay = 0.1 * 1000;
+
+    private tooltipDelayTimeout = 0;
+
+    private old = this.tooltipTimeout;
+
+    private isisShowing = false;
+
+    private oldPos: any;
 
     constructor(
         private targetElement: HTMLElement,
@@ -140,7 +164,7 @@ export class MapRenderer {
 
 
         // Side light
-        const sidelight = new THREE.DirectionalLight( '#defaf8', 1 );
+        const sidelight = new THREE.DirectionalLight( '#defaf8', 0.6 );
         sidelight.position.set( 70, 150, 70 );
         sidelight.target.position.set( 0, 0, 0, );
 
@@ -160,7 +184,6 @@ export class MapRenderer {
 
             sidelight.shadow.camera.near = 75;
             sidelight.shadow.camera.far = 270;
-
         }
 
         this.scene.add( sidelight );
@@ -173,7 +196,7 @@ export class MapRenderer {
 
 
         // Ambient Light
-        const ambientLight = new THREE.AmbientLight( '#fff', 0.45 );
+        const ambientLight = new THREE.AmbientLight( '#fff', 0.9 );
         this.scene.add( ambientLight );
 
 
@@ -260,7 +283,7 @@ export class MapRenderer {
 
     }
 
-    loadMap = () => {
+    loadMap = ( onHover?: ( ev: OnHoverEvent ) => void, onLeave?: () => void ) => {
         if ( this.loaded ) {
             return;
         }
@@ -283,21 +306,71 @@ export class MapRenderer {
                         }
                         const name = child.name.split( '_' )[0];
                         (child as any).cursor = 'pointer';
-                        (child as any).on( 'mousedown', () => {
+                        (child as any).on( 'mousedown', ( ev: any ) => {
+                            const { screenX, screenY } = ev.data.originalEvent;
+                            this.oldPos = { screenX, screenY };
                             (child as any).isMouseDown = true;
                         } );
-                        (child as any).on( 'mouseup', () => {
-                            if ( (child as any).isMouseDown === true ) {
+                        (child as any).on( 'mouseup', ( ev: any ) => {
+                            const { screenX, screenY } = ev.data.originalEvent;
+                            console.log( { screenX, screenY } );
+                            console.log( this.oldPos );
+                            if ( (child as any).isMouseDown === true
+                                && Math.abs( this.oldPos.screenX - screenX ) < 15
+                                && Math.abs( this.oldPos.screenY - screenY ) < 15 ) {
                                 this.focusObject( name );
                                 (child as any).isMouseDown = false;
                             }
                         } );
-                        (child as any).on( 'mouseover', () => {
+                        (child as any).on( 'mouseover', ( ev: any ) => {
                             if ( (child.material as any).color.getHex() !== 12068914 ) {
                                 (child.material as any).color.set( '#fff' );
                             }
                         } );
+                        (child as any).on( 'mousemove', ( ev: any ) => {
+                            if ( this.isFullScreen && onHover ) {
+                                const { clientX, clientY } = ev.data.originalEvent;
+                                const relX = screenX - (window.outerWidth - this.size.width);
+                                const relY = screenY - (window.outerHeight - this.size.height);
+                                const currentPosition = { x: clientX, y: clientY };
+                                // console.log(ev.data.originalEvent);
+
+                                if ( this.lastName !== ev.data.target.name ) {
+                                    this.lastName = ev.data.target.name;
+                                    clearInterval( this.countDown );
+                                    this.isShowing = true;
+                                    this.countDown = setInterval( () => {
+                                        this.isisShowing = true;
+                                        onHover( { position: currentPosition, mesh: ev.data.target } );
+                                    }, this.tooltipTimeout );
+                                } else {
+                                    if ( !this.isShowing ) {
+                                        this.isShowing = true;
+                                        this.countDown = setInterval( () => {
+                                            this.isisShowing = true;
+                                            onHover( { position: currentPosition, mesh: ev.data.target } );
+                                        }, this.tooltipTimeout );
+                                    }
+                                }
+                            }
+                        } );
                         (child as any).on( 'mouseout', () => {
+                            if ( this.isFullScreen && onLeave && this.isShowing ) {
+                                if ( this.isisShowing ) {
+                                    clearTimeout( this.tooltipDelayTimeout );
+                                    this.tooltipTimeout = this.old;
+                                    this.old = this.tooltipTimeout;
+                                    this.tooltipTimeout = 0.1 * 1000;
+                                    this.tooltipDelayTimeout = setTimeout( () => {
+                                        this.tooltipTimeout = this.old;
+                                    }, this.tooltipDelay );
+                                }
+                                this.isisShowing = false;
+                                this.isShowing = false;
+                                clearInterval( this.countDown );
+                                onLeave();
+                            }
+
                             if ( (child.material as any).color.getHex() !== 12068914 ) {
                                 (child.material as any).color.set( '#8e8e8e' );
                             }
@@ -427,7 +500,6 @@ export class MapRenderer {
                 } )
                 .onComplete( () => {
                     this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
-                    // this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
                     this.controls.target = new THREE.Vector3( to.x, to.y, to.z );
                 } )
                 .start();
@@ -611,7 +683,7 @@ export class MapRenderer {
             try {
                 this.interaction.destroy();
                 this.interaction = null;
-            } catch (e) {
+            } catch ( e ) {
                 this.interaction = null;
             }
 
