@@ -196,7 +196,7 @@ export class MapRenderer {
 
 
         // Ambient Light
-        const ambientLight = new THREE.AmbientLight( '#fff', 0.9 );
+        const ambientLight = new THREE.AmbientLight( '#fff', 1 );
         this.scene.add( ambientLight );
 
 
