@@ -1,5 +1,6 @@
 <template>
     <div id="app">
+        <p>test</p>
         <Header />
         <router-view />
         <update-message/>
