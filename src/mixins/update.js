@@ -18,7 +18,7 @@ export default {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (this.refreshing) return;
             this.refreshing = true;
-            window.location.reload();
+            window.location.reload(true);
         })
     } ,
     methods: {
