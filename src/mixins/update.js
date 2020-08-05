@@ -1,6 +1,6 @@
 import { swUpdated } from '@/registerServiceWorker';
 
-const REFRESH_DELAY = 20;
+const REFRESH_DELAY = 3;
 
 export default {
     data() {
@@ -35,8 +35,6 @@ export default {
             }
         } ,
         updateAvailable( event ) {
-            console.log(event);
-
             this.registration = event.detail;
             this.updateExists = true;
             this.timer = REFRESH_DELAY;

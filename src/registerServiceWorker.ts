@@ -12,7 +12,6 @@ export const swUpdated = 'swUpdated';
             )
         },
         updated( registration: ServiceWorkerRegistration ) {
-            console.log( 'New content is available; please refresh.' );
             document.dispatchEvent(
                 new CustomEvent( swUpdated, { detail: registration } )
             );
