@@ -24,6 +24,7 @@
         } ,
         methods: {
             fetchCommits() {
+                const _i = 12;
                 axios.get(url)
                     .then(res => {
                         this.commits = res.data;

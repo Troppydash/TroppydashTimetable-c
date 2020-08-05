@@ -2,14 +2,16 @@
     <div id="app">
         <Header />
         <router-view />
+        <update-message/>
     </div>
 </template>
 
 <script>
     import Header from '@/components/Header';
+    import UpdateMessage from '@/components/UpdateMessage';
 
     export default {
-        components: { Header } ,
+        components: { UpdateMessage , Header } ,
     };
 </script>
 
