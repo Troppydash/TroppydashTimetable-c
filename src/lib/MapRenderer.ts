@@ -50,6 +50,12 @@ interface OnHoverEvent {
     mesh: Mesh;
 }
 
+// TODO: Changing daylight color
+const sunsetColors = {
+    main: '#FDB813',
+    second: '#dedede'
+}
+
 export class MapRenderer {
 
     public size: CanvasSettings
@@ -146,27 +152,34 @@ export class MapRenderer {
 
         this.interaction = new Interaction( this.renderer, this.scene, this.camera );
 
-        //Top Light
-        // const topLight = new THREE.SpotLight( '#defaf8', 0.3 );
-        // topLight.position.set( 0, 300, 0 );
-        // topLight.target.position.set( 0, 0, 0 );
-        //
-        // if ( haveShadow ) {
-        //     topLight.castShadow = true;
-        //     topLight.shadow.camera.near = 0.008;
-        //     topLight.shadow.camera.far = 300;
-        //     topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
-        //     topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
-        //     topLight.shadow.bias = -0.000001;
-        // }
-        //
-        // this.scene.add( topLight );
+        // Top Light
+        const topLight = new THREE.DirectionalLight( '#fdfbd3', 0.3 );
+        topLight.position.set( 0, 25, 0 );
+        topLight.target.position.set( 0, 0, 0 );
+
+        if ( haveShadow ) {
+            topLight.castShadow = true;
+            topLight.shadow.camera.near = 18;
+            topLight.shadow.camera.far = 60;
+            topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
+            topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
+            topLight.shadow.bias = -0.000001;
+
+            topLight.shadow.camera.left = -100;
+            topLight.shadow.camera.right = 100;
+            topLight.shadow.camera.top = 175;
+            topLight.shadow.camera.bottom = -100;
+        }
+
+        this.scene.add( topLight );
+        // this.scene.add(new THREE.CameraHelper(topLight.shadow.camera));
+
 
 
         // Side light
-        const sidelight = new THREE.DirectionalLight( '#defaf8', 0.6 );
-        sidelight.position.set( 70, 150, 70 );
-        sidelight.target.position.set( 0, 0, 0, );
+        const sidelight = new THREE.DirectionalLight( '#fdfbd3', 0.7 );
+        sidelight.position.set( 50 * 2, 70 * 2, 120 * 2 );
+        sidelight.target.position.set( 30, 0, 0, );
 
         if ( haveShadow ) {
             sidelight.castShadow = true;
@@ -177,13 +190,18 @@ export class MapRenderer {
             sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
             // sidelight.shadow.bias = -0.0000005;
             sidelight.shadow.bias = -0.01;
-            sidelight.shadow.camera.left = -90;
-            sidelight.shadow.camera.right = 200;
-            sidelight.shadow.camera.top = 110;
-            sidelight.shadow.camera.bottom = -75;
+            // sidelight.shadow.camera.left = -90;
+            // sidelight.shadow.camera.right = 200;
+            // sidelight.shadow.camera.top = 110;
+            // sidelight.shadow.camera.bottom = -75;
 
-            sidelight.shadow.camera.near = 75;
-            sidelight.shadow.camera.far = 270;
+            sidelight.shadow.camera.left = -200;
+            sidelight.shadow.camera.right = 200;
+            sidelight.shadow.camera.top = 200;
+            sidelight.shadow.camera.bottom = -200;
+
+            sidelight.shadow.camera.near = 20;
+            sidelight.shadow.camera.far = 450;
         }
 
         this.scene.add( sidelight );
@@ -196,7 +214,7 @@ export class MapRenderer {
 
 
         // Ambient Light
-        const ambientLight = new THREE.AmbientLight( '#fff', 1 );
+        const ambientLight = new THREE.AmbientLight( '#dedede', 1 );
         this.scene.add( ambientLight );
 
 
