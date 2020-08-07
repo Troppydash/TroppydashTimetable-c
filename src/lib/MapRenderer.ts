@@ -5,7 +5,8 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
-import { Mesh } from "three";
+import { Mesh, Object3D, Shader } from "three";
+import moment from "moment";
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -50,10 +51,24 @@ interface OnHoverEvent {
     mesh: Mesh;
 }
 
-// TODO: Changing daylight color
-const sunsetColors = {
-    main: '#FDB813',
-    second: '#dedede'
+interface ToolTip {
+    timeout: number;
+    delay: number;
+}
+
+interface MapColors {
+    [key: string]: TimeColor;
+}
+
+interface TimeColor {
+    sunlight: string;
+    ambient: string;
+    toplight: string;
+    sky: string;
+
+    building: string;
+    selectedBuilding: string;
+    highlightBuilding: string;
 }
 
 export class MapRenderer {
@@ -93,25 +108,91 @@ export class MapRenderer {
     private countDown = -1;
     private isShowing = false;
 
-    private tooltipTimeout = 1 * 1000;
-    private tooltipDelay = 0.1 * 1000;
-
+    private toolTip: ToolTip = { delay: 0.1 * 1000, timeout: 1000 };
     private tooltipDelayTimeout = 0;
-
-    private old = this.tooltipTimeout;
+    private old = this.toolTip.timeout;
 
     private isisShowing = false;
-
     private oldPos: any;
+
+    private readonly colors: MapColors = {
+        morning: {
+            sunlight: '#ffa24b',
+            ambient: '#888',
+            toplight: '#fff1e5',
+            sky: '#485e6b',
+
+            building: "#8e8e8e",
+            selectedBuilding: "#b82832",
+            highlightBuilding: "#ffffff",
+        },
+        afternoon: {
+            sunlight: '#fdfbd3',
+            ambient: '#dedede',
+            toplight: '#fdfbd3',
+            sky: '#87ceeb',
+
+            building: "#8e8e8e",
+            selectedBuilding: "#b82832",
+            highlightBuilding: "#ffffff",
+        },
+        sunset: {
+            sunlight: '#FDB813',
+            ambient: '#ccc',
+            toplight: '#d69800',
+            sky: '#f5c6a1',
+
+            building: "#8e8e8e",
+            selectedBuilding: "#b82832",
+            highlightBuilding: "#ffffff",
+        },
+        night: {
+            sunlight: '#333',
+            ambient: '#222',
+            toplight: '#ffbb73',
+            sky: '#87889c',
+
+            building: "#8e8e8e",
+            selectedBuilding: "#b82832",
+            highlightBuilding: "#ffffff",
+        },
+    };
+    private readonly selectedColor: TimeColor;
+
+    // private composer: EffectComposer;
+    //
+    // private outlinePass: OutlinePass;
+
+    getColorsFromTOD = () => {
+
+        const h = moment().hour();
+        // const h = 10;
+
+        if ( h >= 5 && h < 11 ) {
+            return this.colors["morning"];
+        }
+        if ( h >= 11 && h < 15 ) {
+            return this.colors['afternoon'];
+        }
+        if ( h >= 15 && h < 17 ) {
+            return this.colors['sunset'];
+        }
+        return this.colors['night'];
+    }
 
     constructor(
         private targetElement: HTMLElement,
         qualitySettings: QualitySettings,
         canvasSettings: CanvasSettings,
-        mapOffsets: MapOffsets
+        mapOffsets: MapOffsets,
+        toolTipSettings?: ToolTip,
     ) {
-        this.targetElement.innerHTML = '';
+        if ( toolTipSettings ) {
+            this.toolTip = toolTipSettings;
+        }
 
+        this.selectedColor = this.getColorsFromTOD();
+        this.targetElement.innerHTML = '';
         this.mapOffsets = mapOffsets;
         const {
             mapQuality, haveShadow,
@@ -131,6 +212,7 @@ export class MapRenderer {
         } );
         this.renderer.setSize( this.size.width, this.size.height );
 
+
         if ( haveShadow ) {
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.autoUpdate = false;
@@ -142,7 +224,7 @@ export class MapRenderer {
 
         // Set up Scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( '#87ceeb' );
+        this.scene.background = new THREE.Color( this.selectedColor.sky );
 
 
         // Set up camera
@@ -152,8 +234,16 @@ export class MapRenderer {
 
         this.interaction = new Interaction( this.renderer, this.scene, this.camera );
 
+        // this.composer = new EffectComposer(this.renderer);
+        //
+        // const renderPass = new RenderPass( this.scene, this.camera );
+        // this.composer.addPass( renderPass );
+        //
+        // this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
+        // this.composer.addPass(this.outlinePass);
+
         // Top Light
-        const topLight = new THREE.DirectionalLight( '#fdfbd3', 0.3 );
+        const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 0.3 );
         topLight.position.set( 0, 25, 0 );
         topLight.target.position.set( 0, 0, 0 );
 
@@ -175,25 +265,17 @@ export class MapRenderer {
         // this.scene.add(new THREE.CameraHelper(topLight.shadow.camera));
 
 
-
         // Side light
-        const sidelight = new THREE.DirectionalLight( '#fdfbd3', 0.7 );
+        const sidelight = new THREE.DirectionalLight( this.selectedColor.sunlight, 0.7 );
         sidelight.position.set( 50 * 2, 70 * 2, 120 * 2 );
         sidelight.target.position.set( 30, 0, 0, );
 
         if ( haveShadow ) {
             sidelight.castShadow = true;
 
-            // sidelight.shadow.mapSize.width = 2 ** (mapQuality + 6);
             sidelight.shadow.mapSize.width = 2 ** (mapQuality + 6);
-            // sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
             sidelight.shadow.mapSize.height = 2 ** (mapQuality + 6);
-            // sidelight.shadow.bias = -0.0000005;
             sidelight.shadow.bias = -0.01;
-            // sidelight.shadow.camera.left = -90;
-            // sidelight.shadow.camera.right = 200;
-            // sidelight.shadow.camera.top = 110;
-            // sidelight.shadow.camera.bottom = -75;
 
             sidelight.shadow.camera.left = -200;
             sidelight.shadow.camera.right = 200;
@@ -214,7 +296,7 @@ export class MapRenderer {
 
 
         // Ambient Light
-        const ambientLight = new THREE.AmbientLight( '#dedede', 1 );
+        const ambientLight = new THREE.AmbientLight( this.selectedColor.ambient, 1 );
         this.scene.add( ambientLight );
 
 
@@ -298,9 +380,7 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
             this.renderer.setSize( this.size.width, this.size.height );
         }
-
     }
-
     loadMap = ( onHover?: ( ev: OnHoverEvent ) => void, onLeave?: () => void ) => {
         if ( this.loaded ) {
             return;
@@ -316,11 +396,10 @@ export class MapRenderer {
                 gltf.scene.traverse( child => {
                     if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
                         // Buildings
-                        (child.material as any).color.set( '#8e8e8e' );
+                        (child.material as any).color.set( this.selectedColor.building );
                         if ( this.settings.haveShadow ) {
                             child.castShadow = true;
                             child.receiveShadow = true;
-                            // (child.material as any).shadowSide = THREE.BackSide;
                         }
                         const name = child.name.split( '_' )[0];
                         (child as any).cursor = 'pointer';
@@ -331,8 +410,6 @@ export class MapRenderer {
                         } );
                         (child as any).on( 'mouseup', ( ev: any ) => {
                             const { screenX, screenY } = ev.data.originalEvent;
-                            // console.log( { screenX, screenY } );
-                            // console.log( this.oldPos );
                             if ( (child as any).isMouseDown === true
                                 && Math.abs( this.oldPos.screenX - screenX ) < 15
                                 && Math.abs( this.oldPos.screenY - screenY ) < 15 ) {
@@ -341,18 +418,15 @@ export class MapRenderer {
                             }
                         } );
                         (child as any).on( 'mouseover', ( ev: any ) => {
-                            if ( (child.material as any).color.getHex() !== 12068914 ) {
-                                (child.material as any).color.set( '#fff' );
+                            if ( !(child as any).isSelected ) {
+                                (child.material as any).color.set( this.selectedColor.highlightBuilding );
                             }
                         } );
                         (child as any).on( 'mousemove', ( ev: any ) => {
                             // TODO: Make this tooltip nicer
                             if ( this.isFullScreen && onHover ) {
                                 const { clientX, clientY } = ev.data.originalEvent;
-                                const relX = screenX - (window.outerWidth - this.size.width);
-                                const relY = screenY - (window.outerHeight - this.size.height);
                                 const currentPosition = { x: clientX, y: clientY };
-                                // console.log(ev.data.originalEvent);
 
                                 if ( this.lastName !== ev.data.target.name ) {
                                     this.lastName = ev.data.target.name;
@@ -361,14 +435,14 @@ export class MapRenderer {
                                     this.countDown = setInterval( () => {
                                         this.isisShowing = true;
                                         onHover( { position: currentPosition, mesh: ev.data.target } );
-                                    }, this.tooltipTimeout );
+                                    }, this.toolTip.timeout );
                                 } else {
                                     if ( !this.isShowing ) {
                                         this.isShowing = true;
                                         this.countDown = setInterval( () => {
                                             this.isisShowing = true;
                                             onHover( { position: currentPosition, mesh: ev.data.target } );
-                                        }, this.tooltipTimeout );
+                                        }, this.toolTip.timeout );
                                     }
                                 }
                             }
@@ -377,12 +451,12 @@ export class MapRenderer {
                             if ( this.isFullScreen && onLeave && this.isShowing ) {
                                 if ( this.isisShowing ) {
                                     clearTimeout( this.tooltipDelayTimeout );
-                                    this.tooltipTimeout = this.old;
-                                    this.old = this.tooltipTimeout;
-                                    this.tooltipTimeout = 0.1 * 1000;
+                                    this.toolTip.timeout = this.old;
+                                    this.old = this.toolTip.timeout;
+                                    this.toolTip.timeout = 0.1 * 1000;
                                     this.tooltipDelayTimeout = setTimeout( () => {
-                                        this.tooltipTimeout = this.old;
-                                    }, this.tooltipDelay );
+                                        this.toolTip.timeout = this.old;
+                                    }, this.toolTip.delay );
                                 }
                                 this.isisShowing = false;
                                 this.isShowing = false;
@@ -390,8 +464,8 @@ export class MapRenderer {
                                 onLeave();
                             }
 
-                            if ( (child.material as any).color.getHex() !== 12068914 ) {
-                                (child.material as any).color.set( '#8e8e8e' );
+                            if ( !(child as any).isSelected ) {
+                                (child.material as any).color.set( this.selectedColor.building );
                             }
                         } );
                     } else {
@@ -436,7 +510,8 @@ export class MapRenderer {
         if ( this.models.length !== 0 ) {
             this.selected.forEach( index => {
                 try {
-                    (this.models[index] as any).material.color.set( '#8e8e8e' );
+                    (this.models[index] as any).isSelected = false;
+                    (this.models[index] as any).material.color.set( this.selectedColor.building );
                 } catch ( e ) {
                     console.log( e );
                 }
@@ -457,16 +532,12 @@ export class MapRenderer {
         const indexes = this.getIndexFromRoomNumber( roomNumber );
         this.selected = indexes;
 
-        // indexes.forEach( (( value, index ) => {
-        //     if ( index === 0 ) {
-        //         return;
-        //     }
-        //
-        //     (this.models[value] as any).material.color.set( '#ba5d64' )
-        // }) )
-
         const mostLikelyItem = (this.models[indexes[0]] as any);
-        mostLikelyItem.material.color.set( '#b82832' );
+        console.log( mostLikelyItem );
+        // this.displayWireframe( mostLikelyItem );
+        mostLikelyItem.isSelected = true;
+        // mostLikelyItem.material.color.set( '#b82832' );
+        mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
 
         const from = this.camera.position.clone();
         const to = mostLikelyItem.position.clone();
@@ -482,13 +553,9 @@ export class MapRenderer {
         this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
         this.camera.lookAt( new THREE.Vector3( to.x, to.y, to.z ) );
 
-        // console.log(fromRot);
-
         const toRot = this.camera.quaternion.clone();
         this.camera.position.set( oldPos.x, oldPos.y, oldPos.z );
         this.camera.rotation.set( oldRot.x, oldRot.y, oldRot.z );
-        // console.log(toRot);
-
 
         if ( this.settings.haveAutoRotate ) {
             this.startRotationTimer();
@@ -538,6 +605,8 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
+            // this.composer.setSize(width, height);
+
         }
     }
 
