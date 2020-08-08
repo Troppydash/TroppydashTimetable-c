@@ -108,7 +108,7 @@ export class MapRenderer {
     private countDown = -1;
     private isShowing = false;
 
-    private toolTip: ToolTip = { delay: 0.1 * 1000, timeout: 1000 };
+    private toolTip: ToolTip = { delay: 0.5 * 1000, timeout: 1000 };
     private tooltipDelayTimeout = 0;
     private old = this.toolTip.timeout;
 
@@ -185,6 +185,7 @@ export class MapRenderer {
         qualitySettings: QualitySettings,
         canvasSettings: CanvasSettings,
         mapOffsets: MapOffsets,
+        private mapLocation: string,
         toolTipSettings?: ToolTip,
     ) {
         if ( toolTipSettings ) {
@@ -389,7 +390,7 @@ export class MapRenderer {
         // Load Map
         return new Promise( (( resolve, reject ) => {
             const loader = new GLTFLoader.GLTFLoader();
-            loader.load( '/maps/compressed/scots.gltf', gltf => {
+            loader.load( this.mapLocation, gltf => {
                 this.models = gltf.scene.children;
 
                 const ground: THREE.Object3D[] = [];
@@ -453,7 +454,7 @@ export class MapRenderer {
                                     clearTimeout( this.tooltipDelayTimeout );
                                     this.toolTip.timeout = this.old;
                                     this.old = this.toolTip.timeout;
-                                    this.toolTip.timeout = 0.1 * 1000;
+                                    this.toolTip.timeout = 0.5 * 1000;
                                     this.tooltipDelayTimeout = setTimeout( () => {
                                         this.toolTip.timeout = this.old;
                                     }, this.toolTip.delay );

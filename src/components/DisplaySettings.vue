@@ -8,7 +8,9 @@
             <div class="settings-section__content" id="edituser">
                 <div class="settings-group__container">
                     <div class="settings-group__title">
-                        <a href="#edituser">Edit User</a>
+                        <a href="#edituser">
+                            Edit User
+                        </a>
                     </div>
                     <div class="settings-group__content">
                         <EditUser />
@@ -60,7 +62,7 @@
                         <a href="#beta-map">Map Settings</a>
                     </div>
                     <div class="settings-group__content">
-                        <!--<EditMap/>-->
+                        <MapSettings />
                     </div>
                 </div>
                 <div class="settings-group__container" id="beta-table">
@@ -108,10 +110,11 @@
     import EditMap from '@/components/SettingsComponents/EditMap';
     import EditTable from '@/components/SettingsComponents/EditTable';
     import PastCommits from '@/components/SettingsComponents/PastCommits';
+    import MapSettings from '@/components/SettingsComponents/MapSettings';
 
     export default {
         name: 'DisplaySettings' ,
-        components: { PastCommits , EditTable , EditMap , UserActions , EditUser }
+        components: { MapSettings , PastCommits , EditTable , EditMap , UserActions , EditUser }
     };
 </script>
 

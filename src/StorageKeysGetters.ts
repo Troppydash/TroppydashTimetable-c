@@ -1,7 +1,7 @@
-import { clamp, GetFromLocalStorageOrDefault } from "@/Helpers";
+import { clamp, GetFromLocalStorageOrDefault, isMobileBrowser } from "@/Helpers";
 import {
     AUTO_ROTATE,
-    AUTO_ROTATE_TIMEOUT, DISABLE_HIGHLIGHTING_LIKE_TERMS, DISPLAY_PREVIOUS_DAYS,
+    AUTO_ROTATE_TIMEOUT, DISABLE_HIGHLIGHTING_LIKE_TERMS, DISPLAY_PREVIOUS_DAYS, ENABLE_TEXTURES,
     MAP_QUALITY,
     MAP_XOFFSET, MAP_YOFFSET,
     SHADOWS_ON, SHOW_ROOM_NAME,
@@ -33,3 +33,4 @@ export const getAutoRotateTimeout = () => GetFromLocalStorageOrDefault( AUTO_ROT
 export const getDisplayNearbyWeeks = () => GetFromLocalStorageOrDefault( DISPLAY_PREVIOUS_DAYS, false, USER_PREFERENCES, value => value === 'true' );
 export const getDisableHighlighting = () => GetFromLocalStorageOrDefault( DISABLE_HIGHLIGHTING_LIKE_TERMS, false, USER_PREFERENCES, value => value === 'true' );
 export const getShowRoomName = () => GetFromLocalStorageOrDefault( SHOW_ROOM_NAME, 'default', USER_PREFERENCES )
+export const getEnableTexture = () => GetFromLocalStorageOrDefault( ENABLE_TEXTURES, !isMobileBrowser(), USER_PREFERENCES, value => value === 'true' );

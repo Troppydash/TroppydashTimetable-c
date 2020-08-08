@@ -37,30 +37,6 @@
 
         <li>
             <div class="mapsetting-label">
-                <span>Map X-Offset</span>
-            </div>
-            <div class="mapsetting-content">
-                <div class="counter">
-                    <i class="fas fa-minus fa-lg" @click="decrXOffset"></i>
-                    <span>{{ mapXOffset }}</span>
-                    <i class="fas fa-plus fa-lg" @click="incrXOffset"></i>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="mapsetting-label">
-                <span>Map Y-Offset</span>
-            </div>
-            <div class="mapsetting-content">
-                <div class="counter">
-                    <i class="fas fa-minus fa-lg" @click="decrYOffset"></i>
-                    <span>{{ mapYOffset }}</span>
-                    <i class="fas fa-plus fa-lg" @click="incrYOffset"></i>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="mapsetting-label">
                 <span>Auto Rotate Camera</span>
             </div>
             <div class="mapsetting-content">
@@ -114,8 +90,7 @@
             const shadows = getShadows();
             const quality = getQuality();
 
-            const mapXOffset = getMapXOffset();
-            const mapYOffset = getMapYOffset();
+
 
             const smooth = getSmoothCamera();
 
@@ -128,8 +103,7 @@
                 enableSmoothCamera: smooth ,
                 enableAutoRotate: autoRotate ,
                 enableAutoRotateTimeout: autoRotateTimeout ,
-                mapXOffset: mapXOffset,
-                mapYOffset: mapYOffset,
+
             };
         } ,
         watch: {
@@ -237,7 +211,7 @@
     };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 
     .mapsetting-content {
     }

@@ -24,6 +24,8 @@ export const DISABLE_HIGHLIGHTING_LIKE_TERMS = 'disable_highlighting_like_terms'
 // always, default, never
 export const SHOW_ROOM_NAME = 'show_room_name';
 
+export const ENABLE_TEXTURES = 'enabled_textures';
+
 // Date Settings
 export const CUSTOM_DATE_MESSAGE = 'custom_date_message';
 export const WEEK_START_ON_MONDAY = 'week_start_on_monday';

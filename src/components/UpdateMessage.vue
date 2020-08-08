@@ -1,7 +1,7 @@
 <template>
     <div class="update-container" v-if="updateExists">
-        <p>An Update is available</p>
-        <p>Your browser will automatically refresh in {{ timer }} seconds</p>
+        <p>An update is available</p>
+        <p>This page will refresh in <b>{{ timer }}</b> seconds</p>
     </div>
 </template>
 

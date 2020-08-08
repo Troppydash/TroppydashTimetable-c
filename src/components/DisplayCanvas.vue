@@ -29,7 +29,7 @@
     import { MapRenderer } from '@/lib/MapRenderer';
     import {
         getAutoRotate ,
-        getAutoRotateTimeout , getMapXOffset , getMapYOffset ,
+        getAutoRotateTimeout , getEnableTexture , getMapXOffset , getMapYOffset ,
         getQuality ,
         getShadows ,
         getSmoothCamera
@@ -183,7 +183,8 @@
                     {
                         xOffset: getMapXOffset() ,
                         yOffset: getMapYOffset() ,
-                    }
+                    },
+                    getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf',
                 );
                 this.mapRenderer.loadMap(this.handleHover , this.handleOnLeave)
                     .then(() => {
