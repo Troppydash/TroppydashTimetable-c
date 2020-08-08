@@ -534,7 +534,6 @@ export class MapRenderer {
         this.selected = indexes;
 
         const mostLikelyItem = (this.models[indexes[0]] as any);
-        console.log( mostLikelyItem );
         // this.displayWireframe( mostLikelyItem );
         mostLikelyItem.isSelected = true;
         // mostLikelyItem.material.color.set( '#b82832' );
