@@ -29,7 +29,7 @@
     import { MapRenderer } from '@/lib/MapRenderer';
     import {
         getAutoRotate ,
-        getAutoRotateTimeout , getEnableTexture , getMapXOffset , getMapYOffset ,
+        getAutoRotateTimeout , getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU ,
         getQuality ,
         getShadows ,
         getSmoothCamera
@@ -39,7 +39,11 @@
         name: 'DisplayCanvas' ,
         props: ['isMobile' , 'toggleCanvas' , 'closed'] ,
         data() {
+
+            const openOSU = getOpenOSU();
+
             return {
+                openOSU,
                 location: null ,
                 mapRenderer: null ,
                 isFullScreen: false ,
@@ -212,9 +216,15 @@
             }
             this.loaded = true;
             this.loadMap();
+
+            if (!this.openOSU) {
+                this.toggleCanv();
+            }
         } ,
         beforeDestroy() {
-            this.cleanupMap();
+            if (this.mapRenderer) {
+                this.cleanupMap();
+            }
         }
     };
 </script>

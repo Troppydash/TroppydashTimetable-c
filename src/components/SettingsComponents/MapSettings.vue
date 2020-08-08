@@ -14,6 +14,18 @@
 
         <li>
             <div class="mapsetting-label">
+                <span>Open map on startup</span>
+            </div>
+            <div class="mapsetting-content">
+                <label class="switch">
+                    <input type="checkbox" v-model="openOSU">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </li>
+
+        <li>
+            <div class="mapsetting-label">
                 <span>Map X-Offset</span>
             </div>
             <div class="mapsetting-content">
@@ -40,13 +52,13 @@
 </template>
 
 <script>
-    import { getEnableTexture , getMapXOffset , getMapYOffset } from '@/StorageKeysGetters';
+    import { getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU } from '@/StorageKeysGetters';
     import { clamp , SetLocalStorage } from '@/Helpers';
     import {
         DISPLAY_PREVIOUS_DAYS ,
         ENABLE_TEXTURES ,
         MAP_XOFFSET ,
-        MAP_YOFFSET ,
+        MAP_YOFFSET , OPEN_OSU ,
         USER_PREFERENCES
     } from '@/StorageKeys';
 
@@ -54,20 +66,30 @@
         name: 'MapSettings',
         data() {
             const enableTextures = getEnableTexture();
+            const openOSU = getOpenOSU();
             const mapXOffset = getMapXOffset();
             const mapYOffset = getMapYOffset();
             return {
                 enableTextures,
                 mapXOffset,
                 mapYOffset,
+                openOSU,
             }
         },
         watch: {
+
             enableTextures(isOn) {
                 if (isOn) {
                     SetLocalStorage(ENABLE_TEXTURES , 'true' , USER_PREFERENCES);
                 } else {
                     SetLocalStorage(ENABLE_TEXTURES , 'false' , USER_PREFERENCES);
+                }
+            },
+            openOSU(isOn) {
+                if (isOn) {
+                    SetLocalStorage(OPEN_OSU , 'true' , USER_PREFERENCES);
+                } else {
+                    SetLocalStorage(OPEN_OSU , 'false' , USER_PREFERENCES);
                 }
             },
             mapXOffset(value) {
