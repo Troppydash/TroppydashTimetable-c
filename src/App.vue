@@ -21,6 +21,7 @@
         --scots-grey1: #6b6b6b;
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: #f2f2f2;
+        --background: #f2f2f2;
     }
 
     html,
@@ -116,7 +117,6 @@
         &:active {
             background: #63050d;
             border: none;
-
         }
     }
 
@@ -132,6 +132,46 @@
     .button-large {
         padding: 1rem 1.3rem;
         font-size: 1.2rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --scots-red: #881e27;
+            --scots-grey1: #6b6b6b;
+            --scots-grey2: #4b4b4b;
+            --scots-lightgrey: rgba(179, 177, 177, 0.50);
+            --background: var(--normal-grey);
+
+            --normal-grey: #282828;
+            --darker-grey: #1f1f1f;
+            --darkest-grey: #181818;
+        }
+
+        html,
+        body {
+            background: var(--normal-grey);
+
+            color: white;
+        }
+
+        a {
+            color: white !important;
+        }
+
+        .vdp-datepicker {
+            color: black !important;
+        }
+
+        input,
+        button,
+        .button:not(.button-primary):not(.close-button):not(.full-button),
+        .input {
+            color: white;
+            background: var(--darkest-grey);
+            &:hover {
+                background: var(--darker-grey);
+            }
+        }
     }
 
 </style>
