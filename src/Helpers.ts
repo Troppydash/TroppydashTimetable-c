@@ -21,10 +21,10 @@ export const GetFromLocalStorageOrDefault = (
                 return defaultValue;
             }
 
-            if (collection[key] === null) {
-                return defaultValue;
+            if (collection[key]) {
+                return collection[key];
             }
-            return collection[key];
+            return defaultValue;
         }
     } else {
         const item = localStorage.getItem(key);
