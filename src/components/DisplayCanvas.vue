@@ -234,7 +234,7 @@
     .tooltip {
         position: absolute;
 
-        background: var(--scots-lightgrey);
+        background: #f2f2f2;
         color: var(--scots-grey2);
         padding: 0.2rem;
 

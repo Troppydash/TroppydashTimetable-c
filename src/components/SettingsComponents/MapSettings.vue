@@ -121,21 +121,5 @@
 </script>
 
 <style scoped lang="scss">
-    .editTable {
-        list-style: none;
-        margin: 0;
-        padding: 0;
 
-        li {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 0.5rem;
-
-            &:hover {
-                background: var(--scots-lightgrey);
-            }
-        }
-    }
 </style>

@@ -4,7 +4,7 @@
             <router-link to="/home" class="header-link">Home</router-link>
             <router-link to="/settings" class="header-link">Settings</router-link>
             <div class="username-container">
-                <p class="username">Hello {{ username }}</p>
+                <p class="username">Hello {{ shortenedUsername }}</p>
             </div>
         </div>
         <div class="header" v-else>
@@ -29,7 +29,10 @@
                 'username' ,
                 'authenticated' ,
                 'loading'
-            ])
+            ]),
+            shortenedUsername() {
+                return (this.username.length < 20) ? this.username : this.username.substr(0, 20) + '...'
+            }
         }
     };
 </script>

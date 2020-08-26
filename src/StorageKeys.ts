@@ -23,6 +23,7 @@ export const DISABLE_HIGHLIGHTING_LIKE_TERMS = 'disable_highlighting_like_terms'
 
 // always, default, never
 export const SHOW_ROOM_NAME = 'show_room_name';
+export const COLOR_MODE = 'color_mode';
 
 export const ENABLE_TEXTURES = 'enabled_textures';
 export const OPEN_OSU = 'open_osu';
