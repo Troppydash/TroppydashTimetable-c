@@ -6,11 +6,13 @@
             <form @submit.prevent="handleRegister" class="register-form">
                 <div>
                     <label>
+                        <span class="input-label">Email</span>
                         <input class="input" type="text" placeholder="Email" v-model="email" :disabled="loaded" />
                     </label>
                 </div>
                 <div>
                     <label>
+                        <span class="input-label">Password</span>
                         <input class="input" type="password" placeholder="Password" v-model="password"
                                :disabled="loaded">
                     </label>
@@ -107,6 +109,9 @@
 
         & > div {
             margin: 10px 0;
+            & > label {
+                display: inline-block;
+            }
         }
     }
 

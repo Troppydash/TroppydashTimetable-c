@@ -88,6 +88,13 @@
         font-size: 1.2rem;
     }
 
+    .input-label {
+        text-align: left;
+        font-size: 1.25rem;
+        display: block;
+        margin: 0 0.25rem;
+    }
+
     .input {
         padding: 1rem;
         height: 3rem;
