@@ -27,12 +27,15 @@
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: #f2f2f2;
         --background: var(--normal-grey);
+        --background-color: var(--scots-lightgrey);
 
         --normal-grey: #282828;
         --darker-grey: #1f1f1f;
         --darkest-grey: #181818;
 
         --highlight: var(--scots-lightgrey);
+
+        --text: black;
     }
 
     html,
@@ -160,8 +163,12 @@
             --scots-lightgrey: rgba(179, 177, 177, 0.50);
             --background: var(--normal-grey);
             --highlight: rgba(181, 179, 179, 0.2);
+            --background-color: var(--normal-grey);
 
             background: var(--normal-grey);
+
+            --text: white;
+
 
             color: white;
 
@@ -192,8 +199,12 @@
         --scots-lightgrey: rgba(179, 177, 177, 0.50);
         --background: var(--normal-grey);
         --highlight: rgba(181, 179, 179, 0.2);
+        --background-color: var(--normal-grey);
 
         background: var(--normal-grey);
+
+        --text: white;
+
 
         color: white;
 

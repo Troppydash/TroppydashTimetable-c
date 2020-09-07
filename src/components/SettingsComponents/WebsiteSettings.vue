@@ -39,23 +39,33 @@
     };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     select {
         font-family: "Roboto", Sans, sans-serif;
-        text-align: right;
+        //text-align: right;
         width: auto;
         padding: 0.45rem 1rem 0.5rem;
-        color: black;
+        //color: black;
         height: 34px;
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
         background: var(--scots-lightgrey);
+        color: var(--text);
 
         transition: all 120ms ease-in-out;
 
+        text-align: center;
+        text-align-last: center;
+        -moz-text-align-last: center;
+
+        & > option {
+            background: var(--background-color);
+            color: var(--text);
+        }
+
         &:hover {
-            background: #dcdcdc;
+            background: var(--highlight);
             border: 1px solid var(--scots-red);
         }
     }

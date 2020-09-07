@@ -104,26 +104,6 @@
 
 <style scoped lang="scss">
 
-    select {
-        font-family: "Roboto", Sans, sans-serif;
-        text-align: right;
-        width: auto;
-        padding: 0.45rem 1rem 0.5rem;
-        color: black;
-        height: 34px;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-        background: var(--scots-lightgrey);
-
-        transition: all 120ms ease-in-out;
-
-        &:hover {
-            background: #dcdcdc;
-            border: 1px solid var(--scots-red);
-        }
-    }
-
 
     .counter {
         height: 27px;

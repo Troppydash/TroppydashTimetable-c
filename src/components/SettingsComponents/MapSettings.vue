@@ -48,15 +48,30 @@
                 </div>
             </div>
         </li>
+        <li>
+            <div class="mapsetting-label">
+                <span>Time Of Day</span>
+            </div>
+            <div class="mapsetting-content">
+                <select v-model="timeOfDay">
+                    <option value="auto">Auto</option>
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                    <option value="sunset">Sunset</option>
+                    <option value="night">Night</option>
+                </select>
+            </div>
+        </li>
     </ul>
 </template>
 
 <script>
-    import { getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU } from '@/StorageKeysGetters';
+    import { getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU , getTOD } from '@/StorageKeysGetters';
     import { clamp , SetLocalStorage } from '@/Helpers';
     import {
+        COLOR_MODE ,
         DISPLAY_PREVIOUS_DAYS ,
-        ENABLE_TEXTURES ,
+        ENABLE_TEXTURES , MAP_TIME_OF_DAY ,
         MAP_XOFFSET ,
         MAP_YOFFSET , OPEN_OSU ,
         USER_PREFERENCES
@@ -69,15 +84,20 @@
             const openOSU = getOpenOSU();
             const mapXOffset = getMapXOffset();
             const mapYOffset = getMapYOffset();
+
+            const timeOfDay = getTOD();
             return {
                 enableTextures,
                 mapXOffset,
                 mapYOffset,
                 openOSU,
+                timeOfDay
             }
         },
         watch: {
-
+            timeOfDay( newVal ) {
+                SetLocalStorage(MAP_TIME_OF_DAY , newVal , USER_PREFERENCES);
+            },
             enableTextures(isOn) {
                 if (isOn) {
                     SetLocalStorage(ENABLE_TEXTURES , 'true' , USER_PREFERENCES);

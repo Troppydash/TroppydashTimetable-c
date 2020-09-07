@@ -28,6 +28,9 @@ export const COLOR_MODE = 'color_mode';
 export const ENABLE_TEXTURES = 'enabled_textures';
 export const OPEN_OSU = 'open_osu';
 
+// auto, morning, afternoon, sunset, night
+export const MAP_TIME_OF_DAY = 'map_time_of_day';
+
 // Date Settings
 export const CUSTOM_DATE_MESSAGE = 'custom_date_message';
 export const WEEK_START_ON_MONDAY = 'week_start_on_monday';

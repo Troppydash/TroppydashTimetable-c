@@ -2,7 +2,7 @@ import { clamp, GetFromLocalStorageOrDefault, isMobileBrowser } from "@/Helpers"
 import {
     AUTO_ROTATE,
     AUTO_ROTATE_TIMEOUT, COLOR_MODE, DISABLE_HIGHLIGHTING_LIKE_TERMS, DISPLAY_PREVIOUS_DAYS, ENABLE_TEXTURES,
-    MAP_QUALITY,
+    MAP_QUALITY, MAP_TIME_OF_DAY,
     MAP_XOFFSET, MAP_YOFFSET, OPEN_OSU,
     SHADOWS_ON, SHOW_ROOM_NAME,
     SMOOTH_CAMERA,
@@ -34,5 +34,8 @@ export const getDisplayNearbyWeeks = () => GetFromLocalStorageOrDefault( DISPLAY
 export const getDisableHighlighting = () => GetFromLocalStorageOrDefault( DISABLE_HIGHLIGHTING_LIKE_TERMS, false, USER_PREFERENCES, value => value === 'true' );
 export const getShowRoomName = () => GetFromLocalStorageOrDefault( SHOW_ROOM_NAME, 'default', USER_PREFERENCES )
 export const getColorMode = () => GetFromLocalStorageOrDefault( COLOR_MODE, 'auto', USER_PREFERENCES )
+
+export const getTOD: () => string = () => GetFromLocalStorageOrDefault( MAP_TIME_OF_DAY, 'auto', USER_PREFERENCES )
+
 export const getEnableTexture = () => GetFromLocalStorageOrDefault( ENABLE_TEXTURES, !isMobileBrowser(), USER_PREFERENCES, value => value === 'true' );
 export const getOpenOSU = () => GetFromLocalStorageOrDefault( OPEN_OSU, true, USER_PREFERENCES, value => value === 'true' );

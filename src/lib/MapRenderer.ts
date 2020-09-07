@@ -71,6 +71,14 @@ interface TimeColor {
     highlightBuilding: string;
 }
 
+export enum TimeOfDay {
+    MORNING = "morning",
+    AFTERNOON = "afternoon",
+    SUNSET = "sunset",
+    NIGHT = "night",
+    AUTO = "auto",
+}
+
 export class MapRenderer {
 
     public size: CanvasSettings
@@ -164,33 +172,31 @@ export class MapRenderer {
     // private outlinePass: OutlinePass;
 
     getColorsFromTOD = () => {
+        // return this.colors['afternoon'];
 
-        const h = moment().hour();
-
-        if ( h >= 5 && h < 11 ) {
-            return this.colors["morning"];
-        }
-        if ( h >= 11 && h < 15 ) {
-            return this.colors['afternoon'];
-        }
-        if ( h >= 15 && h < 17 ) {
-            return this.colors['sunset'];
-        }
-        return this.colors['night'];
+        const tod = this.getTimeOfDay();
+        return this.colors[tod.toString()];
     }
 
     getTimeOfDay = () => {
+        // return TimeOfDay.MORNING;
+        // console.log(this.customTimeOfDay);
+        if (this.customTimeOfDay !== TimeOfDay.AUTO) {
+            return this.customTimeOfDay;
+        }
+
         const h = moment().hour();
         if ( h >= 5 && h < 11 ) {
-            return 'morning';
+            return TimeOfDay.MORNING;
         }
         if ( h >= 11 && h < 15 ) {
-            return 'afternoon';
+            return TimeOfDay.AFTERNOON;
         }
         if ( h >= 15 && h < 17 ) {
-            return 'sunset';
+            return TimeOfDay.SUNSET;
         }
-        return 'night';
+
+        return TimeOfDay.NIGHT;
     }
 
     constructor(
@@ -200,6 +206,7 @@ export class MapRenderer {
         mapOffsets: MapOffsets,
         private mapLocation: string,
         toolTipSettings?: ToolTip,
+        private customTimeOfDay: string = TimeOfDay.AUTO
     ) {
         if ( toolTipSettings ) {
             this.toolTip = toolTipSettings;
@@ -406,15 +413,19 @@ export class MapRenderer {
                 this.models = gltf.scene.children;
 
                 const ground: THREE.Object3D[] = [];
+                const lights: THREE.Object3D[] = [];
 
                 gltf.scene.traverse( child => {
                     // console.log(child);
                     if (child instanceof THREE.PointLight) {
                         child.castShadow = false;
+                        // lights.push(child);
+
                         if (this.getTimeOfDay() === 'night') {
-                            child.intensity = 300;
+                            child.intensity /= 4;
                         } else  {
-                            child.intensity = 200;
+                            lights.push(child);
+                            // child.intensity = 200;
                         }
                     } else if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
                         // Buildings
@@ -509,7 +520,16 @@ export class MapRenderer {
                     }
                 }
 
-                this.renderer.shadowMap.needsUpdate = true;
+                // console.log(lights);
+                if (this.getTimeOfDay() !== 'night') {
+                    for ( let i = 0; i < lights.length; i++ ) {
+                        if (lights[i].parent != null) {
+                            gltf.scene.remove( lights[i].parent!);
+                        }
+                    }
+                }
+
+                    this.renderer.shadowMap.needsUpdate = true;
                 this.scene.add( gltf.scene );
                 resolve();
             }, undefined, err => {
