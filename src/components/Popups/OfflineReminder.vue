@@ -1,6 +1,6 @@
 <template>
     <div class="offline-container">
-        <span class="text-big text-special">You are offline blah blah blah, check your wifi connection blah blah blah...</span>
+        <span class="text-small text-special">You are now viewing offline. Support is limited.</span>
     </div>
 </template>
 
@@ -12,7 +12,7 @@
 
 <style scoped>
     .offline-container {
-        margin: 1rem 1rem;
+        margin: 0.5rem auto 0;
         text-align: center;
     }
 </style>

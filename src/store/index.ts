@@ -154,6 +154,7 @@ export default new Vuex.Store( {
                 error: ''
             };
             state.isVerified = false;
+            state.networkCalls = [];
         },
         setUserError( state, payload ) {
             state.error = payload.error;

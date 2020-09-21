@@ -169,7 +169,7 @@
     }
 
     .text-small {
-        font-size: 0.5rem;
+        font-size: 0.8rem;
     }
 
     .text-normal {
@@ -182,7 +182,7 @@
 
     .text-special {
         color: var(--text);
-        border-bottom: 4px solid var(--scots-red);
+        border-bottom: 2px solid var(--scots-red);
         line-height: 1.4;
     }
 
