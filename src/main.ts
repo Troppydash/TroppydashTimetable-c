@@ -7,8 +7,11 @@ import store from './store'
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
+import VueOffline from 'vue-offline';
+
 import "../node_modules/normalize.css/normalize.css";
 Vue.config.productionTip = false
+
 
 // TODO: Secure this
 const config = {
@@ -32,6 +35,10 @@ firebase.auth().onAuthStateChanged( user => {
             store,
             render: h => h( App )
         } ).$mount( '#app' )
+        Vue.use(VueOffline, {
+            mixin: false,
+            storage: false
+        });
     }
 } )
 

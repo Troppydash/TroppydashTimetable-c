@@ -1,6 +1,7 @@
 <template>
     <div id="app">
         <Header />
+        <OfflineReminder v-if="isOffline"/>
         <router-view />
         <update-message />
     </div>
@@ -10,12 +11,24 @@
     import Header from '@/components/Header';
     import UpdateMessage from '@/components/UpdateMessage';
     import { getColorMode } from '@/StorageKeysGetters';
+    import OfflineReminder from '@/components/Popups/OfflineReminder';
+    import { VueOfflineMixin } from 'vue-offline';
 
     export default {
-        components: { UpdateMessage , Header } ,
+        components: { OfflineReminder , UpdateMessage , Header } ,
+        mixins: [VueOfflineMixin],
         mounted() {
+            this.$store.commit('setOffline', this.isOffline);
+
             const colorMode = getColorMode();
+
             document.getElementsByTagName('body')[0].className = colorMode;
+            this.$on('offline', () => {
+                this.$store.dispatch('setStatus', true);
+            })
+            this.$on('online', () => {
+                this.$store.dispatch('setStatus', false);
+            })
         }
     };
 </script>
@@ -155,9 +168,27 @@
         }
     }
 
+    .text-small {
+        font-size: 0.5rem;
+    }
+
+    .text-normal {
+        font-size: 1rem;
+    }
+
+    .text-big {
+        font-size: 1.5rem;
+    }
+
+    .text-special {
+        color: var(--text);
+        border-bottom: 4px solid var(--scots-red);
+        line-height: 1.4;
+    }
+
     @media (prefers-color-scheme: dark) {
         body.auto {
-            --scots-red: #881d24;
+            --scots-red: #b82832;
             --scots-grey1: #6b6b6b;
             --scots-grey2: #4b4b4b;
             --scots-lightgrey: rgba(179, 177, 177, 0.50);
@@ -193,7 +224,7 @@
     }
 
     body.dark {
-        --scots-red: #881d24;
+        --scots-red: #b82832;
         --scots-grey1: #6b6b6b;
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: rgba(179, 177, 177, 0.50);

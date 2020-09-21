@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { Store, Action } from 'vuex';
 import api from '../service/api';
 
 import firebase from 'firebase/app';
@@ -17,7 +18,15 @@ import {
 import { GetFromLocalStorageOrDefault, GetFromLocalStorageOrNull, SetLocalStorage } from "@/Helpers";
 import { getDisplayNearbyWeeks } from "@/StorageKeysGetters";
 
+
 Vue.use( Vuex )
+
+const OFFLINE_USERNAME = 'offline';
+
+interface NetworkCall {
+    functionName: string;
+    args: any[];
+}
 
 export default new Vuex.Store( {
     state: {
@@ -33,12 +42,16 @@ export default new Vuex.Store( {
         }>(),
 
         isVerified: false,
+        isOffline: false,
 
         timetable: {
             loading: false,
             data: [],
             error: ''
-        }
+        },
+
+        networkCalls: Array<NetworkCall>(),
+        isCallingCalls: false,
     },
     getters: {
         lastMessage( state ) {
@@ -99,6 +112,9 @@ export default new Vuex.Store( {
         }
     },
     mutations: {
+        setOffline( state, status ) {
+            state.isOffline = status;
+        },
         addMessages( state, { message } ) {
             state.messages.push( message );
         },
@@ -144,8 +160,62 @@ export default new Vuex.Store( {
             state.authenticated = false;
             router.replace( '/login' );
         },
+
+        addNetworkCall(state, payload: NetworkCall) {
+            state.networkCalls = [...state.networkCalls, payload];
+        },
+
+        clearNetworkCall(state) {
+            state.networkCalls = [];
+        }
     },
     actions: {
+        setStatus( context, isOffline ) {
+            // was offline and now it isn't
+            const oldWasOffline = context.state.isOffline;
+            context.commit( 'setOffline', isOffline );
+
+            if ( oldWasOffline && !isOffline ) {
+                context.dispatch( 'callNetworkCalls' );
+            }
+        },
+
+        callNetworkCalls( context ) {
+            if ( context.state.isOffline ) {
+                return;
+            }
+            context.state.isCallingCalls = true;
+
+            const promises = [];
+            for ( const call of context.state.networkCalls ) {
+                console.log(call);
+                promises.push( context.dispatch( call.functionName, ...call.args ) );
+            }
+
+            Promise.all( promises )
+                .then( values => {
+                    console.log( values );
+                } )
+                .catch( err => {
+                    console.log( err );
+                } )
+                .finally(() => {
+                    context.commit('clearNetworkCall');
+                    context.state.isCallingCalls = false;
+                })
+        },
+
+        protectNetworkCalls( context, payload: NetworkCall ) {
+            if (context.state.isCallingCalls) {
+                return;
+            }
+            setTimeout(() => {
+                if (context.state.isOffline) {
+                    context.commit('addNetworkCall', payload);
+                }
+            }, 200);
+        },
+
         // Called: Settings
         verifyEmail( context ) {
             const actionCodeSettings = {
@@ -237,6 +307,13 @@ export default new Vuex.Store( {
         },
         // Called: Login
         handleLoginUser( context, payload ) {
+            context.dispatch('protectNetworkCalls', {
+                functionName: 'handleLoginUser',
+                args: [
+                    payload
+                ]
+            });
+
             context.commit( 'setLoading', { isLoading: true } );
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
                 .then( () => {
@@ -254,6 +331,10 @@ export default new Vuex.Store( {
                     return { error: '' };
                 } )
                 .catch( err => {
+                    if ( context.state.isOffline ) {
+                        context.commit( 'setUser', { username: OFFLINE_USERNAME } )
+                        return { error: '' }
+                    }
                     return { error: err.message };
                 } )
                 .finally( () => {
@@ -292,8 +373,12 @@ export default new Vuex.Store( {
         },
         // Called: TimeTable, Settings
         handleGetUser( context ) {
-            context.commit( 'setLoading', { isLoading: true } );
+            context.dispatch('protectNetworkCalls', {
+                functionName: 'handleGetUser',
+                args: []
+            });
 
+            context.commit( 'setLoading', { isLoading: true } );
             const user = {
                 username: ''
             };
@@ -313,8 +398,13 @@ export default new Vuex.Store( {
                     return { error: '' }
                 } )
                 .catch( err => {
-                    context.dispatch( 'handleLogoutUser' );
-                    console.log( err );
+                    if ( context.state.isOffline ) {
+                        user.username = OFFLINE_USERNAME;
+                        context.commit( 'setUser', {
+                            ...user
+                        } );
+                        return { error: '' }
+                    }
                     return { error: err.message }
                 } ).finally( () => {
                     context.commit( 'setLoading', { isLoading: false } );
@@ -322,6 +412,10 @@ export default new Vuex.Store( {
         },
         // Called: DisplayDatePicker, TimeTable
         handleGetTimetable( context, { force = false, date = null } ) {
+            context.dispatch('protectNetworkCalls', {
+                functionName: 'handleGetTimetable',
+                args: [{ force, date }]
+            });
             if ( !force && context.state.timetable.data.length > 0 ) {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'data already exists', from: 'handleGetTimetable' }
@@ -329,7 +423,7 @@ export default new Vuex.Store( {
                 return;
             }
 
-            if ( !context.state.isVerified ) {
+            if ( !context.state.isVerified && !context.state.isOffline ) {
                 context.commit( 'addMessages', {
                     message: { type: 'error', text: 'email not verified', from: 'handleGetTimetable' }
                 } );
@@ -337,8 +431,8 @@ export default new Vuex.Store( {
             }
 
             context.commit( 'setTimetableLoading', { isLoading: true } );
-            if ( date === null ) {
-                if ( !force && localStorage.getItem( TIMETABLE ) ) {
+            if ( date === null || !force ) {
+                if ( localStorage.getItem( TIMETABLE ) ) {
                     context.state.timetable.error = '';
                     context.state.timetable.data = JSON.parse( localStorage.getItem( TIMETABLE )! );
                     context.commit( 'addMessages', {
@@ -363,7 +457,6 @@ export default new Vuex.Store( {
                         return;
                     } )
                     .catch( err => {
-                        console.log( err );
                         context.state.timetable.error = err.response.data.message;
                         context.commit( 'addMessages', {
                             message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
@@ -407,7 +500,6 @@ export default new Vuex.Store( {
                         return;
                     } )
                     .catch( err => {
-                        console.log( err );
                         context.state.timetable.error = err.response.data.message;
                         context.commit( 'addMessages', {
                             message: { type: 'error', text: err.response.data.message, from: 'handleGetTimetable' }
@@ -441,5 +533,6 @@ export default new Vuex.Store( {
                 } );
         }
     },
-    modules: {}
+    modules: {},
 } )
+

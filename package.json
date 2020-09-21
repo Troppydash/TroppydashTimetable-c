@@ -9,7 +9,25 @@
   "vue": {
     "pwa": {
       "name": "STimetable (Dev)",
-      "themeColor": "#b82832"
+      "themeColor": "#b82832",
+      "workboxOptions": {
+        "runtimeCaching": [
+          {
+            "urlPattern": "https://kit.fontawesome.com/",
+            "handler": "cacheFirst",
+            "options": {
+              "cacheName": "icons"
+            }
+          },
+          {
+            "urlPattern": "https://fonts.",
+            "handler": "cacheFirst",
+            "options": {
+              "cacheName": "fonts"
+            }
+          }
+        ]
+      }
     }
   },
   "dependencies": {
@@ -25,6 +43,7 @@
     "three.interaction": "^0.2.3",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
+    "vue-offline": "^2.0.8",
     "vue-property-decorator": "^8.4.1",
     "vue-router": "^3.1.6",
     "vuejs-datepicker": "^1.6.2",
