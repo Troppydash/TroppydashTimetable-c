@@ -5,7 +5,7 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
-import { Mesh, Object3D, Shader } from "three";
+import { Color, Mesh, Object3D, Shader } from "three";
 import moment from "moment";
 
 interface QualitySettings {
@@ -69,6 +69,14 @@ interface TimeColor {
     building: string;
     selectedBuilding: string;
     highlightBuilding: string;
+}
+
+export enum TimeOfDay {
+    MORNING = "morning",
+    AFTERNOON = "afternoon",
+    SUNSET = "sunset",
+    NIGHT = "night",
+    AUTO = "auto",
 }
 
 export class MapRenderer {
@@ -149,7 +157,7 @@ export class MapRenderer {
         night: {
             sunlight: '#333',
             ambient: '#222',
-            toplight: '#ffbb73',
+            toplight: '#343434',
             sky: '#87889c',
 
             building: "#8e8e8e",
@@ -164,20 +172,31 @@ export class MapRenderer {
     // private outlinePass: OutlinePass;
 
     getColorsFromTOD = () => {
+        // return this.colors['afternoon'];
+
+        const tod = this.getTimeOfDay();
+        return this.colors[tod.toString()];
+    }
+
+    getTimeOfDay = () => {
+        // return TimeOfDay.MORNING;
+        // console.log(this.customTimeOfDay);
+        if (this.customTimeOfDay !== TimeOfDay.AUTO) {
+            return this.customTimeOfDay;
+        }
 
         const h = moment().hour();
-        // const h = 10;
-
         if ( h >= 5 && h < 11 ) {
-            return this.colors["morning"];
+            return TimeOfDay.MORNING;
         }
         if ( h >= 11 && h < 15 ) {
-            return this.colors['afternoon'];
+            return TimeOfDay.AFTERNOON;
         }
         if ( h >= 15 && h < 17 ) {
-            return this.colors['sunset'];
+            return TimeOfDay.SUNSET;
         }
-        return this.colors['night'];
+
+        return TimeOfDay.NIGHT;
     }
 
     constructor(
@@ -187,6 +206,7 @@ export class MapRenderer {
         mapOffsets: MapOffsets,
         private mapLocation: string,
         toolTipSettings?: ToolTip,
+        private customTimeOfDay: string = TimeOfDay.AUTO
     ) {
         if ( toolTipSettings ) {
             this.toolTip = toolTipSettings;
@@ -212,8 +232,7 @@ export class MapRenderer {
             powerPreference: mapQuality > 8 ? 'high-performance' : 'default'
         } );
         this.renderer.setSize( this.size.width, this.size.height );
-
-
+        this.renderer.physicallyCorrectLights = true;
         if ( haveShadow ) {
             this.renderer.shadowMap.enabled = true;
             this.renderer.shadowMap.autoUpdate = false;
@@ -244,17 +263,17 @@ export class MapRenderer {
         // this.composer.addPass(this.outlinePass);
 
         // Top Light
-        const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 0.3 );
-        topLight.position.set( 0, 25, 0 );
+        const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 4 );
+        topLight.position.set( 0, 25 * 3, -20 * 3);
         topLight.target.position.set( 0, 0, 0 );
 
         if ( haveShadow ) {
-            topLight.castShadow = true;
+            // topLight.castShadow = false;
             topLight.shadow.camera.near = 18;
-            topLight.shadow.camera.far = 60;
+            topLight.shadow.camera.far = 60 * 3;
             topLight.shadow.mapSize.width = 2 ** (mapQuality + 6);
             topLight.shadow.mapSize.height = 2 ** (mapQuality + 6);
-            topLight.shadow.bias = -0.000001;
+            topLight.shadow.bias = -0.01;
 
             topLight.shadow.camera.left = -100;
             topLight.shadow.camera.right = 100;
@@ -267,7 +286,7 @@ export class MapRenderer {
 
 
         // Side light
-        const sidelight = new THREE.DirectionalLight( this.selectedColor.sunlight, 0.7 );
+        const sidelight = new THREE.DirectionalLight( this.selectedColor.sunlight, 3 );
         sidelight.position.set( 50 * 2, 70 * 2, 120 * 2 );
         sidelight.target.position.set( 30, 0, 0, );
 
@@ -394,10 +413,25 @@ export class MapRenderer {
                 this.models = gltf.scene.children;
 
                 const ground: THREE.Object3D[] = [];
+                const lights: THREE.Object3D[] = [];
+
                 gltf.scene.traverse( child => {
-                    if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
+                    // console.log(child);
+                    if (child instanceof THREE.PointLight) {
+                        child.castShadow = false;
+                        // lights.push(child);
+
+                        if (this.getTimeOfDay() === 'night') {
+                            child.intensity /= 4;
+                        } else  {
+                            lights.push(child);
+                            // child.intensity = 200;
+                        }
+                    } else if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
                         // Buildings
                         (child.material as any).color.set( this.selectedColor.building );
+                        (child.material as any).roughness = 1;
+                        // console.log(child.material as an);
                         if ( this.settings.haveShadow ) {
                             child.castShadow = true;
                             child.receiveShadow = true;
@@ -486,7 +520,16 @@ export class MapRenderer {
                     }
                 }
 
-                this.renderer.shadowMap.needsUpdate = true;
+                // console.log(lights);
+                if (this.getTimeOfDay() !== 'night') {
+                    for ( let i = 0; i < lights.length; i++ ) {
+                        if (lights[i].parent != null) {
+                            gltf.scene.remove( lights[i].parent!);
+                        }
+                    }
+                }
+
+                    this.renderer.shadowMap.needsUpdate = true;
                 this.scene.add( gltf.scene );
                 resolve();
             }, undefined, err => {

@@ -26,13 +26,13 @@
 
 <script>
     import { mapGetters } from 'vuex';
-    import { MapRenderer } from '@/lib/MapRenderer';
+    import { MapRenderer , TimeOfDay } from '@/lib/MapRenderer';
     import {
         getAutoRotate ,
         getAutoRotateTimeout , getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU ,
         getQuality ,
         getShadows ,
-        getSmoothCamera
+        getSmoothCamera , getTOD
     } from '@/StorageKeysGetters';
 
     export default {
@@ -189,6 +189,8 @@
                         yOffset: getMapYOffset() ,
                     },
                     getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf',
+                    undefined,
+                    getTOD()
                 );
                 this.mapRenderer.loadMap(this.handleHover , this.handleOnLeave)
                     .then(() => {
@@ -234,7 +236,7 @@
     .tooltip {
         position: absolute;
 
-        background: var(--scots-lightgrey);
+        background: #f2f2f2;
         color: var(--scots-grey2);
         padding: 0.2rem;
 

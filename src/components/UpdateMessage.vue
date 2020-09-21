@@ -16,7 +16,7 @@
 
 <style scoped lang="scss">
     .update-container {
-        background: var(--scots-lightgrey);
+        background: var(--background);
         border: 2px solid var(--scots-red);
         padding: 0.25rem;
 

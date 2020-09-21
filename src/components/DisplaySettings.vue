@@ -57,20 +57,28 @@
                 <span>Beta Settings</span>
             </div>
             <div class="settings-section__content">
-                <div class="settings-group__container" id="beta-map">
+                <div class="settings-group__container" id="betamapsettings">
                     <div class="settings-group__title">
-                        <a href="#beta-map">Map Settings</a>
+                        <a href="#betamapsettings">Beta Map Settings</a>
                     </div>
                     <div class="settings-group__content">
                         <MapSettings />
                     </div>
                 </div>
-                <div class="settings-group__container" id="beta-table">
+                <div class="settings-group__container" id="betatablesettings">
                     <div class="settings-group__title">
-                        <a href="#beta-table">Table Settings</a>
+                        <a href="#betatablesettings">Beta Table Settings</a>
                     </div>
                     <div class="settings-group__content">
                         <!--<EditTable/>-->
+                    </div>
+                </div>
+                <div class="settings-group__container" id="betawebsitesettings">
+                    <div class="settings-group__title">
+                        <a href="#betawebsitesettings">Beta Website Settings</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <WebsiteSettings />
                     </div>
                 </div>
             </div>
@@ -111,10 +119,11 @@
     import EditTable from '@/components/SettingsComponents/EditTable';
     import PastCommits from '@/components/SettingsComponents/PastCommits';
     import MapSettings from '@/components/SettingsComponents/MapSettings';
+    import WebsiteSettings from '@/components/SettingsComponents/WebsiteSettings';
 
     export default {
         name: 'DisplaySettings' ,
-        components: { MapSettings , PastCommits , EditTable , EditMap , UserActions , EditUser }
+        components: { WebsiteSettings , MapSettings , PastCommits , EditTable , EditMap , UserActions , EditUser }
     };
 </script>
 

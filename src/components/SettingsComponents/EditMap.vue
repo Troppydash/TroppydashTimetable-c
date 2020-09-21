@@ -258,7 +258,7 @@
             padding: 0.5rem;
 
             &:hover {
-                background: var(--scots-lightgrey);
+                background: var(--highlight);
             }
         }
     }

@@ -324,7 +324,7 @@
 
         tbody tr {
             &:hover {
-                background: var(--scots-lightgrey);
+                background: var(--highlight);
             }
         }
 
