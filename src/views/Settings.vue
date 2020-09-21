@@ -53,12 +53,18 @@
     .settings {
         width: 100%;
 
-        margin: 50px 0;
+        margin: 40px 0;
 
         box-sizing: content-box;
 
         position: relative;
         display: flex;
         justify-content: center;
+    }
+
+    @media only screen and (max-width: 1023px) {
+        .settings {
+            margin: 20px 0;
+        }
     }
 </style>

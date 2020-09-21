@@ -6,7 +6,7 @@
         </div>
         <VerifyEmailBanner v-if="!loading && !isVerified && username" />
     </div>
-    <div v-else>
+    <div v-else class="home">
         <p>Getting Current User, Please Wait...</p>
     </div>
 </template>
