@@ -189,6 +189,7 @@ export default new Vuex.Store( {
 
             const promises = [];
             for ( const call of context.state.networkCalls ) {
+                // TODO REMove calls
                 console.log(call);
                 promises.push( context.dispatch( call.functionName, ...call.args ) );
             }

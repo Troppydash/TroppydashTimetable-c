@@ -2,7 +2,7 @@
     <div class="displayTable" v-if="!isMobile">
         <DisplayDatePicker />
         <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="false" />
-        <table class="main-table">
+        <table v-if="!isLoading" class="main-table">
             <thead>
             <tr>
                 <th ref="dateCol"></th>
@@ -35,11 +35,12 @@
             </tr>
             </tbody>
         </table>
+        <LoadingMessage v-else />
     </div>
     <div class="displayTable" v-else>
         <DisplayDatePicker />
         <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="true" />
-        <div class="main-list__container">
+        <div v-if="!isLoading" class="main-list__container">
             <div class="main-list" v-for="(day, index) in timetable" :key="day.Date">
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
@@ -64,6 +65,7 @@
                 </ul>
             </div>
         </div>
+        <LoadingMessage v-else />
     </div>
 </template>
 
@@ -73,10 +75,11 @@
     import { getDisableHighlighting , getShowRoomName } from '@/StorageKeysGetters';
     import DayProgressbar from '@/components/DayProgressbar';
     import moment from 'moment';
+    import LoadingMessage from '@/components/LoadingMessage';
 
     export default {
         name: 'DisplayTable' ,
-        components: { DayProgressbar , DisplayDatePicker } ,
+        components: { LoadingMessage , DayProgressbar , DisplayDatePicker } ,
         props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile' , 'closed'] ,
         data() {
             const disableHighlighting = getDisableHighlighting();
@@ -140,6 +143,9 @@
                 'currentLesson' ,
                 'timetable'
             ]),
+            isLoading() {
+                return this.$store.state.timetable.loading;
+            }
         } ,
         mounted() {
             setTimeout(() => {

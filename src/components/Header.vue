@@ -14,7 +14,7 @@
     </div>
     <div v-else class="header-outside">
         <div class="header">
-            <a>Loading...</a>
+            <a>Authenticating</a>
         </div>
     </div>
 </template>

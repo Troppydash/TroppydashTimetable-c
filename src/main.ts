@@ -10,6 +10,7 @@ import 'firebase/auth';
 import VueOffline from 'vue-offline';
 
 import "../node_modules/normalize.css/normalize.css";
+import { generateLoadingMessage } from "@/service/loadingMessage";
 Vue.config.productionTip = false
 
 
@@ -27,6 +28,14 @@ const config = {
 firebase.initializeApp( config );
 
 let app: Vue;
+
+Vue.mixin({
+    computed: {
+        randomLoadingMessage() {
+            return generateLoadingMessage().message;
+        }
+    }
+})
 
 firebase.auth().onAuthStateChanged( user => {
     if ( !app ) {

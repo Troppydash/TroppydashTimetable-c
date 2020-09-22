@@ -1,13 +1,10 @@
 <template>
     <div class="home" v-if="!loading">
-        <TimeTable v-if="!timetable.loading" />
-        <div v-else>
-            <p>Retrieving Timetable, Please Wait...</p>
-        </div>
+        <TimeTable/>
         <VerifyEmailBanner v-if="!loading && !isVerified && username" />
     </div>
-    <div v-else class="home">
-        <p>Getting Current User, Please Wait...</p>
+    <div v-else style="margin: 40px 0 0 0;">
+        <LoadingMessage />
     </div>
 </template>
 
@@ -21,10 +18,11 @@
     import { mapState } from 'vuex';
     import TimeTable from '@/components/TimeTable';
     import VerifyEmailBanner from '@/components/VerifyEmailBanner';
+    import LoadingMessage from '@/components/LoadingMessage';
 
     export default {
         name: 'Home' ,
-        components: { VerifyEmailBanner , TimeTable } ,
+        components: { LoadingMessage , VerifyEmailBanner , TimeTable } ,
         data() {
             return {};
         } ,
@@ -37,24 +35,24 @@
             ])
         } ,
         mounted() {
-                if (!this.$store.state.username) {
-                    this.$store.dispatch('handleGetUser')
-                        .then(() => {
-                            // setTimeout(() => {
-                            this.$store.dispatch('handleGetTimetable' , {
-                                force: false ,
-                                date: this.$route.query.date || null
-                            });
-                            // } , 100);
+            if (!this.$store.state.username) {
+                this.$store.dispatch('handleGetUser')
+                    .then(() => {
+                        // setTimeout(() => {
+                        this.$store.dispatch('handleGetTimetable' , {
+                            force: false ,
+                            date: this.$route.query.date || null
                         });
-                } else {
-                    // setTimeout(() => {
-                    this.$store.dispatch('handleGetTimetable' , {
-                        force: false ,
-                        date: this.$route.query.date || null
+                        // } , 100);
                     });
-                    // } , 100);
-                }
+            } else {
+                // setTimeout(() => {
+                this.$store.dispatch('handleGetTimetable' , {
+                    force: false ,
+                    date: this.$route.query.date || null
+                });
+                // } , 100);
+            }
         }
     };
 </script>

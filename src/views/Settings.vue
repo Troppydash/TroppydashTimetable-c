@@ -3,8 +3,8 @@
         <DisplaySettingsSidebar :is-mobile="isMobile" />
         <DisplaySettings />
     </div>
-    <div class="settings" v-else>
-        <p>Getting Current User, Please Wait...</p>
+    <div v-else style="margin: 40px 0 0 0;">
+        <LoadingMessage />
     </div>
 </template>
 
@@ -12,10 +12,11 @@
     import { mapGetters , mapState } from 'vuex';
     import DisplaySettings from '@/components/DisplaySettings';
     import DisplaySettingsSidebar from '@/components/DisplaySettingsSidebar';
+    import LoadingMessage from '@/components/LoadingMessage';
 
     export default {
         name: 'Settings' ,
-        components: { DisplaySettingsSidebar , DisplaySettings } ,
+        components: { LoadingMessage , DisplaySettingsSidebar , DisplaySettings } ,
         data() {
             return {
                 isMobile: false ,
