@@ -6,9 +6,13 @@
             </div>
             <div class="mapsetting-content">
                 <div class="counter">
-                    <i class="fas fa-minus fa-lg" @click="decrShadowQuality"></i>
+                    <fa-icon icon="minus" size="lg" @click="decrShadowQuality"/>
+
+<!--                    <i class="fas fa-minus fa-lg" @click="decrShadowQuality"></i>-->
                     <span>{{ shadowQuality }}</span>
-                    <i class="fas fa-plus fa-lg" @click="incrShadowQuality"></i>
+<!--                    <i class="fas fa-plus fa-lg" @click="incrShadowQuality"></i>-->
+                    <fa-icon icon="plus" size="lg" @click="incrShadowQuality"/>
+
                 </div>
             </div>
         </li>
@@ -52,9 +56,12 @@
             </div>
             <div class="mapsetting-content">
                 <div class="counter">
-                    <i class="fas fa-minus fa-lg" @click="decrTimeout"></i>
+                    <fa-icon icon="minus" size="lg" @click="decrTimeout"/>
+<!--                    <i class="fas fa-minus fa-lg" @click="decrTimeout"></i>-->
                     <span>{{ enableAutoRotateTimeout }}</span>
-                    <i class="fas fa-plus fa-lg" @click="incrTimeout"></i>
+                    <fa-icon icon="plus" size="lg" @click="incrTimeout"/>
+
+<!--                    <i class="fas fa-plus fa-lg" @click="incrTimeout"></i>-->
                 </div>
             </div>
         </li>
@@ -231,7 +238,7 @@
 
         }
 
-        i {
+        & > svg {
             cursor: pointer;
             color: var(--scots-red);
 

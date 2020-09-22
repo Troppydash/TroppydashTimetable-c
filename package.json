@@ -9,28 +9,13 @@
   "vue": {
     "pwa": {
       "name": "STimetable (Dev)",
-      "themeColor": "#b82832",
-      "workboxOptions": {
-        "runtimeCaching": [
-          {
-            "urlPattern": "https://kit.fontawesome.com/",
-            "handler": "cacheFirst",
-            "options": {
-              "cacheName": "icons"
-            }
-          },
-          {
-            "urlPattern": "https://fonts.",
-            "handler": "cacheFirst",
-            "options": {
-              "cacheName": "fonts"
-            }
-          }
-        ]
-      }
+      "themeColor": "#b82832"
     }
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.30",
+    "@fortawesome/free-solid-svg-icons": "^5.14.0",
+    "@fortawesome/vue-fontawesome": "^2.0.0",
     "@tweenjs/tween.js": "^18.5.0",
     "axios": "^0.19.2",
     "core-js": "^3.6.4",

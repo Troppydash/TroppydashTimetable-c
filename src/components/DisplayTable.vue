@@ -45,11 +45,13 @@
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
                     <div class="arrow">
-                        <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>
-                        <i class="fa fa-lg fa-angle-down" v-else></i>
+<!--                        <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>-->
+                        <fa-icon icon="angle-up" v-if="days[index]"/>
+                        <fa-icon icon="angle-down"  v-else/>
+<!--                        <i class="fa fa-lg fa-angle-down" v-else></i>-->
                     </div>
                 </div>
-                <ul v-if="days[index]" class="main-list-item" :class="{ open: days[index] }">
+                <ul class="main-list-item" :class="{ open: days[index] }">
                     <li v-for="period in day.periodData" :key="period.PeriodID"
                         v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
                         :class="{
@@ -274,8 +276,7 @@
             margin: 0;
             padding: 0;
 
-            max-height: 0;
-            transition: max-height 1s ease-in;
+            //max-height: 0;
             overflow: hidden;
 
             li {
@@ -286,27 +287,39 @@
         }
     }
 
-    @-webkit-keyframes slide {
-        100% {
-            max-height: 500px;
-            transition: max-height 1s;
-        }
-    }
-
-    @keyframes slide {
-        100% {
-            max-height: 500px;
-            transition: max-height 1s;
-        }
-    }
+    //@-webkit-keyframes slide {
+    //    0% {
+    //        max-height: 0;
+    //        transition: max-height 1s;
+    //    }
+    //    100% {
+    //        max-height: 500px;
+    //        transition: max-height 1s;
+    //    }
+    //}
+    //
+    //@keyframes slide {
+    //    0% {
+    //        max-height: 0;
+    //        transition: max-height 1s;
+    //    }
+    //    100% {
+    //        max-height: 500px;
+    //        transition: max-height 1s;
+    //    }
+    //}
 
     .main-list-item {
-        max-height: 0;
-        transition: max-height 1s;
-        overflow: hidden;
+        max-height: 600px;
+        transition: max-height 0.75s ease;
+        transition-delay: 10ms;
 
-        animation: slide 0.75s forwards;
-        -webkit-animation: slide 0.75s forwards;
+        //animation: slide 0.75s forwards;
+        //-webkit-animation: slide 0.75s forwards;
+
+        &:not(.open) {
+            max-height: 0;
+        }
     }
 
 
