@@ -107,10 +107,12 @@
                     height = width / 16 * 9;
                 }
 
-                this.mapRenderer.changeSize({
-                    width ,
-                    height
-                });
+                if (this.mapRenderer) {
+                    this.mapRenderer.changeSize({
+                        width ,
+                        height
+                    });
+                }
             } ,
         } ,
         methods: {

@@ -544,6 +544,8 @@ export class MapRenderer {
             return;
         }
 
+
+        // @ts-ignore
         TWEEN.update();
         requestAnimationFrame( this.animate );
         this.renderer.render( this.scene, this.camera );
@@ -610,6 +612,7 @@ export class MapRenderer {
                 this.isAnimating = false;
             }, 1000 );
             const time = { t: 0 }
+
             new TWEEN.Tween( time )
                 .to( { t: 1 }, 1000 )
                 .easing( TWEEN.Easing.Exponential.InOut )
@@ -619,9 +622,10 @@ export class MapRenderer {
                 .onComplete( () => {
                     this.camera.quaternion.copy( toRot );
                 } )
+                // @ts-ignore
                 .start();
 
-            new TWEEN.Tween( from )
+            new TWEEN.Tween( from as any )
                 .to( toOffset, 1000 )
                 .easing( TWEEN.Easing.Exponential.InOut )
                 .onUpdate( () => {
@@ -631,6 +635,7 @@ export class MapRenderer {
                     this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
                     this.controls.target = new THREE.Vector3( to.x, to.y, to.z );
                 } )
+                // @ts-ignore
                 .start();
         } else {
             this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
@@ -806,7 +811,7 @@ export class MapRenderer {
             this.models.forEach( model => {
                 MapRenderer.dispose( model );
             } )
-            this.scene.dispose();
+            // this.scene.dispose();
             this.renderer.dispose();
             this.doesStop = true;
             this.loaded = false;
