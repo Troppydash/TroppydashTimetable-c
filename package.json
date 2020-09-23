@@ -7,10 +7,7 @@
     "lint": "vue-cli-service lint"
   },
   "vue": {
-    "pwa": {
-      "name": "STimetable (Dev)",
-      "themeColor": "#b82832"
-    }
+
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
