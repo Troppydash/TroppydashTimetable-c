@@ -23,7 +23,7 @@ const routes: Array<RouteConfig> = [
     {
         path: '/register',
         name: 'Register',
-        component: Register
+        component: () => import( /* webpackChunkName: "register" */ '@/views/Register.vue' )
     },
     {
         path: '/',
@@ -55,9 +55,9 @@ router.beforeEach( ( to, from, next ) => {
     const currentUser = firebase.auth().currentUser;
     const requireAuth = to.matched.some( record => record.meta.requireAuth );
 
-    if ( requireAuth && !currentUser && !store.state.authenticated)
+    if ( requireAuth && !currentUser && !store.state.authenticated )
         next( 'login' );
-    else if ( !requireAuth && currentUser && store.state.authenticated)
+    else if ( !requireAuth && currentUser && store.state.authenticated )
         next( 'home' );
     else
         next();

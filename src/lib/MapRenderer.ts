@@ -5,7 +5,7 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
-import { Color, Mesh, Object3D, Shader } from "three";
+import { Mesh } from "three";
 import moment from "moment";
 
 interface QualitySettings {
@@ -121,7 +121,13 @@ export class MapRenderer {
     private old = this.toolTip.timeout;
 
     private isisShowing = false;
-    private oldPos: any;
+    private oldPos: {
+        screenX: number;
+        screenY: number;
+    } = {
+        screenY: 0,
+        screenX: 0
+    };
 
     private readonly colors: MapColors = {
         morning: {
@@ -181,7 +187,7 @@ export class MapRenderer {
     getTimeOfDay = () => {
         // return TimeOfDay.MORNING;
         // console.log(this.customTimeOfDay);
-        if (this.customTimeOfDay !== TimeOfDay.AUTO) {
+        if ( this.customTimeOfDay !== TimeOfDay.AUTO ) {
             return this.customTimeOfDay;
         }
 
@@ -264,7 +270,7 @@ export class MapRenderer {
 
         // Top Light
         const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 4 );
-        topLight.position.set( 0, 25 * 3, -20 * 3);
+        topLight.position.set( 0, 25 * 3, -20 * 3 );
         topLight.target.position.set( 0, 0, 0 );
 
         if ( haveShadow ) {
@@ -417,14 +423,14 @@ export class MapRenderer {
 
                 gltf.scene.traverse( child => {
                     // console.log(child);
-                    if (child instanceof THREE.PointLight) {
+                    if ( child instanceof THREE.PointLight ) {
                         child.castShadow = false;
                         // lights.push(child);
 
-                        if (this.getTimeOfDay() === 'night') {
+                        if ( this.getTimeOfDay() === 'night' ) {
                             child.intensity /= 4;
-                        } else  {
-                            lights.push(child);
+                        } else {
+                            lights.push( child );
                             // child.intensity = 200;
                         }
                     } else if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
@@ -521,15 +527,15 @@ export class MapRenderer {
                 }
 
                 // console.log(lights);
-                if (this.getTimeOfDay() !== 'night') {
+                if ( this.getTimeOfDay() !== 'night' ) {
                     for ( let i = 0; i < lights.length; i++ ) {
-                        if (lights[i].parent != null) {
-                            gltf.scene.remove( lights[i].parent!);
+                        if ( lights[i].parent != null ) {
+                            gltf.scene.remove( lights[i].parent! );
                         }
                     }
                 }
 
-                    this.renderer.shadowMap.needsUpdate = true;
+                this.renderer.shadowMap.needsUpdate = true;
                 this.scene.add( gltf.scene );
                 resolve();
             }, undefined, err => {
@@ -653,8 +659,6 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
-            // this.composer.setSize(width, height);
-
         }
     }
 
