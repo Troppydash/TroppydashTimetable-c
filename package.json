@@ -6,9 +6,6 @@
     "build": "vue-cli-service build --modern",
     "lint": "vue-cli-service lint"
   },
-  "vue": {
-
-  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
