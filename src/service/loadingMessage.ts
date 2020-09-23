@@ -2,8 +2,8 @@ enum QuotePerson {
     WROPPY,
     TROPPY,
     PROPPY,
-
-
+    AROPPY,
+    WIROPPY,
 }
 
 
