@@ -23,12 +23,12 @@
         methods: {
             setInfo() {
                 const info = [];
-                document.getElementsByClassName('settings-section__container').forEach(section => {
+                document.querySelectorAll('.settings-section__container').forEach(section => {
                     const current = {};
                     current.heading = section.getElementsByClassName('settings-section__title')[0].children[0].innerText;
                     current.subHeadings = [];
 
-                    section.getElementsByClassName('settings-group__container').forEach(subHeading => {
+                    section.querySelectorAll('.settings-group__container').forEach(subHeading => {
                         current.subHeadings.push(subHeading.getElementsByClassName('settings-group__title')[0].children[0].innerText);
                     });
                     info.push(current);
