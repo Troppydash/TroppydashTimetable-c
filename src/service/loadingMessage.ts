@@ -39,6 +39,18 @@ const messages: LoadingMessages[] = [
             "Loading funny message...",
             "Downloading more RAM..."
         ]
+    },
+    {
+        suggestedPerson: QuotePerson.AROPPY,
+        messages: [
+            "Peanut butter and Jelly makes the best sandwich",
+        ],
+    },
+    {
+        suggestedPerson: QuotePerson.PROPPY,
+        messages: [
+            "currently gamninhg, i am ninja copped the victiry royae, dropped the 40 bomb. yrah the boys, please wait",
+        ]
     }
 ];
 
