@@ -31,11 +31,8 @@
             <div class="mapsetting-content">
                 <div class="counter">
                     <fa-icon icon="minus" size="lg" @click="decrXOffset"/>
-<!--                    <i class="fas fa-minus fa-lg" @click="decrXOffset"></i>-->
                     <span>{{ mapXOffset }}</span>
                     <fa-icon icon="plus" size="lg" @click="incrXOffset"/>
-
-<!--                    <i class="fas fa-plus fa-lg" @click="incrXOffset"></i>-->
                 </div>
             </div>
         </li>
@@ -46,12 +43,8 @@
             <div class="mapsetting-content">
                 <div class="counter">
                     <fa-icon icon="minus" size="lg" @click="decrYOffset"/>
-
-<!--                    <i class="fas fa-minus fa-lg" @click="decrYOffset"></i>-->
                     <span>{{ mapYOffset }}</span>
                     <fa-icon icon="plus" size="lg" @click="incrYOffset"/>
-
-<!--                    <i class="fas fa-plus fa-lg" @click="incrYOffset"></i>-->
                 </div>
             </div>
         </li>

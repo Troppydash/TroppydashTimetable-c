@@ -29,6 +29,10 @@
             this.$on('online', () => {
                 this.$store.dispatch('setStatus', false);
             })
+
+            if (!this.$store.state.username) {
+                this.$store.dispatch('handleGetUser');
+            }
         }
     };
 </script>
@@ -168,6 +172,10 @@
         }
     }
 
+    .button-form[disabled] {
+        background: var(--scots-grey1);
+    }
+
     .text-small {
         font-size: 0.8rem;
     }
@@ -184,6 +192,27 @@
         color: var(--text);
         border-bottom: 2px solid var(--scots-red);
         line-height: 1.4;
+    }
+
+
+    .big-text {
+        margin: 1rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 5rem;
+    }
+
+    .medium-text {
+        margin: 2rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 3rem;
+    }
+
+    .sub-text {
+        margin: 1rem 0;
+        font-weight: normal;
+        font-size: 1.5rem;
     }
 
     @media (prefers-color-scheme: dark) {

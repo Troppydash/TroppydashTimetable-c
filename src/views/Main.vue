@@ -23,7 +23,7 @@
             <div class="feature">
                 <h1 class="medium-text">You can...</h1>
 
-                <h5 class="sub-text">See the read about the spaghetti code <a href="https://github.com/Troppydash/TroppydashTimetable-c">here</a></h5>
+                <h5 class="sub-text">Read about the spaghetti code <a href="https://github.com/Troppydash/TroppydashTimetable-c">here</a></h5>
                 <h5 class="sub-text">Or try the website out <router-link to="register">here</router-link></h5>
             </div>
             <div class="feature">
@@ -54,38 +54,12 @@
                 this.$refs.map.focusObject(code);
             } ,
         },
-
-        mounted() {
-            if (!this.$store.state.username) {
-                this.$store.dispatch('handleGetUser');
-            }
-        }
     };
 </script>
 
 <style scoped lang="scss">
     .content-container {
         margin: 50px 20px;
-    }
-
-    .big-text {
-        margin: 1rem 0;
-        font-family: "Roboto Light", Sans, sans-serif;
-        font-weight: lighter;
-        font-size: 5rem;
-    }
-
-    .medium-text {
-        margin: 2rem 0;
-        font-family: "Roboto Light", Sans, sans-serif;
-        font-weight: lighter;
-        font-size: 3rem;
-    }
-
-    .sub-text {
-        margin: 1rem 0;
-        font-weight: normal;
-        font-size: 1.5rem;
     }
 
     .header {

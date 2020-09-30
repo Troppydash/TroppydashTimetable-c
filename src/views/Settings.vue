@@ -38,9 +38,6 @@
             } ,
         },
         mounted() {
-            if (!this.$store.state.username) {
-                this.$store.dispatch('handleGetUser');
-            }
             this.onResize();
             window.addEventListener('resize' , this.onResize);
         },

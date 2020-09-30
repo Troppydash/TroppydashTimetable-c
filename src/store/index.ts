@@ -520,23 +520,24 @@ export default new Vuex.Store( {
             }
 
         },
-        handleCalibrate( context ) {
+        handleCalibrate( context, { firstname, lastname, middlename } ) {
             return firebase.auth().currentUser?.getIdToken()
                 .then( token => {
-                    return axios.post( `https://frozen-hamlet-21795.herokuapp.com/calibrate`, {}, {
+                    return axios.post( `https://frozen-hamlet-21795.herokuapp.com/calibrate`, {
+                        firstname,
+                        lastname,
+                        middlename
+                    }, {
                         headers: { Authorization: `Bearer ${token}` }
                     } )
                 } )
                 .then(res => {
-                    if (res.data.success) {
-                        return context.dispatch('handleEditUser', {
-                            username: context.state.username,
-                            keyCode: res.data.keyCode
-                        })
-                    }
+                    return {
+                        success: res.data.success
+                    };
                 })
                 .catch(err => {
-                    console.error(err);
+                    return { success: err.response.data.success, message: err.response.data.message };
                 })
         },
         handleEditUser( context, { username, keyCode } ) {
