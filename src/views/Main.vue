@@ -23,10 +23,9 @@
             <div class="feature">
                 <h1 class="medium-text">You can...</h1>
 
-                <h5 class="sub-text">See the source code <a href="https://github.com/Troppydash/TroppydashTimetable-c">here</a></h5>
-                <h5 class="sub-text">Or try it out <router-link to="login">here</router-link></h5>
+                <h5 class="sub-text">See the read about the spaghetti code <a href="https://github.com/Troppydash/TroppydashTimetable-c">here</a></h5>
+                <h5 class="sub-text">Or try the website out <router-link to="register">here</router-link></h5>
             </div>
-
             <div class="feature">
                 Have fun :)
             </div>

@@ -17,6 +17,7 @@
             <p v-if="error" class="error">{{ error }}</p>
             <div>
                 <input type="submit" value="Update" class="button button-form button-primary" />
+                <button class="cal-button button button-primary" v-on:click="handleCalibrate">Calibrate</button>
             </div>
         </form>
     </div>
@@ -40,6 +41,9 @@
             }
         } ,
         methods: {
+            handleCalibrate() {
+                this.$store.dispatch('handleCalibrate');
+            },
             handleSubmit() {
                 this.$store.dispatch('handleEditUser' , {
                     username: this.username ,
@@ -58,6 +62,9 @@
 </script>
 
 <style scoped>
+    .cal-button {
+        margin-left: 1rem;
+    }
     .edituser-form {
         margin: 0 auto;
         width: auto;

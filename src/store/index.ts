@@ -162,11 +162,11 @@ export default new Vuex.Store( {
             router.replace( '/login' );
         },
 
-        addNetworkCall(state, payload: NetworkCall) {
-            state.networkCalls = [...state.networkCalls, payload];
+        addNetworkCall( state, payload: NetworkCall ) {
+            state.networkCalls = [ ...state.networkCalls, payload ];
         },
 
-        clearNetworkCall(state) {
+        clearNetworkCall( state ) {
             state.networkCalls = [];
         }
     },
@@ -190,7 +190,7 @@ export default new Vuex.Store( {
             const promises = [];
             for ( const call of context.state.networkCalls ) {
                 // TODO REMove calls
-                console.log(call);
+                console.log( call );
                 promises.push( context.dispatch( call.functionName, ...call.args ) );
             }
 
@@ -201,21 +201,21 @@ export default new Vuex.Store( {
                 .catch( err => {
                     console.log( err );
                 } )
-                .finally(() => {
-                    context.commit('clearNetworkCall');
+                .finally( () => {
+                    context.commit( 'clearNetworkCall' );
                     context.state.isCallingCalls = false;
-                })
+                } )
         },
 
         protectNetworkCalls( context, payload: NetworkCall ) {
-            if (context.state.isCallingCalls) {
+            if ( context.state.isCallingCalls ) {
                 return;
             }
-            setTimeout(() => {
-                if (context.state.isOffline) {
-                    context.commit('addNetworkCall', payload);
+            setTimeout( () => {
+                if ( context.state.isOffline ) {
+                    context.commit( 'addNetworkCall', payload );
                 }
-            }, 200);
+            }, 200 );
         },
 
         // Called: Settings
@@ -309,12 +309,12 @@ export default new Vuex.Store( {
         },
         // Called: Login
         handleLoginUser( context, payload ) {
-            context.dispatch('protectNetworkCalls', {
+            context.dispatch( 'protectNetworkCalls', {
                 functionName: 'handleLoginUser',
                 args: [
                     payload
                 ]
-            });
+            } );
 
             context.commit( 'setLoading', { isLoading: true } );
             return firebase.auth().signInWithEmailAndPassword( payload.email, payload.password )
@@ -375,13 +375,13 @@ export default new Vuex.Store( {
         },
         // Called: TimeTable, Settings
         handleGetUser( context ) {
-            context.dispatch('protectNetworkCalls', {
+            context.dispatch( 'protectNetworkCalls', {
                 functionName: 'handleGetUser',
                 args: []
-            });
+            } );
 
-            if (!firebase.auth().currentUser) {
-                return new Promise((resolve, reject) => resolve());
+            if ( !firebase.auth().currentUser ) {
+                return new Promise( ( resolve, reject ) => resolve() );
             }
 
             context.commit( 'setLoading', { isLoading: true } );
@@ -418,10 +418,11 @@ export default new Vuex.Store( {
         },
         // Called: DisplayDatePicker, TimeTable
         handleGetTimetable( context, { force = false, date = null } ) {
-            context.dispatch('protectNetworkCalls', {
+            context.dispatch( 'protectNetworkCalls', {
                 functionName: 'handleGetTimetable',
-                args: [{ force, date }]
-            });
+                args: [ { force, date } ]
+            } );
+
             if ( !force && context.state.timetable.data.length > 0 ) {
                 context.commit( 'addMessages', {
                     message: { type: 'info', text: 'data already exists', from: 'handleGetTimetable' }
@@ -518,6 +519,25 @@ export default new Vuex.Store( {
 
             }
 
+        },
+        handleCalibrate( context ) {
+            return firebase.auth().currentUser?.getIdToken()
+                .then( token => {
+                    return axios.post( `https://frozen-hamlet-21795.herokuapp.com/calibrate`, {}, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    } )
+                } )
+                .then(res => {
+                    if (res.data.success) {
+                        return context.dispatch('handleEditUser', {
+                            username: context.state.username,
+                            keyCode: res.data.keyCode
+                        })
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                })
         },
         handleEditUser( context, { username, keyCode } ) {
             if ( username === '' ) {
