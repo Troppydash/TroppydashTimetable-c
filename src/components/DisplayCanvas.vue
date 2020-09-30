@@ -6,18 +6,14 @@
                  v-if="!isFullScreen">
                 <button class="button close-button" :class="{ 'button__closed': closed, 'button__open': !closed }"
                         @click="toggleCanv">
-<!--                    <i class="fa fa-angle-left" v-if="closed"></i>-->
                     <fa-icon v-if="closed" icon="angle-left" />
                     <fa-icon v-else icon="times" />
-
-                    <!--                    <i class="fa fa-times" v-else></i>-->
                 </button>
             </div>
             <div class="full-button__container" v-if="!closed">
                 <button class="button full-button" @click="toggleFullScreen">
                     <fa-icon icon="expand" v-if="!isFullScreen"/>
                     <fa-icon icon="compress" v-else/>
-                    <!--                    <i class="fas fa-compress"></i>-->
                 </button>
             </div>
             <div id="schoolMap" :class="{ closed: closed, 'fullscreen': isFullScreen }"></div>
@@ -44,9 +40,7 @@
         name: 'DisplayCanvas' ,
         props: ['isMobile' , 'toggleCanvas' , 'closed'] ,
         data() {
-
             const openOSU = getOpenOSU();
-
             return {
                 openOSU ,
                 location: null ,

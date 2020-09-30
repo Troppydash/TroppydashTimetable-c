@@ -1,12 +1,13 @@
 <template>
-    <div class="googleLogin">
-        <button class="google-button button" @click="handleSocialLogin" :disabled="loading">
-            <span>Sign in with Google</span>
-            <span>
-                <img alt="Google Logo" src="../assets/google-logo.svg" />
-            </span>
-        </button>
-    </div>
+    <div></div>
+<!--    <div class="googleLogin">-->
+<!--        <button class="google-button button" @click="handleSocialLogin" :disabled="loading">-->
+<!--            <span>Sign in with Google</span>-->
+<!--            <span>-->
+<!--                <img alt="Google Logo" src="../assets/google-logo.svg" />-->
+<!--            </span>-->
+<!--        </button>-->
+<!--    </div>-->
 </template>
 
 <script>

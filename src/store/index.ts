@@ -380,6 +380,10 @@ export default new Vuex.Store( {
                 args: []
             });
 
+            if (!firebase.auth().currentUser) {
+                return new Promise((resolve, reject) => resolve());
+            }
+
             context.commit( 'setLoading', { isLoading: true } );
             const user = {
                 username: ''

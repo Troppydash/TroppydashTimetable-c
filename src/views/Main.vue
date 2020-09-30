@@ -1,0 +1,134 @@
+<template>
+    <div class="content-container">
+        <div class="header">
+            <h1 class="big-text">STimetable</h1>
+            <h5 class="sub-text">A Timetable Management Website</h5>
+        </div>
+        <div class="body">
+            <div class="feature">
+                <h5 class="sub-text">It contains...</h5>
+            </div>
+            <!-- features -->
+            <div class="feature feature1">
+                <h1 class="medium-text">Your Timetable</h1>
+                <Timetable :onClick="handleClick" :selected-item="selectedItem" />
+            </div>
+            <div class="feature feature2">
+                <h1 class="medium-text">And A Map</h1>
+                <div class="map-wrapper">
+                    <SchoolMap ref="map" />
+                </div>
+            </div>
+
+            <div class="feature">
+                <h1 class="medium-text">You can...</h1>
+
+                <h5 class="sub-text">See the source code <a href="https://github.com/Troppydash/TroppydashTimetable-c">here</a></h5>
+                <h5 class="sub-text">Or try it out <router-link to="login">here</router-link></h5>
+            </div>
+
+            <div class="feature">
+                Have fun :)
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    import SchoolMap from '@/components/MainViewComponents/SchoolMap';
+    import Timetable from '@/components/MainViewComponents/Timetable';
+
+    export default {
+        name: 'Main' ,
+        components: { Timetable , SchoolMap } ,
+        data() {
+            return {
+                selectedItem: '' ,
+            }
+        },
+        methods:  {
+            handleClick( code , item ) {
+                if (!code) {
+                    return;
+                }
+                this.selectedItem = item;
+                this.$refs.map.focusObject(code);
+            } ,
+        },
+
+        mounted() {
+            if (!this.$store.state.username) {
+                this.$store.dispatch('handleGetUser');
+            }
+        }
+    };
+</script>
+
+<style scoped lang="scss">
+    .content-container {
+        margin: 50px 20px;
+    }
+
+    .big-text {
+        margin: 1rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 5rem;
+    }
+
+    .medium-text {
+        margin: 2rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 3rem;
+    }
+
+    .sub-text {
+        margin: 1rem 0;
+        font-weight: normal;
+        font-size: 1.5rem;
+    }
+
+    .header {
+        text-align: center;
+        margin: 0 0 5rem ;
+    }
+
+    .body {
+
+    }
+
+    .feature {
+        width: 80%;
+        margin: 3rem auto;
+    }
+
+    .map-wrapper {
+        width: auto;
+    }
+
+    .feature2 {
+        text-align: left;
+    }
+
+    @media only screen and (max-width: 1023px) {
+        .feature {
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        .big-text {
+            font-size: 4rem;
+        }
+
+        .medium-text {
+
+            font-size: 2rem;
+        }
+
+        .sub-text {
+
+            font-size: 1rem;
+        }
+    }
+</style>

@@ -662,6 +662,14 @@ export class MapRenderer {
         }
     }
 
+    autoresize = () => {
+        const width = this.targetElement.clientWidth;
+        this.changeSize({
+            width,
+            height: width * 9 / 16
+        })
+    }
+
     changeSize = ( size: CanvasSettings ) => {
         if ( size.width !== this.backupSize.width ) {
             this.backupSize = { ...size };

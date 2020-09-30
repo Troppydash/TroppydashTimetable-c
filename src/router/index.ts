@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Settings from '../views/Settings.vue'
 import Register from '../views/Register.vue'
+import Main from '../views/Main.vue'
 import store from '../store';
 
 import firebase from 'firebase/app';
@@ -27,9 +28,13 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/',
+        name: 'Main',
+        component: Main
+    },
+    {
+        path: '/home',
         name: 'Home',
         component: Home,
-        alias: '/home',
         meta: {
             requireAuth: true
         }
