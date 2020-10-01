@@ -75,10 +75,11 @@
 
         margin-bottom: 10px;
     }
+
     @media only screen and (max-width: 1023px) {
         .modal-container {
-            width: 80%;
-            height: 70%;
+            width: 90%;
+            height: 85%;
         }
 
         .header {

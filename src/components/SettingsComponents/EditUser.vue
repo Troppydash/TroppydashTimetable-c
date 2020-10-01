@@ -29,24 +29,24 @@
         <CustomModel :is-showing="isCalibrating" title="Calibration"
                      :on-cancel="handleCalibrateClose" :on-complete="handleCalibrateClose">
             <div class="content-container">
-                <div>
+                <div style="padding-right: 2rem">
                     <form @submit.prevent="startCalibrate" class="cal-form">
                         <div>
                             <p class="input-label">Firstname</p>
                             <label>
-                                <input :disabled="isCalibratingLoading" class="input" type="text" v-model="firstname" placeholder="Firstname" />
+                                <input :disabled="isCalibratingLoading" class="input input-wide" type="text" v-model="firstname" placeholder="Firstname" />
                             </label>
                         </div>
                         <div>
                             <p class="input-label">Lastname</p>
                             <label>
-                                <input :disabled="isCalibratingLoading" class="input" type="text" v-model="lastname" placeholder="Lastname" />
+                                <input :disabled="isCalibratingLoading" class="input input-wide" type="text" v-model="lastname" placeholder="Lastname" />
                             </label>
                         </div>
                         <div>
                             <p class="input-label">Middlename</p>
                             <label>
-                                <input :disabled="isCalibratingLoading" class="input" type="text" v-model="middlename" placeholder="Middlename" />
+                                <input :disabled="isCalibratingLoading" class="input input-wide" type="text" v-model="middlename" placeholder="Middlename" />
                             </label>
                         </div>
                         <p class="error" v-if="calError">{{ calError }}</p>
@@ -143,6 +143,7 @@
 </script>
 
 <style scoped lang="scss">
+
     .cal-button {
         margin: 10px 0;
     }
@@ -158,9 +159,9 @@
         align-items: stretch;
         justify-content: space-between;
 
+
         & > div {
             width: 50%;
-            padding: 0 1rem;
         }
     }
 
@@ -181,11 +182,15 @@
         width: 400px;
     }
 
-    .input {
+    .input-wide {
         width: 100%;
     }
 
     @media only screen and (max-width: 1023px) {
+        .input {
+            width: 100%;
+        }
+
         .content-container {
             flex-direction: column;
 
