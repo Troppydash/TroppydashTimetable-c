@@ -43,7 +43,7 @@
         --scots-grey1: #6b6b6b;
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: #f2f2f2;
-        --background: var(--normal-grey);
+        --background: white;
         --background-color: var(--scots-lightgrey);
 
         --normal-grey: #282828;
@@ -219,7 +219,6 @@
 
     @media (prefers-color-scheme: dark) {
         body.auto {
-            --back: var(--background);
             --scots-red: #b82832;
             --scots-grey1: #6b6b6b;
             --scots-grey2: #4b4b4b;
@@ -263,7 +262,6 @@
         --background: var(--normal-grey);
         --highlight: rgba(181, 179, 179, 0.2);
         --background-color: var(--normal-grey);
-        --back: var(--background);
 
         background: var(--normal-grey);
 
