@@ -52,7 +52,7 @@
         height: 70%;
         max-width: 1024px;
         max-height: 70%;
-        background: var(--background);
+        background: var(--back);
         border: 1px solid var(--scots-red);
         padding: 1rem;
 

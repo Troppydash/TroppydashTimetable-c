@@ -95,7 +95,7 @@
                     </div>
                     <div class="settings-group__content">
                         <p>Made by the Roppys</p>
-                        <p>Compiled 23/09/20</p>
+                        <p>Compiled 1/10/20</p>
                     </div>
                 </div>
             </div>
