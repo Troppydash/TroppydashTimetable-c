@@ -1,9 +1,5 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import Settings from '../views/Settings.vue'
-import Register from '../views/Register.vue'
 import Main from '../views/Main.vue'
 import store from '../store';
 
@@ -14,17 +10,7 @@ Vue.use( VueRouter )
 const routes: Array<RouteConfig> = [
     {
         path: '*',
-        redirect: '/login'
-    },
-    {
-        path: '/login',
-        name: 'Login',
-        component: Login
-    },
-    {
-        path: '/register',
-        name: 'Register',
-        component: () => import( /* webpackChunkName: "register" */ '@/views/Register.vue' )
+        redirect: '/'
     },
     {
         path: '/',
@@ -32,9 +18,19 @@ const routes: Array<RouteConfig> = [
         component: Main
     },
     {
+        path: '/login',
+        name: 'Login',
+        component:  () => import( /* webpackChunkName: "login" */ '@/views/Login.vue' )
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: () => import( /* webpackChunkName: "register" */ '@/views/Register.vue' )
+    },
+    {
         path: '/home',
         name: 'Home',
-        component: Home,
+        component: () => import( /* webpackChunkName: "home" */ '@/views/Home.vue' ),
         meta: {
             requireAuth: true
         }
@@ -42,12 +38,11 @@ const routes: Array<RouteConfig> = [
     {
         path: '/settings',
         name: 'Settings',
-        component: Settings,
+        component: () => import( /* webpackChunkName: "settings" */ '@/views/Settings.vue' ),
         meta: {
             requireAuth: true
         }
     },
-
 ]
 
 const router = new VueRouter( {
