@@ -7,6 +7,11 @@ import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
 import { Mesh } from "three";
 import moment from "moment";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader";
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -173,9 +178,10 @@ export class MapRenderer {
     };
     private readonly selectedColor: TimeColor;
 
-    // private composer: EffectComposer;
+    private composer: EffectComposer;
     //
-    // private outlinePass: OutlinePass;
+    private outlinePass: OutlinePass;
+    private fxaaPass: ShaderPass;
 
     getColorsFromTOD = () => {
         // return this.colors['afternoon'];
@@ -234,7 +240,6 @@ export class MapRenderer {
         // Set up renderer
         this.renderer = new THREE.WebGLRenderer( {
             antialias: mapQuality > 3,
-
             powerPreference: mapQuality > 8 ? 'high-performance' : 'default'
         } );
         this.renderer.setSize( this.size.width, this.size.height );
@@ -260,13 +265,32 @@ export class MapRenderer {
 
         this.interaction = new Interaction( this.renderer, this.scene, this.camera );
 
-        // this.composer = new EffectComposer(this.renderer);
+
         //
-        // const renderPass = new RenderPass( this.scene, this.camera );
-        // this.composer.addPass( renderPass );
+        this.composer = new EffectComposer( this.renderer );
+
+        const renderPass = new RenderPass( this.scene, this.camera );
+        this.composer.addPass( renderPass );
+
+        this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
+        this.composer.addPass( this.outlinePass );
+        const params = {
+            edgeStrength: 4.0,
+            edgeGlow: 0.0,
+            edgeThickness: 1,
+            pulsePeriod: 0,
+        };
+        this.outlinePass.edgeStrength = params.edgeStrength;
+        this.outlinePass.edgeGlow = params.edgeGlow;
+        this.outlinePass.edgeThickness = params.edgeThickness;
+        this.outlinePass.pulsePeriod = params.pulsePeriod;
+        this.outlinePass.visibleEdgeColor.set( this.selectedColor.selectedBuilding );
+        this.outlinePass.hiddenEdgeColor.set( this.selectedColor.selectedBuilding );
+        this.fxaaPass = new ShaderPass( FXAAShader );
+
+        this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+        this.composer.addPass( this.fxaaPass );
         //
-        // this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
-        // this.composer.addPass(this.outlinePass);
 
         // Top Light
         const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 4 );
@@ -399,12 +423,17 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
+            this.composer.setSize( width, height );
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / width, 1 / height );
+
         } else {
             this.size = { ...this.backupSize };
 
             (this.camera as any).aspect = this.size.width / this.size.height;
             (this.camera as any).updateProjectionMatrix();
             this.renderer.setSize( this.size.width, this.size.height );
+            this.composer.setSize( this.size.width, this.size.height );
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
         }
     }
     loadMap = ( onHover?: ( ev: OnHoverEvent ) => void, onLeave?: () => void ) => {
@@ -555,6 +584,7 @@ export class MapRenderer {
         TWEEN.update();
         requestAnimationFrame( this.animate );
         this.renderer.render( this.scene, this.camera );
+        this.composer.render();
         this.controls.update();
     }
 
@@ -588,7 +618,9 @@ export class MapRenderer {
         // this.displayWireframe( mostLikelyItem );
         mostLikelyItem.isSelected = true;
         // mostLikelyItem.material.color.set( '#b82832' );
-        mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
+        this.outlinePass.selectedObjects = [ mostLikelyItem as THREE.Object3D ];
+        // mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
+        console.log( this.outlinePass.selectedObjects );
 
         const from = this.camera.position.clone();
         const to = mostLikelyItem.position.clone();
@@ -664,10 +696,10 @@ export class MapRenderer {
 
     autoresize = () => {
         const width = this.targetElement.clientWidth;
-        this.changeSize({
+        this.changeSize( {
             width,
             height: width * 9 / 16
-        })
+        } )
     }
 
     changeSize = ( size: CanvasSettings ) => {
@@ -678,6 +710,10 @@ export class MapRenderer {
         if ( !this.isFullScreen ) {
             this.size = size;
             this.renderer.setSize( this.size.width, this.size.height );
+            this.composer.setSize( this.size.width, this.size.height );
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+
+
             (this.camera as any).aspect = this.size.width / this.size.height;
             (this.camera as any).updateProjectionMatrix();
         } else {
@@ -689,6 +725,9 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
+            this.composer.setSize( width, height );
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / width, 1 / height );
+
         }
     }
 
