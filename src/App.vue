@@ -20,9 +20,9 @@
         mounted() {
             this.$store.commit('setOffline', this.isOffline);
 
-            const colorMode = getColorMode();
-
-            document.getElementsByTagName('body')[0].className = colorMode;
+            // const colorMode = getColorMode();
+            //
+            // document.getElementsByTagName('body')[0].className = colorMode;
             this.$on('offline', () => {
                 this.$store.dispatch('setStatus', true);
             })
@@ -68,6 +68,16 @@
         -moz-osx-font-smoothing: grayscale;
 
         scroll-behavior: smooth;
+    }
+
+    ::-moz-selection { /* Code for Firefox */
+        color: inherit;
+        background-color: rgba(#b82832, 0.3);
+    }
+
+    ::selection {
+        background-color: rgba(#b82832, 0.3);
+        color: inherit;
     }
 
 

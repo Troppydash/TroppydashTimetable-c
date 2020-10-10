@@ -178,10 +178,10 @@ export class MapRenderer {
     };
     private readonly selectedColor: TimeColor;
 
-    private composer: EffectComposer;
+    private composer?: EffectComposer;
     //
-    private outlinePass: OutlinePass;
-    private fxaaPass: ShaderPass;
+    private outlinePass?: OutlinePass;
+    private fxaaPass?: ShaderPass;
 
     getColorsFromTOD = () => {
         // return this.colors['afternoon'];
@@ -267,29 +267,34 @@ export class MapRenderer {
 
 
         //
-        this.composer = new EffectComposer( this.renderer );
+        // Monkey patch performance thing
 
-        const renderPass = new RenderPass( this.scene, this.camera );
-        this.composer.addPass( renderPass );
+        if ( mapQuality > 7 ) {
+            this.composer = new EffectComposer( this.renderer );
 
-        this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
-        this.composer.addPass( this.outlinePass );
-        const params = {
-            edgeStrength: 4.0,
-            edgeGlow: 0.0,
-            edgeThickness: 1,
-            pulsePeriod: 0,
-        };
-        this.outlinePass.edgeStrength = params.edgeStrength;
-        this.outlinePass.edgeGlow = params.edgeGlow;
-        this.outlinePass.edgeThickness = params.edgeThickness;
-        this.outlinePass.pulsePeriod = params.pulsePeriod;
-        this.outlinePass.visibleEdgeColor.set( this.selectedColor.selectedBuilding );
-        this.outlinePass.hiddenEdgeColor.set( this.selectedColor.selectedBuilding );
-        this.fxaaPass = new ShaderPass( FXAAShader );
+            const renderPass = new RenderPass( this.scene, this.camera );
+            this.composer.addPass( renderPass );
 
-        this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
-        this.composer.addPass( this.fxaaPass );
+            this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
+            this.composer.addPass( this.outlinePass );
+            const params = {
+                edgeStrength: 4.0,
+                edgeGlow: 0.0,
+                edgeThickness: 1,
+                pulsePeriod: 0,
+            };
+            this.outlinePass.edgeStrength = params.edgeStrength;
+            this.outlinePass.edgeGlow = params.edgeGlow;
+            this.outlinePass.edgeThickness = params.edgeThickness;
+            this.outlinePass.pulsePeriod = params.pulsePeriod;
+            this.outlinePass.visibleEdgeColor.set( this.selectedColor.selectedBuilding );
+            this.outlinePass.hiddenEdgeColor.set( this.selectedColor.selectedBuilding );
+            this.fxaaPass = new ShaderPass( FXAAShader );
+
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+            this.composer.addPass( this.fxaaPass );
+        }
+
         //
 
         // Top Light
@@ -423,8 +428,9 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
-            this.composer.setSize( width, height );
-            this.fxaaPass.uniforms['resolution'].value.set( 1 / width, 1 / height );
+
+            this.composer?.setSize( width, height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / width, 1 / height );
 
         } else {
             this.size = { ...this.backupSize };
@@ -432,8 +438,8 @@ export class MapRenderer {
             (this.camera as any).aspect = this.size.width / this.size.height;
             (this.camera as any).updateProjectionMatrix();
             this.renderer.setSize( this.size.width, this.size.height );
-            this.composer.setSize( this.size.width, this.size.height );
-            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+            this.composer?.setSize( this.size.width, this.size.height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
         }
     }
     loadMap = ( onHover?: ( ev: OnHoverEvent ) => void, onLeave?: () => void ) => {
@@ -584,7 +590,7 @@ export class MapRenderer {
         TWEEN.update();
         requestAnimationFrame( this.animate );
         this.renderer.render( this.scene, this.camera );
-        this.composer.render();
+        this.composer?.render();
         this.controls.update();
     }
 
@@ -617,10 +623,14 @@ export class MapRenderer {
         const mostLikelyItem = (this.models[indexes[0]] as any);
         // this.displayWireframe( mostLikelyItem );
         mostLikelyItem.isSelected = true;
-        // mostLikelyItem.material.color.set( '#b82832' );
-        this.outlinePass.selectedObjects = [ mostLikelyItem as THREE.Object3D ];
+
+        if (this.outlinePass && this.settings.mapQuality > 7) {
+            this.outlinePass.selectedObjects = [ mostLikelyItem as THREE.Object3D ];
+        } else {
+            mostLikelyItem.material.color.set( '#b82832' );
+        }
         // mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
-        console.log( this.outlinePass.selectedObjects );
+        // console.log( this.outlinePass.selectedObjects );
 
         const from = this.camera.position.clone();
         const to = mostLikelyItem.position.clone();
@@ -710,8 +720,8 @@ export class MapRenderer {
         if ( !this.isFullScreen ) {
             this.size = size;
             this.renderer.setSize( this.size.width, this.size.height );
-            this.composer.setSize( this.size.width, this.size.height );
-            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+            this.composer?.setSize( this.size.width, this.size.height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
 
 
             (this.camera as any).aspect = this.size.width / this.size.height;
@@ -725,8 +735,8 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
-            this.composer.setSize( width, height );
-            this.fxaaPass.uniforms['resolution'].value.set( 1 / width, 1 / height );
+            this.composer?.setSize( width, height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / width, 1 / height );
 
         }
     }
