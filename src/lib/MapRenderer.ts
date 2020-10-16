@@ -5,8 +5,13 @@ import * as GLTFLoader from "three/examples/jsm/loaders/GLTFLoader";
 import TWEEN from "@tweenjs/tween.js";
 import similarity from 'similarity';
 import { Interaction } from 'three.interaction';
-import { Color, Mesh, Object3D, Shader } from "three";
+import { Mesh } from "three";
 import moment from "moment";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
+import { FXAAShader } from "three/examples/jsm/shaders/FXAAShader";
 
 interface QualitySettings {
     haveShadow: boolean;
@@ -121,7 +126,13 @@ export class MapRenderer {
     private old = this.toolTip.timeout;
 
     private isisShowing = false;
-    private oldPos: any;
+    private oldPos: {
+        screenX: number;
+        screenY: number;
+    } = {
+        screenY: 0,
+        screenX: 0
+    };
 
     private readonly colors: MapColors = {
         morning: {
@@ -167,9 +178,10 @@ export class MapRenderer {
     };
     private readonly selectedColor: TimeColor;
 
-    // private composer: EffectComposer;
+    private composer?: EffectComposer;
     //
-    // private outlinePass: OutlinePass;
+    private outlinePass?: OutlinePass;
+    private fxaaPass?: ShaderPass;
 
     getColorsFromTOD = () => {
         // return this.colors['afternoon'];
@@ -181,7 +193,7 @@ export class MapRenderer {
     getTimeOfDay = () => {
         // return TimeOfDay.MORNING;
         // console.log(this.customTimeOfDay);
-        if (this.customTimeOfDay !== TimeOfDay.AUTO) {
+        if ( this.customTimeOfDay !== TimeOfDay.AUTO ) {
             return this.customTimeOfDay;
         }
 
@@ -228,7 +240,6 @@ export class MapRenderer {
         // Set up renderer
         this.renderer = new THREE.WebGLRenderer( {
             antialias: mapQuality > 3,
-
             powerPreference: mapQuality > 8 ? 'high-performance' : 'default'
         } );
         this.renderer.setSize( this.size.width, this.size.height );
@@ -254,17 +265,41 @@ export class MapRenderer {
 
         this.interaction = new Interaction( this.renderer, this.scene, this.camera );
 
-        // this.composer = new EffectComposer(this.renderer);
+
         //
-        // const renderPass = new RenderPass( this.scene, this.camera );
-        // this.composer.addPass( renderPass );
+        // Monkey patch performance thing
+
+        if ( mapQuality > 7 ) {
+            this.composer = new EffectComposer( this.renderer );
+
+            const renderPass = new RenderPass( this.scene, this.camera );
+            this.composer.addPass( renderPass );
+
+            this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
+            this.composer.addPass( this.outlinePass );
+            const params = {
+                edgeStrength: 4.0,
+                edgeGlow: 0.0,
+                edgeThickness: 1,
+                pulsePeriod: 0,
+            };
+            this.outlinePass.edgeStrength = params.edgeStrength;
+            this.outlinePass.edgeGlow = params.edgeGlow;
+            this.outlinePass.edgeThickness = params.edgeThickness;
+            this.outlinePass.pulsePeriod = params.pulsePeriod;
+            this.outlinePass.visibleEdgeColor.set( this.selectedColor.selectedBuilding );
+            this.outlinePass.hiddenEdgeColor.set( this.selectedColor.selectedBuilding );
+            this.fxaaPass = new ShaderPass( FXAAShader );
+
+            this.fxaaPass.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+            this.composer.addPass( this.fxaaPass );
+        }
+
         //
-        // this.outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), this.scene, this.camera );
-        // this.composer.addPass(this.outlinePass);
 
         // Top Light
         const topLight = new THREE.DirectionalLight( this.selectedColor.toplight, 4 );
-        topLight.position.set( 0, 25 * 3, -20 * 3);
+        topLight.position.set( 0, 25 * 3, -20 * 3 );
         topLight.target.position.set( 0, 0, 0 );
 
         if ( haveShadow ) {
@@ -393,12 +428,18 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
+
+            this.composer?.setSize( width, height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / width, 1 / height );
+
         } else {
             this.size = { ...this.backupSize };
 
             (this.camera as any).aspect = this.size.width / this.size.height;
             (this.camera as any).updateProjectionMatrix();
             this.renderer.setSize( this.size.width, this.size.height );
+            this.composer?.setSize( this.size.width, this.size.height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
         }
     }
     loadMap = ( onHover?: ( ev: OnHoverEvent ) => void, onLeave?: () => void ) => {
@@ -417,14 +458,14 @@ export class MapRenderer {
 
                 gltf.scene.traverse( child => {
                     // console.log(child);
-                    if (child instanceof THREE.PointLight) {
+                    if ( child instanceof THREE.PointLight ) {
                         child.castShadow = false;
                         // lights.push(child);
 
-                        if (this.getTimeOfDay() === 'night') {
+                        if ( this.getTimeOfDay() === 'night' ) {
                             child.intensity /= 4;
-                        } else  {
-                            lights.push(child);
+                        } else {
+                            lights.push( child );
                             // child.intensity = 200;
                         }
                     } else if ( child instanceof THREE.Mesh && (child.material && !child.name.includes( 'Plane' )) ) {
@@ -521,15 +562,15 @@ export class MapRenderer {
                 }
 
                 // console.log(lights);
-                if (this.getTimeOfDay() !== 'night') {
+                if ( this.getTimeOfDay() !== 'night' ) {
                     for ( let i = 0; i < lights.length; i++ ) {
-                        if (lights[i].parent != null) {
-                            gltf.scene.remove( lights[i].parent!);
+                        if ( lights[i].parent != null ) {
+                            gltf.scene.remove( lights[i].parent! );
                         }
                     }
                 }
 
-                    this.renderer.shadowMap.needsUpdate = true;
+                this.renderer.shadowMap.needsUpdate = true;
                 this.scene.add( gltf.scene );
                 resolve();
             }, undefined, err => {
@@ -544,9 +585,12 @@ export class MapRenderer {
             return;
         }
 
+
+        // @ts-ignore
         TWEEN.update();
         requestAnimationFrame( this.animate );
         this.renderer.render( this.scene, this.camera );
+        this.composer?.render();
         this.controls.update();
     }
 
@@ -579,8 +623,14 @@ export class MapRenderer {
         const mostLikelyItem = (this.models[indexes[0]] as any);
         // this.displayWireframe( mostLikelyItem );
         mostLikelyItem.isSelected = true;
-        // mostLikelyItem.material.color.set( '#b82832' );
-        mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
+
+        if (this.outlinePass && this.settings.mapQuality > 7) {
+            this.outlinePass.selectedObjects = [ mostLikelyItem as THREE.Object3D ];
+        } else {
+            mostLikelyItem.material.color.set( '#b82832' );
+        }
+        // mostLikelyItem.material.color.set( this.selectedColor.selectedBuilding );
+        // console.log( this.outlinePass.selectedObjects );
 
         const from = this.camera.position.clone();
         const to = mostLikelyItem.position.clone();
@@ -610,6 +660,7 @@ export class MapRenderer {
                 this.isAnimating = false;
             }, 1000 );
             const time = { t: 0 }
+
             new TWEEN.Tween( time )
                 .to( { t: 1 }, 1000 )
                 .easing( TWEEN.Easing.Exponential.InOut )
@@ -619,9 +670,10 @@ export class MapRenderer {
                 .onComplete( () => {
                     this.camera.quaternion.copy( toRot );
                 } )
+                // @ts-ignore
                 .start();
 
-            new TWEEN.Tween( from )
+            new TWEEN.Tween( from as any )
                 .to( toOffset, 1000 )
                 .easing( TWEEN.Easing.Exponential.InOut )
                 .onUpdate( () => {
@@ -631,6 +683,7 @@ export class MapRenderer {
                     this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
                     this.controls.target = new THREE.Vector3( to.x, to.y, to.z );
                 } )
+                // @ts-ignore
                 .start();
         } else {
             this.camera.position.set( toOffset.x, toOffset.y, toOffset.z );
@@ -648,9 +701,15 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
-            // this.composer.setSize(width, height);
-
         }
+    }
+
+    autoresize = () => {
+        const width = this.targetElement.clientWidth;
+        this.changeSize( {
+            width,
+            height: width * 9 / 16
+        } )
     }
 
     changeSize = ( size: CanvasSettings ) => {
@@ -661,6 +720,10 @@ export class MapRenderer {
         if ( !this.isFullScreen ) {
             this.size = size;
             this.renderer.setSize( this.size.width, this.size.height );
+            this.composer?.setSize( this.size.width, this.size.height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / this.size.width, 1 / this.size.height );
+
+
             (this.camera as any).aspect = this.size.width / this.size.height;
             (this.camera as any).updateProjectionMatrix();
         } else {
@@ -672,6 +735,9 @@ export class MapRenderer {
             (this.camera as any).updateProjectionMatrix();
 
             this.renderer.setSize( width, height );
+            this.composer?.setSize( width, height );
+            this.fxaaPass?.uniforms['resolution'].value.set( 1 / width, 1 / height );
+
         }
     }
 
@@ -763,28 +829,22 @@ export class MapRenderer {
     private static dispose = ( obj: any ) => {
         const children = obj.children;
         let child;
-
         if ( children ) {
             for ( let i = 0; i < children.length; i += 1 ) {
                 child = children[i];
                 MapRenderer.dispose( child );
             }
         }
-
         const geometry = obj.geometry;
         const material = obj.material;
-
         if ( geometry ) {
             geometry.dispose();
         }
-
         if ( material ) {
             const texture = material.map;
-
             if ( texture ) {
                 texture.dispose();
             }
-
             material.dispose();
         }
     }
@@ -806,7 +866,7 @@ export class MapRenderer {
             this.models.forEach( model => {
                 MapRenderer.dispose( model );
             } )
-            this.scene.dispose();
+            // this.scene.dispose();
             this.renderer.dispose();
             this.doesStop = true;
             this.loaded = false;

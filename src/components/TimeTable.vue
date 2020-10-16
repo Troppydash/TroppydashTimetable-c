@@ -68,6 +68,13 @@
         width: 100%;
 
         padding-bottom: 50vh;
-        margin: 50px 0 0;
+        margin: 40px 0 0;
     }
+
+    @media only screen and (max-width: 1023px) {
+        .timeTable {
+            margin: 10px 0 0;
+        }
+    }
+
 </style>

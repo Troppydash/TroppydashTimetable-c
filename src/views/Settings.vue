@@ -3,8 +3,8 @@
         <DisplaySettingsSidebar :is-mobile="isMobile" />
         <DisplaySettings />
     </div>
-    <div class="settings" v-else>
-        <p>Getting Current User, Please Wait...</p>
+    <div v-else style="margin: 40px 0 0 0;">
+        <LoadingMessage />
     </div>
 </template>
 
@@ -12,10 +12,11 @@
     import { mapGetters , mapState } from 'vuex';
     import DisplaySettings from '@/components/DisplaySettings';
     import DisplaySettingsSidebar from '@/components/DisplaySettingsSidebar';
+    import LoadingMessage from '@/components/LoadingMessage';
 
     export default {
         name: 'Settings' ,
-        components: { DisplaySettingsSidebar , DisplaySettings } ,
+        components: { LoadingMessage , DisplaySettingsSidebar , DisplaySettings } ,
         data() {
             return {
                 isMobile: false ,
@@ -37,9 +38,6 @@
             } ,
         },
         mounted() {
-            if (!this.$store.state.username) {
-                this.$store.dispatch('handleGetUser');
-            }
             this.onResize();
             window.addEventListener('resize' , this.onResize);
         },
@@ -53,12 +51,18 @@
     .settings {
         width: 100%;
 
-        margin: 50px 0;
+        margin: 40px 0;
 
         box-sizing: content-box;
 
         position: relative;
         display: flex;
         justify-content: center;
+    }
+
+    @media only screen and (max-width: 1023px) {
+        .settings {
+            margin: 20px 0;
+        }
     }
 </style>

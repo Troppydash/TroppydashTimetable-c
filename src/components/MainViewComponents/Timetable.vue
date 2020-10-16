@@ -1,8 +1,6 @@
 <template>
     <div class="displayTable" v-if="!isMobile">
-        <DisplayDatePicker />
-        <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="false" />
-        <table v-if="!isLoading" class="main-table">
+        <table class="main-table">
             <thead>
             <tr>
                 <th ref="dateCol"></th>
@@ -12,7 +10,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(day, index) in timetable" :key="day.Date" :class="{ 'today': index === today }">
+            <tr v-for="(day, index) in tableData" :key="day.Date" :class="{ 'today': index === today }">
                 <td class="date-column">{{ prettyDate(day.DateFormatted) }}</td>
                 <td v-for="period in day.periodData" :key="period.PeriodID"
                     v-on:click="() => onClick(period.AdditionalData.Room, ''+index+period.PeriodID)"
@@ -25,30 +23,22 @@
                     @mouseover="() => hoverItem(period.AdditionalData.Desc)"
                     @mouseleave="() => unhoverItem()">
                     {{ period.AdditionalData.Desc }}
-                    <span v-if="forceRoomName === null ? closed : forceRoomName"
-                          class="room-number room-number-desktop">
+                    <span class="room-number room-number-desktop">
                         {{ period.AdditionalData.Room }}
                     </span>
-                   <!-- <span>{{ period.FromTime }}</span>
-                    <span>{{ period.ToTime }}</span>-->
                 </td>
             </tr>
             </tbody>
         </table>
-        <LoadingMessage v-else />
     </div>
     <div class="displayTable" v-else>
-        <DisplayDatePicker />
-        <DayProgressbar :offsetWidth="offsetWidth" :is-mobile="true" />
-        <div v-if="!isLoading" class="main-list__container">
-            <div class="main-list" v-for="(day, index) in timetable" :key="day.Date">
+        <div class="main-list__container">
+            <div class="main-list" v-for="(day, index) in tableData" :key="day.Date">
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
                     <div class="arrow">
-<!--                        <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>-->
-                        <fa-icon icon="angle-up" v-if="days[index]"/>
-                        <fa-icon icon="angle-down"  v-else/>
-<!--                        <i class="fa fa-lg fa-angle-down" v-else></i>-->
+                        <fa-icon icon="angle-up" v-if="days[index]" />
+                        <fa-icon icon="angle-down" v-else />
                     </div>
                 </div>
                 <ul class="main-list-item" :class="{ open: days[index] }">
@@ -59,30 +49,25 @@
                             'lesson': currentLesson === ''+index+period.PeriodID
                         } ">
                         {{ period.AdditionalData.Desc }}
-                        <span v-if="forceRoomName === null ? closed : forceRoomName"
-                              class="room-number room-number-mobile">
+                        <span class="room-number room-number-mobile">
                             {{ period.AdditionalData.Room }}
                         </span>
                     </li>
                 </ul>
             </div>
         </div>
-        <LoadingMessage v-else />
     </div>
 </template>
 
 <script>
-    import { mapGetters } from 'vuex';
-    import DisplayDatePicker from '@/components/DisplayDatePicker';
     import { getDisableHighlighting , getShowRoomName } from '@/StorageKeysGetters';
-    import DayProgressbar from '@/components/DayProgressbar';
     import moment from 'moment';
-    import LoadingMessage from '@/components/LoadingMessage';
+    import { mapGetters } from 'vuex';
+    import { getFakeTableData } from '@/Helpers';
 
     export default {
-        name: 'DisplayTable' ,
-        components: { LoadingMessage , DayProgressbar , DisplayDatePicker } ,
-        props: ['tableData' , 'onClick' , 'selectedItem' , 'isMobile' , 'closed'] ,
+        name: 'Timetable' ,
+        props: ['onClick', 'selectedItem'],
         data() {
             const disableHighlighting = getDisableHighlighting();
 
@@ -94,6 +79,7 @@
                 forceRoomName = false;
             }
 
+            const fakeData = getFakeTableData();
             return {
                 forceRoomName ,
                 disableHighlighting ,
@@ -101,10 +87,12 @@
                 hoveredItem: '' ,
 
                 offsetWidth: 0 ,
-                handleResize: null,
-                didLoad: false
-            }
+                didLoad: false ,
+                tableData: fakeData,
+                isMobile: false,
+            };
         } ,
+
         methods: {
             prettyDate( date ) {
                 return moment(date.toString() , 'dddd Do MMMM, YYYY').format('dddd, MMMM Do YYYY');
@@ -129,7 +117,10 @@
             } ,
             handleToggle( index ) {
                 this.days.splice(index , 1 , !this.days[index]);
-            }
+            },
+            onResize() {
+                this.isMobile = window.innerWidth < 1400;
+            } ,
         } ,
         computed: {
             tableHeaders() {
@@ -144,31 +135,14 @@
                 'today' ,
                 'currentLesson' ,
                 'timetable'
-            ]),
-            isLoading() {
-                return this.$store.state.timetable.loading;
-            }
-        } ,
+            ])
+        },
         mounted() {
-            setTimeout(() => {
-                this.handleResize();
-            }, 500)
-            this.handleResize = () => {
-                const offsetWidth = this.$refs.dateCol ? this.$refs.dateCol.offsetWidth : null;
-                if (!(!offsetWidth || offsetWidth > (window.innerWidth * 0.6))) {
-                    this.offsetWidth = offsetWidth;
-                }
-            };
-            window.addEventListener( 'resize', this.handleResize );
-
-            setTimeout(() => {
-                this.days = this.timetable.map(( _ , index ) => {
-                    return index === this.$store.getters.today;
-                });
-            } , 500);
+            this.onResize();
+            window.addEventListener('resize' , this.onResize);
         } ,
         beforeDestroy() {
-            window.removeEventListener('resize', this.handleResize);
+            window.removeEventListener('resize' , this.onResize);
         }
     };
 </script>
@@ -328,7 +302,6 @@
         text-align: left;
         width: 100%;
 
-        padding: 0 5%;
     }
 
     .date-column {

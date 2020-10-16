@@ -23,12 +23,12 @@
         methods: {
             setInfo() {
                 const info = [];
-                document.getElementsByClassName('settings-section__container').forEach(section => {
+                document.querySelectorAll('.settings-section__container').forEach(section => {
                     const current = {};
                     current.heading = section.getElementsByClassName('settings-section__title')[0].children[0].innerText;
                     current.subHeadings = [];
 
-                    section.getElementsByClassName('settings-group__container').forEach(subHeading => {
+                    section.querySelectorAll('.settings-group__container').forEach(subHeading => {
                         current.subHeadings.push(subHeading.getElementsByClassName('settings-group__title')[0].children[0].innerText);
                     });
                     info.push(current);
@@ -46,6 +46,7 @@
 
     .displaySettingsSidebar {
         width: 300px;
+        height: auto;
         align-self: flex-start;
         position: -webkit-sticky;
         position: sticky;
@@ -54,6 +55,10 @@
         background: var(--scots-lightgrey);
 
         margin: 0 2rem;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: calc(100vh - 100px);
     }
 
     @media only screen and (max-width: 1200px) {

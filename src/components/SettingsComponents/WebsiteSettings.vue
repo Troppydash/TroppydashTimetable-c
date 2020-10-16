@@ -32,7 +32,7 @@
         } ,
         watch: {
             colorMode( newVal ) {
-                SetLocalStorage(COLOR_MODE , newVal , USER_PREFERENCES);
+                SetLocalStorage(COLOR_MODE , newVal);
                 document.getElementsByTagName('body')[0].className = newVal;
             }
         }

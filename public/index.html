@@ -9,6 +9,19 @@
     <title>STimetable</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <script>
+        // color changing script have to be ran first
+        var colorMode = localStorage.getItem('color_mode');
+        if (!colorMode) {
+            colorMode = 'auto';
+        }
+
+        document.addEventListener("DOMContentLoaded", function(_) {
+            // console.log(colorMode);
+            document.getElementsByTagName('body')[0].className = colorMode;
+        });
+    </script>
 </head>
 <body>
 <noscript>
@@ -16,9 +29,8 @@
         Please enable it to continue.</strong>
 </noscript>
 <div id="app"></div>
-<!-- built files will be auto injected -->
 
-<script src="https://kit.fontawesome.com/a91be21f2b.js" crossorigin="anonymous"></script>
+<!-- auto injected -->
 
 </body>
 </html>

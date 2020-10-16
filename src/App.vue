@@ -1,6 +1,7 @@
 <template>
     <div id="app">
         <Header />
+        <OfflineReminder v-if="isOffline"/>
         <router-view />
         <update-message />
     </div>
@@ -9,13 +10,28 @@
 <script>
     import Header from '@/components/Header';
     import UpdateMessage from '@/components/UpdateMessage';
-    import { getColorMode } from '@/StorageKeysGetters';
+    import OfflineReminder from '@/components/Popups/OfflineReminder';
+    import { VueOfflineMixin } from 'vue-offline';
 
     export default {
-        components: { UpdateMessage , Header } ,
+        components: { OfflineReminder , UpdateMessage , Header } ,
+        mixins: [VueOfflineMixin],
         mounted() {
-            const colorMode = getColorMode();
-            document.getElementsByTagName('body')[0].className = colorMode;
+            this.$store.commit('setOffline', this.isOffline);
+
+            // const colorMode = getColorMode();
+            //
+            // document.getElementsByTagName('body')[0].className = colorMode;
+            this.$on('offline', () => {
+                this.$store.dispatch('setStatus', true);
+            })
+            this.$on('online', () => {
+                this.$store.dispatch('setStatus', false);
+            })
+
+            if (!this.$store.state.username) {
+                this.$store.dispatch('handleGetUser');
+            }
         }
     };
 </script>
@@ -26,7 +42,7 @@
         --scots-grey1: #6b6b6b;
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: #f2f2f2;
-        --background: var(--normal-grey);
+        --background: white;
         --background-color: var(--scots-lightgrey);
 
         --normal-grey: #282828;
@@ -36,6 +52,8 @@
         --highlight: var(--scots-lightgrey);
 
         --text: black;
+
+        --back: white;
     }
 
     html,
@@ -49,6 +67,16 @@
         -moz-osx-font-smoothing: grayscale;
 
         scroll-behavior: smooth;
+    }
+
+    ::-moz-selection { /* Code for Firefox */
+        color: inherit;
+        background-color: rgba(#b82832, 0.3);
+    }
+
+    ::selection {
+        background-color: rgba(#b82832, 0.3);
+        color: inherit;
     }
 
 
@@ -155,9 +183,52 @@
         }
     }
 
+    .button-form[disabled] {
+        background: var(--scots-grey1);
+    }
+
+    .text-small {
+        font-size: 0.8rem;
+    }
+
+    .text-normal {
+        font-size: 1rem;
+    }
+
+    .text-big {
+        font-size: 1.5rem;
+    }
+
+    .text-special {
+        color: var(--text);
+        border-bottom: 2px solid var(--scots-red);
+        line-height: 1.4;
+    }
+
+
+    .big-text {
+        margin: 1rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 5rem;
+    }
+
+    .medium-text {
+        margin: 2rem 0;
+        font-family: "Roboto Light", Sans, sans-serif;
+        font-weight: lighter;
+        font-size: 3rem;
+    }
+
+    .sub-text {
+        margin: 1rem 0;
+        font-weight: normal;
+        font-size: 1.5rem;
+    }
+
     @media (prefers-color-scheme: dark) {
         body.auto {
-            --scots-red: #881d24;
+            --scots-red: #b82832;
             --scots-grey1: #6b6b6b;
             --scots-grey2: #4b4b4b;
             --scots-lightgrey: rgba(179, 177, 177, 0.50);
@@ -193,7 +264,7 @@
     }
 
     body.dark {
-        --scots-red: #881d24;
+        --scots-red: #b82832;
         --scots-grey1: #6b6b6b;
         --scots-grey2: #4b4b4b;
         --scots-lightgrey: rgba(179, 177, 177, 0.50);

@@ -33,7 +33,9 @@ export const getAutoRotateTimeout = () => GetFromLocalStorageOrDefault( AUTO_ROT
 export const getDisplayNearbyWeeks = () => GetFromLocalStorageOrDefault( DISPLAY_PREVIOUS_DAYS, false, USER_PREFERENCES, value => value === 'true' );
 export const getDisableHighlighting = () => GetFromLocalStorageOrDefault( DISABLE_HIGHLIGHTING_LIKE_TERMS, false, USER_PREFERENCES, value => value === 'true' );
 export const getShowRoomName = () => GetFromLocalStorageOrDefault( SHOW_ROOM_NAME, 'default', USER_PREFERENCES )
-export const getColorMode = () => GetFromLocalStorageOrDefault( COLOR_MODE, 'auto', USER_PREFERENCES )
+
+export const getColorMode = () => GetFromLocalStorageOrDefault(COLOR_MODE, 'auto');
+// export const getColorMode = () => GetFromLocalStorageOrDefault( COLOR_MODE, 'auto', USER_PREFERENCES )
 
 export const getTOD: () => string = () => GetFromLocalStorageOrDefault( MAP_TIME_OF_DAY, 'auto', USER_PREFERENCES )
 
