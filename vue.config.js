@@ -1,6 +1,6 @@
 module.exports = {
     pwa: {
-        name: "STimetable",
+        name: "STimetable (Dev)",
         themeColor: "#b82832",
         msTileColor: '#b82832',
         appleMobileWebAppCapable: 'yes',
