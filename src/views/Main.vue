@@ -53,7 +53,7 @@
                 this.selectedItem = item;
                 this.$refs.map.focusObject(code);
             } ,
-        },
+        }
     };
 </script>
 

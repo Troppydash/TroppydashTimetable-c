@@ -10,7 +10,6 @@
 <script>
     import Header from '@/components/Header';
     import UpdateMessage from '@/components/UpdateMessage';
-    import { getColorMode } from '@/StorageKeysGetters';
     import OfflineReminder from '@/components/Popups/OfflineReminder';
     import { VueOfflineMixin } from 'vue-offline';
 

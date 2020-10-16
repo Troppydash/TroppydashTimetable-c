@@ -27,6 +27,14 @@
                 this.mapRenderer.focusObject(roomName);
             } ,
         },
+        beforeDestroy() {
+            if (this.mapRenderer) {
+                this.mapRenderer.cleanUp()
+                    .then(() => {
+                        this.mapRenderer = null;
+                    });
+            }
+        },
         mounted() {
             const width = document.getElementById('schoolMap').clientWidth;
             this.mapRenderer = new MapRenderer(

@@ -829,28 +829,22 @@ export class MapRenderer {
     private static dispose = ( obj: any ) => {
         const children = obj.children;
         let child;
-
         if ( children ) {
             for ( let i = 0; i < children.length; i += 1 ) {
                 child = children[i];
                 MapRenderer.dispose( child );
             }
         }
-
         const geometry = obj.geometry;
         const material = obj.material;
-
         if ( geometry ) {
             geometry.dispose();
         }
-
         if ( material ) {
             const texture = material.map;
-
             if ( texture ) {
                 texture.dispose();
             }
-
             material.dispose();
         }
     }
