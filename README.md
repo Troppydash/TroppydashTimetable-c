@@ -1,4 +1,4 @@
-# timetable-client
+The Source Code for the Scots Timetable Website
 
 ## Project setup
 ```
