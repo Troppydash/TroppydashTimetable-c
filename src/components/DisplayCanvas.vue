@@ -12,22 +12,21 @@
             </div>
             <div class="full-button__container" v-if="!closed">
                 <button class="button full-button" @click="toggleFullScreen">
-                    <fa-icon icon="expand" v-if="!isFullScreen"/>
-                    <fa-icon icon="compress" v-else/>
+                    <fa-icon icon="expand" v-if="!isFullScreen" />
+                    <fa-icon icon="compress" v-else />
                 </button>
             </div>
             <div id="schoolMap" :class="{ closed: closed, 'fullscreen': isFullScreen }"></div>
-            <div class="tooltip"
-                 :style="{ display: tooltip.display ? 'block' : 'none', top: tooltip.position.y + 'px', left: tooltip.position.x + 'px' }">
-                <span>{{ tooltip.data.text }}</span>
-            </div>
+            <span class="map-tooltip"
+                 :style="{ top: relPos.relY - 15 + 'px', left: relPos.relX + 15 + 'px' }">
+                {{ ttText }}
+            </span>
         </div>
     </div>
 </template>
 
 <script>
     import { mapGetters } from 'vuex';
-    import { MapRenderer , TimeOfDay } from '@/lib/MapRenderer';
     import {
         getAutoRotate ,
         getAutoRotateTimeout , getEnableTexture , getMapXOffset , getMapYOffset , getOpenOSU ,
@@ -35,6 +34,10 @@
         getShadows ,
         getSmoothCamera , getTOD
     } from '@/StorageKeysGetters';
+    import { MapRendererBuilder } from '@stimetable/map-renderer/lib/renderer';
+    import { AutoResizeFeature } from '@/lib/AutoResizeFeature';
+    import { HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
+    import { FullscreenWatcherFeature } from '@/lib/FullscreenWatcherFeature';
 
     export default {
         name: 'DisplayCanvas' ,
@@ -43,22 +46,10 @@
             const openOSU = getOpenOSU();
             return {
                 openOSU ,
-                location: null ,
-                mapRenderer: null ,
+                mapRendererBuilder: null ,
+                relPos: { relX: -1 , relY: -1 } ,
+                ttText: '' ,
                 isFullScreen: false ,
-                loaded: false ,
-
-                tooltip: {
-                    position: {
-                        x: -100 ,
-                        y: -100 ,
-                    } ,
-                    data: {
-                        text: '' ,
-                        description: '' ,
-                    } ,
-                    display: false
-                }
             };
         } ,
         computed: {
@@ -70,23 +61,16 @@
             } ,
         } ,
         watch: {
-            isFullScreen( value ) {
-                if (value) {
-                    if (!this.isMobileBrowser()) {
-                        this.tooltip.display = true;
-                        this.tooltip.position = { x: -100 , y: -100 };
-                        return;
-                    }
-                }
-                this.tooltip.display = false;
-
-            } ,
             closed( newData ) {
-                // TODO: Make this toggleable
                 if (newData) {
-                    this.cleanupMap();
+                    this.mapRendererBuilder.dispose();
                 } else {
-                    this.loadMap();
+                    this.mapRendererBuilder.register();
+                    const width = !this.isMobile ? 600 : 300;
+                    this.mapRendererBuilder.ref.resize({
+                        width: width ,
+                        height: width / 16 * 9
+                    });
                 }
             } ,
             data( newData ) {
@@ -101,13 +85,13 @@
                     height = width / 16 * 9;
                 }
 
-                if (this.mapRenderer) {
-                    this.mapRenderer.changeSize({
+                if (this.mapRendererBuilder.ref) {
+                    this.mapRendererBuilder.ref.resize({
                         width ,
                         height
                     });
                 }
-            } ,
+            }
         } ,
         methods: {
             isMobileBrowser() {
@@ -118,18 +102,10 @@
                 return check;
             } ,
             toggleFullScreen() {
-                this.isFullScreen = !this.isFullScreen;
-                this.mapRenderer.toggleFullScreen(this.isFullScreen);
+                this.mapRendererBuilder.ref.toggleFullscreen();
+                // this.isFullScreen = !this.isFullScreen;
             } ,
             toggleCanv() {
-                if (getAutoRotate()) {
-                    const closed = document.getElementById('schoolMap').classList.contains('closed');
-                    if (closed) {
-                        this.mapRenderer.startRotationTimer();
-                    } else {
-                        this.mapRenderer.stopRotationTimer();
-                    }
-                }
                 this.toggleCanvas();
             } ,
             tryFocusObject() {
@@ -153,82 +129,84 @@
                 if (!val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room) {
                     return;
                 }
-                this.mapRenderer.focusObject(val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room);
+
+                const roomName = val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room;
+                this.mapRendererBuilder.ref.focusBuildingByName(roomName);
             } ,
             focusObject( roomName ) {
                 if (this.closed) {
                     return;
                 }
-                this.mapRenderer.focusObject(roomName);
-            } ,
-            handleHover( ev ) {
-                // console.log(ev);
-                const { x , y } = ev.position;
-                const { name } = ev.mesh;
-                this.tooltip.data = { ...this.tooltip.data , text: name.split('_').join(' ') };
-                this.tooltip.position = { ...this.tooltip.position , x: x + 5 , y: y - 25 };
-                this.tooltip.display = true;
-            } ,
-            handleOnLeave() {
-                this.tooltip.display = false;
+                this.mapRendererBuilder.ref.focusBuildingByName(roomName);
             } ,
             loadMap() {
                 const width = !this.isMobile ? 600 : 300;
-                this.mapRenderer = new MapRenderer(
-                    document.getElementById('schoolMap') ,
-                    {
-                        haveShadow: getShadows() ,
-                        mapQuality: getQuality() ,
-                        haveSmoothCamera: getSmoothCamera() ,
-                        haveAutoRotate: getAutoRotate() ,
-                        autoRotateTimeout: getAutoRotateTimeout()
+                const tod = getTOD();
+                let map = {};
+                if (tod !== 'auto') {
+                    map = {
+                        timeDependedGetTimeOfDay: () => tod
+                    };
+                }
+                const isNight = tod === 'night';
+                const builder = new MapRendererBuilder({
+                    targetElement: document.getElementById('schoolMap') ,
+                    gltfLocation: getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf' ,
+                    quality: getQuality() ,
+                    createSettingsFromQuality: quality => {
+                        const pp = quality > 7;
+                        return {
+                            quality: {
+                                antialias: pp ? false : quality > 4,
+                                postprocessing: quality > 7 ,
+                            }
+                        };
+                    }
+                } , {
+                    quality: {
+                        shadow: isNight ? false : getShadows()
                     } ,
-                    {
-                        width: width ,
-                        height: width / 16 * 9
+                    camera: {
+                        smooth: getSmoothCamera() ,
                     } ,
-                    {
-                        xOffset: getMapXOffset() ,
-                        yOffset: getMapYOffset() ,
-                    } ,
-                    getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf' ,
-                    undefined ,
-                    getTOD()
-                );
-                this.mapRenderer.loadMap(this.handleHover , this.handleOnLeave)
-                    .then(() => {
-                        // success
-                        if (this.mapRenderer) {
-                            this.mapRenderer.getAndSetUserLocation();
+                    canvas: {
+                        size: {
+                            width ,
+                            height: width / 16 * 9
                         }
-                    })
-                    .catch(err => {
-                        console.error(err);
-                    });
-                window.addEventListener('resize' , this.mapRenderer.onresize);
-            } ,
-            cleanupMap() {
-                window.removeEventListener('resize' , this.mapRenderer.onresize);
-                this.mapRenderer.cleanUp()
-                    .then(() => {
-                        this.mapRenderer = null;
-                    });
+                    } ,
+                    map
+                });
+
+                builder.addFeature(new AutoResizeFeature());
+                builder.addFeature(new TooltipFeature(
+                    document.getElementById('schoolMap') ,
+                    document.getElementById('map-tooltip') ,
+                    ( newText , relativePosition ) => {
+                        this.relPos = relativePosition;
+                        this.ttText = newText;
+                    }
+                ));
+                builder.addFeature(new HighlightingFeature({
+                    postprocessing: getQuality() > 7 ,
+                }));
+                builder.addFeature(new FullscreenWatcherFeature((isFullscreen => {
+                    this.isFullScreen = isFullscreen;
+                })))
+               builder.register();
+                this.mapRendererBuilder = builder;
             }
         } ,
         mounted() {
-            if (this.loaded) {
-                return;
-            }
-            this.loaded = true;
             this.loadMap();
-
             if (!this.openOSU) {
                 this.toggleCanv();
             }
         } ,
         beforeDestroy() {
-            if (this.mapRenderer) {
-                this.cleanupMap();
+            if (this.mapRendererBuilder) {
+                this.mapRendererBuilder.dispose();
+                this.mapRendererBuilder = null;
             }
         }
     };
@@ -344,6 +322,8 @@
     #schoolMap {
         width: 100%;
         height: 342px;
+        min-width: 300px;
+        background: var(--background-color);
 
         box-shadow: 0 0 5px 2px gray;
         border: 2px solid var(--scots-red);
@@ -374,4 +354,17 @@
         /*    opacity: initial;*/
         /*}*/
     }
+
+    .wrapper {
+        position: relative;
+    }
+
+    .map-tooltip {
+        background-color: var(--background-color);
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        pointer-events: none;
+    }
+
 </style>
