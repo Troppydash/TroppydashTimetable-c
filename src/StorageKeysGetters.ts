@@ -35,7 +35,6 @@ export const getDisableHighlighting = () => GetFromLocalStorageOrDefault( DISABL
 export const getShowRoomName = () => GetFromLocalStorageOrDefault( SHOW_ROOM_NAME, 'default', USER_PREFERENCES )
 
 export const getColorMode = () => GetFromLocalStorageOrDefault(COLOR_MODE, 'auto');
-// export const getColorMode = () => GetFromLocalStorageOrDefault( COLOR_MODE, 'auto', USER_PREFERENCES )
 
 export const getTOD: () => string = () => GetFromLocalStorageOrDefault( MAP_TIME_OF_DAY, 'auto', USER_PREFERENCES )
 
