@@ -1,6 +1,6 @@
 <template>
     <div class="map-container">
-        <span id="map-tooltip" v-bind:style="{ top: relPos.relY - 15 + 'px', left: relPos.relX + 15 + 'px' }">{{ ttText }}</span>
+        <span id="map-tooltip" v-if="relPos.relX !== -1" v-bind:style="{ top: relPos.relY - 15 + 'px', left: relPos.relX + 15 + 'px' }">{{ ttText }}</span>
         <div id="schoolMap"></div>
     </div>
 </template>
@@ -10,11 +10,10 @@
         getEnableTexture ,
         getQuality ,
         getShadows ,
-        getSmoothCamera , getTOD
+        getSmoothCamera
     } from '@/StorageKeysGetters';
     import { MapRendererBuilder } from '@stimetable/map-renderer/lib/renderer';
-    import { AutoResizeFeature } from '@/lib/AutoResizeFeature';
-    import { HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
+    import { AutoresizeFeature , HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
 
     export default {
         name: 'Map' ,
@@ -40,7 +39,6 @@
         } ,
         mounted() {
             const width = document.getElementById('schoolMap').clientWidth;
-            const tod = getTOD();
             const builder = new MapRendererBuilder({
                 targetElement: document.getElementById('schoolMap') ,
                 gltfLocation: getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf' ,
@@ -71,9 +69,10 @@
                 }
             });
 
-            builder.addFeature(new AutoResizeFeature());
+            builder.addFeature(new AutoresizeFeature({
+                getWidth: feature => feature.mapRenderer.targetElement.clientWidth
+            }));
             builder.addFeature(new TooltipFeature(
-                document.getElementById('schoolMap'),
                 document.getElementById('map-tooltip'),
                 (newText, relativePosition) => {
                     this.relPos = relativePosition;
@@ -81,7 +80,7 @@
                 }
             ));
             builder.addFeature(new HighlightingFeature({
-                postprocessing: getQuality() > 7,
+                postprocessing: builder.settings.advance.quality.postprocessing,
             }))
             builder.register();
             this.mapRendererBuilder = builder;
@@ -98,8 +97,9 @@
         background-color: var(--background-color);
         position: absolute;
         margin: 0;
-        padding: 0;
+        padding: 5px;
         pointer-events: none;
+        border: 1px solid var(--text);
     }
 
 </style>

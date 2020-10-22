@@ -18,7 +18,8 @@
             </div>
             <div id="schoolMap" :class="{ closed: closed, 'fullscreen': isFullScreen }"></div>
             <span class="map-tooltip"
-                 :style="{ top: relPos.relY - 15 + 'px', left: relPos.relX + 15 + 'px' }">
+                  v-if="relPos.relX !== -1"
+                  :style="{ top: relPos.relY - 15 + 'px', left: relPos.relX + 15 + 'px' }">
                 {{ ttText }}
             </span>
         </div>
@@ -36,7 +37,7 @@
     } from '@/StorageKeysGetters';
     import { MapRendererBuilder } from '@stimetable/map-renderer/lib/renderer';
     import { AutoResizeFeature } from '@/lib/AutoResizeFeature';
-    import { HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
+    import { CallbackFeature , HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
     import { FullscreenWatcherFeature } from '@/lib/FullscreenWatcherFeature';
 
     export default {
@@ -67,7 +68,7 @@
                 } else {
                     this.mapRendererBuilder.register();
                     const width = !this.isMobile ? 600 : 300;
-                    this.mapRendererBuilder.ref.resize({
+                    this.mapRendererBuilder.instance.resize({
                         width: width ,
                         height: width / 16 * 9
                     });
@@ -85,8 +86,8 @@
                     height = width / 16 * 9;
                 }
 
-                if (this.mapRendererBuilder.ref) {
-                    this.mapRendererBuilder.ref.resize({
+                if (this.mapRendererBuilder.instance) {
+                    this.mapRendererBuilder.instance.resize({
                         width ,
                         height
                     });
@@ -102,7 +103,7 @@
                 return check;
             } ,
             toggleFullScreen() {
-                this.mapRendererBuilder.ref.toggleFullscreen();
+                this.mapRendererBuilder.instance.toggleFullscreen();
                 // this.isFullScreen = !this.isFullScreen;
             } ,
             toggleCanv() {
@@ -131,13 +132,13 @@
                 }
 
                 const roomName = val[currentLesson[0]].periodData[currentLesson[1] - 1].AdditionalData.Room;
-                this.mapRendererBuilder.ref.focusBuildingByName(roomName);
+                this.mapRendererBuilder.instance.focusBuildingByName(roomName);
             } ,
             focusObject( roomName ) {
                 if (this.closed) {
                     return;
                 }
-                this.mapRendererBuilder.ref.focusBuildingByName(roomName);
+                this.mapRendererBuilder.instance.focusBuildingByName(roomName);
             } ,
             loadMap() {
                 const width = !this.isMobile ? 600 : 300;
@@ -157,7 +158,7 @@
                         const pp = quality > 7;
                         return {
                             quality: {
-                                antialias: pp ? false : quality > 4,
+                                antialias: pp ? false : quality > 4 ,
                                 postprocessing: quality > 7 ,
                             }
                         };
@@ -177,10 +178,8 @@
                     } ,
                     map
                 });
-
-                builder.addFeature(new AutoResizeFeature());
+                builder.addFeature(new FullscreenWatcherFeature());
                 builder.addFeature(new TooltipFeature(
-                    document.getElementById('schoolMap') ,
                     document.getElementById('map-tooltip') ,
                     ( newText , relativePosition ) => {
                         this.relPos = relativePosition;
@@ -190,10 +189,16 @@
                 builder.addFeature(new HighlightingFeature({
                     postprocessing: getQuality() > 7 ,
                 }));
-                builder.addFeature(new FullscreenWatcherFeature((isFullscreen => {
-                    this.isFullScreen = isFullscreen;
-                })))
-               builder.register();
+                builder.addFeature(new CallbackFeature([
+                    {
+                        method: 'onToggleFullscreen',
+                        callback: (args) => {
+                            const isFullscreen = args[0];
+                            this.isFullScreen = isFullscreen;
+                        }
+                    }
+                ]));
+                builder.register();
                 this.mapRendererBuilder = builder;
             }
         } ,
@@ -363,8 +368,9 @@
         background-color: var(--background-color);
         position: absolute;
         margin: 0;
-        padding: 0;
+        padding: 5px;
         pointer-events: none;
+        border: 1px solid var(--text);
     }
 
 </style>

@@ -3,7 +3,7 @@ import { CanvasSize, THREEObject } from "@stimetable/map-renderer/lib/renderer";
 import { MapRenderer, MapRendererRefs } from "@stimetable/map-renderer/lib/renderer/mapRenderer";
 
 export class FullscreenWatcherFeature extends Feature {
-    constructor(private callback: (isFullscreen: boolean) => void) {
+    constructor() {
         super();
     }
 
@@ -31,8 +31,26 @@ export class FullscreenWatcherFeature extends Feature {
     onResizeCanvas( newSize: CanvasSize ): void {
     }
 
+    private isFullscreen = false;
     onToggleFullscreen( isFullscreen: boolean ): void {
-        this.callback(isFullscreen);
+        this.isFullscreen = isFullscreen;
+        if (isFullscreen) {
+            window.addEventListener('resize', this.autoResize)
+        } else {
+            window.addEventListener('resize', this.autoResize)
+        }
+    }
+
+    private autoResize = () => {
+        setTimeout(() => {
+            if (!this.isFullscreen) {
+                return;
+            }
+            this.mapRenderer.resize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            })
+        }, 100);
     }
 
     onTraverseChild( child: THREEObject ): void {
@@ -41,7 +59,9 @@ export class FullscreenWatcherFeature extends Feature {
     runCleanup(): void {
     }
 
+    private mapRenderer!: MapRenderer
     runSetup( refs: MapRendererRefs, mapRenderer: MapRenderer ): void {
+        this.mapRenderer = mapRenderer;
     }
 
 }
