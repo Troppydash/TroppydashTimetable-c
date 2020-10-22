@@ -1,4 +1,4 @@
-# timetable-client
+The Source Code for the Scots Timetable Website
 
 ## Project setup
 ```
@@ -20,5 +20,4 @@ npm run build
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Feel free to change this project to your likings :)
