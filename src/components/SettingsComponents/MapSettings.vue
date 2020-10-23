@@ -14,7 +14,7 @@
 
         <li>
             <div class="mapsetting-label">
-                <span>Open map on startup</span>
+                <span>Open Map on Startup</span>
             </div>
             <div class="mapsetting-content">
                 <label class="switch">
@@ -24,33 +24,33 @@
             </div>
         </li>
 
+<!--        <li>-->
+<!--            <div class="mapsetting-label">-->
+<!--                <span>Map X-Offset</span>-->
+<!--            </div>-->
+<!--            <div class="mapsetting-content">-->
+<!--                <div class="counter">-->
+<!--                    <fa-icon icon="minus" size="lg" @click="decrXOffset"/>-->
+<!--                    <span>{{ mapXOffset }}</span>-->
+<!--                    <fa-icon icon="plus" size="lg" @click="incrXOffset"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </li>-->
+<!--        <li>-->
+<!--            <div class="mapsetting-label">-->
+<!--                <span>Map Y-Offset</span>-->
+<!--            </div>-->
+<!--            <div class="mapsetting-content">-->
+<!--                <div class="counter">-->
+<!--                    <fa-icon icon="minus" size="lg" @click="decrYOffset"/>-->
+<!--                    <span>{{ mapYOffset }}</span>-->
+<!--                    <fa-icon icon="plus" size="lg" @click="incrYOffset"/>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </li>-->
         <li>
             <div class="mapsetting-label">
-                <span>Map X-Offset</span>
-            </div>
-            <div class="mapsetting-content">
-                <div class="counter">
-                    <fa-icon icon="minus" size="lg" @click="decrXOffset"/>
-                    <span>{{ mapXOffset }}</span>
-                    <fa-icon icon="plus" size="lg" @click="incrXOffset"/>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="mapsetting-label">
-                <span>Map Y-Offset</span>
-            </div>
-            <div class="mapsetting-content">
-                <div class="counter">
-                    <fa-icon icon="minus" size="lg" @click="decrYOffset"/>
-                    <span>{{ mapYOffset }}</span>
-                    <fa-icon icon="plus" size="lg" @click="incrYOffset"/>
-                </div>
-            </div>
-        </li>
-        <li>
-            <div class="mapsetting-label">
-                <span>Time Of Day</span>
+                <span>Map Time Of Day</span>
             </div>
             <div class="mapsetting-content">
                 <select v-model="timeOfDay">

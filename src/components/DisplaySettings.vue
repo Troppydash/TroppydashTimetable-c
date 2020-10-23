@@ -37,7 +37,7 @@
                         <a href="#mapsettings">Map Settings</a>
                     </div>
                     <div class="settings-group__content">
-                        <EditMap/>
+                        <EditMap />
                     </div>
                 </div>
                 <div class="settings-group__container" id="tablesettings">
@@ -45,8 +45,16 @@
                         <a href="#tablesettings">Table Settings</a>
                     </div>
                     <div class="settings-group__content">
-                        <EditTable/>
+                        <EditTable />
                     </div>
+                </div>
+            </div>
+            <div class="settings-group__container" id="websitesettings">
+                <div class="settings-group__title">
+                    <a href="#websitesettings">Website Settings</a>
+                </div>
+                <div class="settings-group__content">
+                    <WebsiteSettings />
                 </div>
             </div>
         </div>
@@ -78,7 +86,6 @@
                         <a href="#betawebsitesettings">Beta Website Settings</a>
                     </div>
                     <div class="settings-group__content">
-                        <WebsiteSettings />
                     </div>
                 </div>
             </div>
@@ -95,7 +102,17 @@
                     </div>
                     <div class="settings-group__content">
                         <p>Made by the Roppys</p>
-                        <p>Compiled 20/10/20</p>
+                        <p>Compiled 23/10/20</p>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section__content">
+                <div class="settings-group__container" id="loadingmessages">
+                    <div class="settings-group__title">
+                        <a href="#loadingmessages">Loading Messages</a>
+                    </div>
+                    <div class="settings-group__content">
+                        <LoadingMessages />
                     </div>
                 </div>
             </div>
@@ -121,10 +138,20 @@
     import PastCommits from '@/components/SettingsComponents/PastCommits';
     import MapSettings from '@/components/SettingsComponents/MapSettings';
     import WebsiteSettings from '@/components/SettingsComponents/WebsiteSettings';
+    import LoadingMessages from '@/components/SettingsComponents/LoadingMessages';
 
     export default {
         name: 'DisplaySettings' ,
-        components: { WebsiteSettings , MapSettings , PastCommits , EditTable , EditMap , UserActions , EditUser }
+        components: {
+            LoadingMessages ,
+            WebsiteSettings ,
+            MapSettings ,
+            PastCommits ,
+            EditTable ,
+            EditMap ,
+            UserActions ,
+            EditUser
+        }
     };
 </script>
 
@@ -137,12 +164,13 @@
     }
 
     .settings-group__container {
-        padding: 1rem;
+        padding: 0.5rem 1rem;
     }
 
     .settings-group__title {
         font-family: "Roboto Light", Sans, sans-serif;
         font-size: 1.5rem;
+
         a {
             color: black;
             text-decoration: underline;
@@ -162,6 +190,7 @@
     .settings-group__content {
         padding: 1rem 0.5rem;
     }
+
     .settings-section__content {
         padding: 0.5rem;
     }

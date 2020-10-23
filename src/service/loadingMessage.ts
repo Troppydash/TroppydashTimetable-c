@@ -1,4 +1,4 @@
-enum QuotePerson {
+export enum QuotePerson {
     WROPPY,
     TROPPY,
     PROPPY,
@@ -17,7 +17,7 @@ interface LoadingMessage {
     message: string;
 }
 
-const messages: LoadingMessages[] = [
+export const messages: LoadingMessages[] = [
     {
         suggestedPerson: QuotePerson.WROPPY,
         messages: [

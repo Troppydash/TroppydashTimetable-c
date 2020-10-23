@@ -31,26 +31,23 @@ export class FullscreenWatcherFeature extends Feature {
     onResizeCanvas( newSize: CanvasSize ): void {
     }
 
-    private isFullscreen = false;
     onToggleFullscreen( isFullscreen: boolean ): void {
-        this.isFullscreen = isFullscreen;
-        if (isFullscreen) {
-            window.addEventListener('resize', this.autoResize)
+        if ( isFullscreen ) {
+            window.addEventListener( 'resize', this.autoResize )
         } else {
-            window.addEventListener('resize', this.autoResize)
+            window.addEventListener( 'resize', this.autoResize )
         }
     }
 
     private autoResize = () => {
-        setTimeout(() => {
-            if (!this.isFullscreen) {
-                return;
-            }
-            this.mapRenderer.resize({
-                width: window.innerWidth,
-                height: window.innerHeight
-            })
-        }, 100);
+        if ( !this.mapRenderer.isFullscreen ) {
+            window.addEventListener( 'resize', this.autoResize )
+            return;
+        }
+        this.mapRenderer.resize( {
+            width: window.innerWidth,
+            height: window.innerHeight
+        } )
     }
 
     onTraverseChild( child: THREEObject ): void {
@@ -60,6 +57,7 @@ export class FullscreenWatcherFeature extends Feature {
     }
 
     private mapRenderer!: MapRenderer
+
     runSetup( refs: MapRendererRefs, mapRenderer: MapRenderer ): void {
         this.mapRenderer = mapRenderer;
     }

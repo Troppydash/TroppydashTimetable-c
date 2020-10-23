@@ -39,32 +39,32 @@
             </div>
         </li>
 
-        <li>
-            <div class="mapsetting-label">
-                <span>Auto Rotate Camera</span>
-            </div>
-            <div class="mapsetting-content">
-                <label class="switch">
-                    <input type="checkbox" v-model="enableAutoRotate">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </li>
-        <li v-if="enableAutoRotate">
-            <div class="mapsetting-label">
-                <span>Rotate Delay</span>
-            </div>
-            <div class="mapsetting-content">
-                <div class="counter">
-                    <fa-icon icon="minus" size="lg" @click="decrTimeout"/>
-<!--                    <i class="fas fa-minus fa-lg" @click="decrTimeout"></i>-->
-                    <span>{{ enableAutoRotateTimeout }}</span>
-                    <fa-icon icon="plus" size="lg" @click="incrTimeout"/>
+<!--        <li>-->
+<!--            <div class="mapsetting-label">-->
+<!--                <span>Auto Rotate Camera</span>-->
+<!--            </div>-->
+<!--            <div class="mapsetting-content">-->
+<!--                <label class="switch">-->
+<!--                    <input type="checkbox" v-model="enableAutoRotate">-->
+<!--                    <span class="slider"></span>-->
+<!--                </label>-->
+<!--            </div>-->
+<!--        </li>-->
+<!--        <li v-if="enableAutoRotate">-->
+<!--            <div class="mapsetting-label">-->
+<!--                <span>Rotate Delay</span>-->
+<!--            </div>-->
+<!--            <div class="mapsetting-content">-->
+<!--                <div class="counter">-->
+<!--                    <fa-icon icon="minus" size="lg" @click="decrTimeout"/>-->
+<!--&lt;!&ndash;                    <i class="fas fa-minus fa-lg" @click="decrTimeout"></i>&ndash;&gt;-->
+<!--                    <span>{{ enableAutoRotateTimeout }}</span>-->
+<!--                    <fa-icon icon="plus" size="lg" @click="incrTimeout"/>-->
 
-<!--                    <i class="fas fa-plus fa-lg" @click="incrTimeout"></i>-->
-                </div>
-            </div>
-        </li>
+<!--&lt;!&ndash;                    <i class="fas fa-plus fa-lg" @click="incrTimeout"></i>&ndash;&gt;-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </li>-->
         <li>
             <button class="button button-primary button-reset" @click="resetMapSettings">Reset</button>
         </li>

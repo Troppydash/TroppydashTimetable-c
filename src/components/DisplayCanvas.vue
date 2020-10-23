@@ -191,15 +191,15 @@
                 }));
                 builder.addFeature(new CallbackFeature([
                     {
-                        method: 'onToggleFullscreen',
-                        callback: (args) => {
+                        method: 'onToggleFullscreen' ,
+                        callback: ( args ) => {
                             const isFullscreen = args[0];
                             this.isFullScreen = isFullscreen;
                         }
                     }
                 ]));
-                builder.register();
                 this.mapRendererBuilder = builder;
+                builder.register();
             }
         } ,
         mounted() {
@@ -249,7 +249,7 @@
         padding: 0.75rem 1rem;
 
         &:hover {
-            color: gray;
+            color: #b8b8b8;
         }
     }
 

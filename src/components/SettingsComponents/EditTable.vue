@@ -1,16 +1,16 @@
 <template>
     <ul class="editTable">
-        <li>
-            <div class="mapsetting-label">
-                <span>Display Previous Days</span>
-            </div>
-            <div class="mapsetting-content">
-                <label class="switch">
-                    <input type="checkbox" v-model="displayNearbyWeeks">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </li>
+<!--        <li>-->
+<!--            <div class="mapsetting-label">-->
+<!--                <span>Display Previous Days</span>-->
+<!--            </div>-->
+<!--            <div class="mapsetting-content">-->
+<!--                <label class="switch">-->
+<!--                    <input type="checkbox" v-model="displayNearbyWeeks">-->
+<!--                    <span class="slider"></span>-->
+<!--                </label>-->
+<!--            </div>-->
+<!--        </li>-->
         <li>
             <div class="mapsetting-label">
                 <span>Disable Highlighting Like Lessons</span>

@@ -26,8 +26,8 @@
         } ,
         methods: {
             focusObject( roomName ) {
-                if (this.mapRendererBuilder.ref) {
-                    this.mapRendererBuilder.ref.focusBuildingByName(roomName);
+                if (this.mapRendererBuilder.instance) {
+                    this.mapRendererBuilder.instance.focusBuildingByName(roomName);
                 }
             } ,
         } ,
