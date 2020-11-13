@@ -1,6 +1,9 @@
 <template>
-    <div class="header-outside" v-if="!loading">
-        <div class="header" v-if="authenticated">
+    <div class="header-outside">
+        <div class="header" v-if="loading">
+            <a>Authenticating</a>
+        </div>
+        <div class="header" v-else-if="authenticated">
             <router-link to="/home" class="header-link">Home</router-link>
             <router-link to="/settings" class="header-link">Settings</router-link>
             <div class="username-container">
@@ -10,11 +13,6 @@
         <div class="header" v-else>
             <router-link to="/login">Login</router-link>
             <router-link to="/register">Register</router-link>
-        </div>
-    </div>
-    <div v-else class="header-outside">
-        <div class="header">
-            <a>Authenticating</a>
         </div>
     </div>
 </template>
@@ -92,6 +90,12 @@
             width: 100%;
 
             align-items: flex-end;
+        }
+
+        .header-outside {
+            position: fixed;
+            top: 0;
+            z-index: 99;
         }
     }
 

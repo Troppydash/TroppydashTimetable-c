@@ -67,10 +67,6 @@
         margin: 0 0 5rem ;
     }
 
-    .body {
-
-    }
-
     .feature {
         width: 80%;
         margin: 3rem auto;

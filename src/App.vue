@@ -1,9 +1,11 @@
 <template>
     <div id="app">
         <Header />
-        <OfflineReminder v-if="isOffline"/>
-        <router-view />
-        <update-message />
+        <div class="rest">
+            <OfflineReminder v-if="isOffline"/>
+            <router-view />
+            <update-message />
+        </div>
     </div>
 </template>
 
@@ -295,6 +297,12 @@
             &:hover {
                 background: var(--darker-grey);
             }
+        }
+    }
+
+    @media only screen and (max-width: 1024px) {
+        .rest {
+            margin-top: 65px;
         }
     }
 
