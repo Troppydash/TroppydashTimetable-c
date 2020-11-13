@@ -76,7 +76,9 @@
             } ,
             data( newData ) {
                 if (newData) {
-                    this.tryFocusObject();
+                    setTimeout(() => {
+                        this.tryFocusObject();
+                    }, 1000);
                 }
             } ,
             isMobile( isMobile ) {

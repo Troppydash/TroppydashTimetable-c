@@ -80,10 +80,15 @@
             }
 
             const fakeData = getFakeTableData();
+
+            const fakeDays = [];
+            for (const _ of fakeData) {
+                fakeDays.push(false);
+            }
             return {
                 forceRoomName ,
                 disableHighlighting ,
-                days: [] ,
+                days: fakeDays,
                 hoveredItem: '' ,
 
                 offsetWidth: 0 ,

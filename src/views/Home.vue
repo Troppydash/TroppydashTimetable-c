@@ -1,6 +1,6 @@
 <template>
     <div class="home" v-if="!loading">
-        <TimeTable/>
+        <TimeTable />
         <VerifyEmailBanner v-if="!loading && !isVerified && username" />
     </div>
     <div v-else style="margin: 40px 0 0 0;">

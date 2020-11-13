@@ -29,8 +29,8 @@
                           class="room-number room-number-desktop">
                         {{ period.AdditionalData.Room }}
                     </span>
-                   <!-- <span>{{ period.FromTime }}</span>
-                    <span>{{ period.ToTime }}</span>-->
+                    <!-- <span>{{ period.FromTime }}</span>
+                     <span>{{ period.ToTime }}</span>-->
                 </td>
             </tr>
             </tbody>
@@ -45,10 +45,10 @@
                 <div class="main-list-title" @click="() => handleToggle(index)" :class="{ 'today': index === today }">
                     <span>{{ day.DateFormatted }}</span>
                     <div class="arrow">
-<!--                        <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>-->
-                        <fa-icon icon="angle-up" v-if="days[index]"/>
-                        <fa-icon icon="angle-down"  v-else/>
-<!--                        <i class="fa fa-lg fa-angle-down" v-else></i>-->
+                        <!--                        <i class="fa fa-lg fa-angle-up" v-if="days[index]"></i>-->
+                        <fa-icon icon="angle-up" v-if="days[index]" />
+                        <fa-icon icon="angle-down" v-else />
+                        <!--                        <i class="fa fa-lg fa-angle-down" v-else></i>-->
                     </div>
                 </div>
                 <ul class="main-list-item" :class="{ open: days[index] }">
@@ -101,9 +101,9 @@
                 hoveredItem: '' ,
 
                 offsetWidth: 0 ,
-                handleResize: null,
-                didLoad: false
-            }
+                handleResize: null ,
+                didLoad: false ,
+            };
         } ,
         methods: {
             prettyDate( date ) {
@@ -144,31 +144,38 @@
                 'today' ,
                 'currentLesson' ,
                 'timetable'
-            ]),
+            ]) ,
             isLoading() {
                 return this.$store.state.timetable.loading;
+            }
+        } ,
+        watch: {
+            timetable( data ) {
+                this.days = this.timetable.map(( _ , index ) => {
+                    return index === this.$store.getters.today;
+                });
             }
         } ,
         mounted() {
             setTimeout(() => {
                 this.handleResize();
-            }, 500)
+            } , 500);
             this.handleResize = () => {
                 const offsetWidth = this.$refs.dateCol ? this.$refs.dateCol.offsetWidth : null;
                 if (!(!offsetWidth || offsetWidth > (window.innerWidth * 0.6))) {
                     this.offsetWidth = offsetWidth;
                 }
             };
-            window.addEventListener( 'resize', this.handleResize );
+            window.addEventListener('resize' , this.handleResize);
 
-            setTimeout(() => {
-                this.days = this.timetable.map(( _ , index ) => {
-                    return index === this.$store.getters.today;
-                });
-            } , 500);
+            // setTimeout(() => {
+            //     this.days = this.timetable.map(( _ , index ) => {
+            //         return index === this.$store.getters.today;
+            //     });
+            // } , 1000);
         } ,
         beforeDestroy() {
-            window.removeEventListener('resize', this.handleResize);
+            window.removeEventListener('resize' , this.handleResize);
         }
     };
 </script>

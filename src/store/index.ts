@@ -438,7 +438,7 @@ export default new Vuex.Store( {
             }
 
             context.commit( 'setTimetableLoading', { isLoading: true } );
-            if ( date === null || !force ) {
+            if ( !force ) {
                 if ( localStorage.getItem( TIMETABLE ) ) {
                     context.state.timetable.error = '';
                     context.state.timetable.data = JSON.parse( localStorage.getItem( TIMETABLE )! );
@@ -448,9 +448,11 @@ export default new Vuex.Store( {
                     context.commit( 'setTimetableLoading', { isLoading: false } );
                 }
 
+                const formattedDate = date ? date.split( '-' ).join( '/' ) : '';
+                const url = date == null ? `https://frozen-hamlet-21795.herokuapp.com/timetable` : `https://frozen-hamlet-21795.herokuapp.com/timetable?date=${formattedDate}`
                 return firebase.auth().currentUser?.getIdToken()
                     .then( token => {
-                        return axios.get( `https://frozen-hamlet-21795.herokuapp.com/timetable`, {
+                        return axios.get( url, {
                             headers: { Authorization: `Bearer ${token}` }
                         } )
                     } )

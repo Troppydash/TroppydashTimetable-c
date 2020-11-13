@@ -30,7 +30,7 @@
                 'timetable'
             ]),
             routerDate() {
-                return this.$route.query.date;
+                return undefined;
             }
         } ,
         watch: {
@@ -56,6 +56,9 @@
         mounted() {
             this.onResize();
             window.addEventListener('resize' , this.onResize);
+            // if (this.$route.query.date) {
+            //     this.$store.dispatch('handleGetTimetable' , { force: true , date: this.$route.query.date || null });
+            // }
         } ,
         beforeDestroy() {
             window.removeEventListener('resize' , this.onResize);
