@@ -36,7 +36,6 @@
         getSmoothCamera , getTOD
     } from '@/StorageKeysGetters';
     import { MapRendererBuilder } from '@stimetable/map-renderer/lib/renderer';
-    import { AutoResizeFeature } from '@/lib/AutoResizeFeature';
     import { CallbackFeature , HighlightingFeature , TooltipFeature } from '@stimetable/map-renderer/lib/features';
     import { FullscreenWatcherFeature } from '@/lib/FullscreenWatcherFeature';
 
@@ -157,12 +156,11 @@
                     gltfLocation: getEnableTexture() ? '/maps/compressed/scots.gltf' : '/maps/compressed/scots-notex.gltf' ,
                     quality: getQuality() ,
                     createSettingsFromQuality: quality => {
-                        const pp = quality > 7;
                         return {
-                            quality: {
-                                antialias: pp ? false : quality > 4 ,
-                                postprocessing: quality > 7 ,
-                            }
+                                quality: {
+                                    antialias: quality > 4 ,
+                                    postprocessing: quality > 7 ,
+                                }
                         };
                     }
                 } , {
@@ -304,6 +302,7 @@
     }
 
     .displayCanvas {
+        z-index: 2;
         position: absolute;
         bottom: 1rem;
         right: 2rem;
