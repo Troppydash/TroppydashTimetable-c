@@ -97,7 +97,7 @@
             return {
                 forceRoomName ,
                 disableHighlighting ,
-                days: [] ,
+                days: [],
                 hoveredItem: '' ,
 
                 offsetWidth: 0 ,
@@ -151,7 +151,7 @@
         } ,
         watch: {
             timetable( data ) {
-                this.days = this.timetable.map(( _ , index ) => {
+                this.days = data.map(( _ , index ) => {
                     return index === this.$store.getters.today;
                 });
             }
@@ -168,11 +168,11 @@
             };
             window.addEventListener('resize' , this.handleResize);
 
-            // setTimeout(() => {
-            //     this.days = this.timetable.map(( _ , index ) => {
-            //         return index === this.$store.getters.today;
-            //     });
-            // } , 1000);
+            if (this.timetable) {
+                this.days = this.timetable.map(( _ , index ) => {
+                    return index === this.$store.getters.today;
+                });
+            }
         } ,
         beforeDestroy() {
             window.removeEventListener('resize' , this.handleResize);

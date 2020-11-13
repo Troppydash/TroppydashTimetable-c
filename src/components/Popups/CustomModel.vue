@@ -78,8 +78,10 @@
 
     @media only screen and (max-width: 1023px) {
         .modal-container {
-            width: 90%;
-            height: 85%;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            max-height: none;
         }
 
         .header {
